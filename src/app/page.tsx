@@ -1,29 +1,20 @@
-"use client";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import Header from "~/components/Header";
+import Landing from "~/components/Landing";
+import PlannedList from "~/components/PlannedList";
 
-export default function Home() {
-	const { data: session } = useSession();
-
-	return (
-		<main className="flex flex-col items-center justify-center min-h-screen p-6">
-			{!session ? (
-				<div className="space-y-4">
-					<button type="button" onClick={() => signIn("anilist")}>
-						Sign in with AniList
-					</button>
-					<button type="button" onClick={() => signIn("myanimelist")}>
-						Sign in with MyAnimeList
-					</button>
-				</div>
-			) : (
-				<div className="text-center space-y-2">
-					<p>{session.user?.image}</p>
-					<p>Welcome, {session.user?.name || "user"}!</p>
-					<button type="button" onClick={() => signOut()}>
-						Sign out
-					</button>
-				</div>
-			)}
-		</main>
-	);
+export default async function Home() {
+    const session = await getServerSession();
+    return (
+        <main className="flex flex-col min-h-dvh m-0 p-0 min-w-screen">
+            {session ? (
+                <>
+                    <Header />
+                    <PlannedList />
+                </>
+            ) : (
+                <Landing />
+            )}
+        </main>
+    );
 }
