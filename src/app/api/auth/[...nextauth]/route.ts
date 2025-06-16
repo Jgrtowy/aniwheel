@@ -35,7 +35,7 @@ const anilistProvider: OAuthConfig<any> = {
         params: {
             response_type: "code",
             client_id: process.env.ANILIST_CLIENT_ID ?? "",
-            redirect_uri: "http://localhost:3000/api/auth/callback/anilist",
+            redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/callback/anilist`,
             scope: "",
         },
     },
@@ -50,7 +50,7 @@ const anilistProvider: OAuthConfig<any> = {
                     code: context.params.code ?? "",
                     client_id: process.env.ANILIST_CLIENT_ID ?? "",
                     client_secret: process.env.ANILIST_CLIENT_SECRET ?? "",
-                    redirect_uri: "http://localhost:3000/api/auth/callback/anilist",
+                    redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/callback/anilist`,
                 }),
             });
 
