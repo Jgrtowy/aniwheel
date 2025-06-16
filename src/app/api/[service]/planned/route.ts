@@ -1,15 +1,6 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
-
-export interface PlannedItem {
-    id: number;
-    title: string;
-    image?: string;
-    romajiTitle?: string;
-    nativeTitle?: string;
-    startDate?: { day: number; month: number; year: number };
-    nextAiringEpisode?: { airingAt: number; timeUntilAiring: number };
-}
+import type { PlannedItem } from "~/lib/types";
+import { authOptions } from "~/server/auth";
 
 export async function GET(request: Request, { params }: { params: Promise<{ service: string }> }) {
     const { service } = await params;

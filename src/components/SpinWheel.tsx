@@ -2,7 +2,7 @@
 
 import { ChevronDown, X } from "lucide-react";
 import { useCallback, useState } from "react";
-import type { PlannedItem } from "~/app/api/[service]/planned/route";
+import type { PlannedItem } from "~/lib/types";
 import { Button } from "./ui/button";
 
 interface SpinWheelProps {

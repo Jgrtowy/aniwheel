@@ -3,7 +3,7 @@ import { Shuffle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import type { PlannedItem } from "~/app/api/[service]/planned/route";
+import type { PlannedItem } from "~/lib/types";
 import { SpinWheel } from "./SpinWheel";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
