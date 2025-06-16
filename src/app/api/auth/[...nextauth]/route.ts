@@ -1,13 +1,26 @@
 import type { NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth";
 import type { OAuthConfig } from "next-auth/providers/oauth";
-import { Buffer } from "node:buffer";
 
 declare module "next-auth" {
     interface Session {
         accessToken?: string;
         provider?: string;
         id?: string;
+        // Add MAL data to session
+        malUser?: {
+            id: string;
+            name: string;
+            image?: string;
+            accessToken: string;
+        };
+    }
+
+    interface User {
+        id: string;
+        name?: string | null;
+        email?: string | null;
+        image?: string | null;
     }
 }
 
@@ -114,10 +127,10 @@ const malProvider: OAuthConfig<any> = {
         url: "https://myanimelist.net/v1/oauth2/authorize",
         params: {
             response_type: "code",
-            code_challenge: process.env.MAL_CODE_CHALLENGE ?? "",
             client_id: process.env.MAL_CLIENT_ID ?? "",
             redirect_uri: "http://localhost:3000/api/auth/callback/myanimelist",
             code_challenge_method: "plain",
+            code_challenge: process.env.MAL_CODE_VERIFIER ?? "",
         },
     },
     token: {
@@ -131,7 +144,7 @@ const malProvider: OAuthConfig<any> = {
                 grant_type: "authorization_code",
                 code,
                 redirect_uri: "http://localhost:3000/api/auth/callback/myanimelist",
-                code_verifier: process.env.MAL_CODE_CHALLENGE ?? "",
+                code_verifier: context.checks?.code_verifier ?? "",
                 client_id: process.env.MAL_CLIENT_ID ?? "",
             });
             const res = await fetch("https://myanimelist.net/v1/oauth2/token", {
@@ -192,7 +205,7 @@ const malProvider: OAuthConfig<any> = {
 };
 
 export const authOptions: NextAuthOptions = {
-    providers: [anilistProvider, malProvider],
+    providers: [anilistProvider],
     secret: process.env.AUTH_SECRET,
     callbacks: {
         async jwt({ token, account, user }) {

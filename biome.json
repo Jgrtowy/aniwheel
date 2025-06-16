@@ -10,5 +10,22 @@
     },
     "organizeImports": {
         "enabled": true
+    },
+    "linter": {
+        "rules": {
+            "correctness": {
+                "noUnusedImports": "off",
+                "useExhaustiveDependencies": "off"
+            },
+            "style": {
+                "useImportType": "warn"
+            },
+            "a11y": {
+                "useKeyWithClickEvents": "off"
+            },
+            "suspicious": {
+                "noArrayIndexKey": "off"
+            }
+        }
     }
 }

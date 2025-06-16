@@ -5,6 +5,10 @@ export interface PlannedItem {
     id: number;
     title: string;
     image?: string;
+    romajiTitle?: string;
+    nativeTitle?: string;
+    startDate?: { day: number; month: number; year: number };
+    nextAiringEpisode?: { airingAt: number; timeUntilAiring: number };
 }
 
 export async function GET(request: Request, { params }: { params: Promise<{ service: string }> }) {
@@ -19,7 +23,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ serv
     }
 
     if (service === "myanimelist") {
-        const data = await fetch("https://api.myanimelist.net/v2/users/@me/animelist?status=plan_to_watch&limit=100", {
+        const data = await fetch("https://api.myanimelist.net/v2/users/@me/animelist?status=plan_to_watch", {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${session.accessToken}`,
@@ -29,6 +33,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ serv
         if (!data.ok) {
             return new Response("Failed to fetch planned items", { status: 500 });
         }
+
         const plannedItems = await data.json();
 
         const formattedItems: PlannedItem[] = plannedItems.data.map((item: { node: { title: string; id: string; main_picture: { medium: string; large: string } } }) => ({
@@ -43,6 +48,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ serv
             },
         });
     }
+
     if (service === "anilist") {
         const data = await fetch("https://graphql.anilist.co", {
             method: "POST",
@@ -52,26 +58,43 @@ export async function GET(request: Request, { params }: { params: Promise<{ serv
             },
             body: JSON.stringify({
                 query: `
-query ($userName: String, $statusIn: [MediaListStatus]) {
-  MediaList(userName: $userName, status_in: $statusIn) {
-    id
-    media {
-      title {
-        english
-        romaji
-      }
-      coverImage {
-        extraLarge
-        large
-        medium
+query ($userName: String, $statusIn: [MediaListStatus], $type: MediaType) {
+  MediaListCollection(userName: $userName, status_in: $statusIn, type: $type) {
+    lists {
+      entries {
+        id
+        media {
+          title {
+            english
+            romaji
+            native
+          }
+          coverImage {
+            medium
+            large
+            extraLarge
+          }
+          startDate {
+            day
+            month
+            year
+          }
+          nextAiringEpisode {
+            airingAt
+            timeUntilAiring
+          }
+        }
       }
     }
   }
 }
+
+
                 `,
                 variables: {
                     userName: session.user.name,
                     statusIn: ["PLANNING"],
+                    type: "ANIME",
                 },
             }),
         });
@@ -79,14 +102,19 @@ query ($userName: String, $statusIn: [MediaListStatus]) {
             return new Response("Failed to fetch planned items", { status: 500 });
         }
 
-        const mediaList = (await data.json()).data.MediaList;
-        console.log(mediaList);
+        const mediaList = (await data.json()).data.MediaListCollection.lists[0].entries;
 
-        const formattedMediaList: PlannedItem[] = mediaList.map((item: { id: number; media: { title: { english: string; romaji: string }; coverImage: { extraLarge: string; large: string; medium: string } } }) => ({
-            id: item.id,
-            title: item.media.title.english || item.media.title.romaji,
-            image: item.media.coverImage.extraLarge || item.media.coverImage.large || item.media.coverImage.medium,
-        }));
+        const formattedMediaList: PlannedItem[] = mediaList.map(
+            (item: { id: number; media: { title: { english: string; romaji: string; native: string }; coverImage: { extraLarge: string; large: string; medium: string }; startDate?: { day: number; month: number; year: number }; nextAiringEpisode?: { airingAt: number; timeUntilAiring: number } } }) => ({
+                id: item.id,
+                title: item.media.title.english || item.media.title.romaji,
+                romajiTitle: item.media.title.romaji,
+                image: item.media.coverImage.extraLarge || item.media.coverImage.large || item.media.coverImage.medium,
+                nativeTitle: item.media.title.native,
+                startDate: item.media.startDate,
+                nextAiringEpisode: item.media.nextAiringEpisode,
+            }),
+        );
         return new Response(JSON.stringify(formattedMediaList), {
             status: 200,
             headers: {
