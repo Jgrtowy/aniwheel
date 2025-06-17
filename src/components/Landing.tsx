@@ -1,11 +1,10 @@
 "use client";
-import { signIn, useSession } from "next-auth/react";
 import React from "react";
 import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { Button } from "./ui/button";
 
 export default function Landing() {
-    const { loginWithAniList, loginWithMAL, logoutAniList, logoutMAL } = useUnifiedSession();
+    const { login } = useUnifiedSession();
 
     return (
         <>
@@ -15,16 +14,16 @@ export default function Landing() {
                 <p className="text-3xl">Login with your favorite anime tracker and spin the wheel!</p>
                 <div className="flex gap-4">
                     <div className="flex flex-col items-center gap-2">
-                        <Button variant="outline" className="text-xl p-6" onClick={async () => signIn("anilist")}>
+                        <Button variant="outline" className="text-xl p-6" onClick={async () => login("anilist")}>
                             AniList
                         </Button>
                         <span className="text-sm text-gray-600">most features!</span>
                     </div>
                     <div className="flex flex-col items-center gap-2">
-                        <Button variant="outline" className="text-xl p-6" disabled>
+                        <Button variant="outline" className="text-xl p-6" onClick={async () => login("myanimelist")}>
                             MyAnimeList
                         </Button>
-                        <span className="text-sm text-gray-600">still working on it!</span>
+                        <span className="text-sm text-gray-600">less features!</span>
                     </div>
                     <div className="flex flex-col items-center gap-2">
                         <Button variant="outline" className="text-xl p-6" disabled>

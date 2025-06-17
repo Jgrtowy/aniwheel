@@ -1,12 +1,13 @@
 import { getServerSession } from "next-auth";
+import { getSession } from "~/lib/session";
 import type { PlannedItem } from "~/lib/types";
 import { authOptions } from "~/server/auth";
 
 export async function GET(request: Request, { params }: { params: Promise<{ service: string }> }) {
     const { service } = await params;
-    const session = await getServerSession(authOptions);
+    const session = await getSession();
 
-    if (!session || !session.user) {
+    if (!session.isAuthenticated) {
         return new Response("Unauthorized", { status: 401 });
     }
     if (!service) {
@@ -14,6 +15,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ serv
     }
 
     if (service === "myanimelist") {
+        if (!session.accessToken) {
+            return new Response("Access token not available", { status: 401 });
+        }
+
         const data = await fetch("https://api.myanimelist.net/v2/users/@me/animelist?status=plan_to_watch", {
             method: "GET",
             headers: {
@@ -41,6 +46,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ serv
     }
 
     if (service === "anilist") {
+        if (!session.accessToken || !session.userName) {
+            return new Response("Access token or username not available", { status: 401 });
+        }
+
         const data = await fetch("https://graphql.anilist.co", {
             method: "POST",
             headers: {
@@ -83,7 +92,7 @@ query ($userName: String, $statusIn: [MediaListStatus], $type: MediaType) {
 
                 `,
                 variables: {
-                    userName: session.user.name,
+                    userName: session.userName,
                     statusIn: ["PLANNING"],
                     type: "ANIME",
                 },

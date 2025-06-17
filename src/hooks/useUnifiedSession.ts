@@ -1,82 +1,77 @@
-import { useSession } from "next-auth/react";
+import { signIn, signOut, useSession as useNextAuthSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 
-export interface MALUser {
+export interface UserProfile {
     id: string;
     name: string;
     image?: string;
     accessToken: string;
+    provider: "anilist" | "myanimelist";
 }
 
-export interface AniListUser {
-    id: string;
-    name: string;
-    image?: string;
-    accessToken: string;
-}
+export interface SessionState {
+    user: UserProfile | UserProfile[] | null;
 
-export interface UnifiedSession {
-    anilistUser: AniListUser | null;
-    malUser: MALUser | null;
-    loading: boolean;
+    isAuthenticated: boolean;
+    isLoading: boolean;
     error: string | null;
-    provider?: string;
+
+    activeProvider?: "anilist" | "myanimelist";
+
+    login: (provider: "anilist" | "myanimelist") => void;
+    logout: (provider?: "anilist" | "myanimelist") => Promise<void>;
+    refresh: () => void;
 }
 
-export function useUnifiedSession(): UnifiedSession & {
-    loginWithAniList: () => void;
-    loginWithMAL: () => void;
-    logoutAniList: () => void;
-    logoutMAL: () => void;
-    refresh: () => void;
-} {
-    const { data: nextAuthSession, status } = useSession();
-    const [malUser, setMalUser] = useState<MALUser | null>(null);
-    const [error, setError] = useState<string | null>(null);
+export function useUnifiedSession(): SessionState {
+    const { data: nextAuthSession, status } = useNextAuthSession();
 
-    // Convert NextAuth session to AniList user
-    const anilistUser: AniListUser | null = nextAuthSession?.user
+    const [malUser, setMalUser] = useState<UserProfile | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [activeProvider, setActiveProvider] = useState<"anilist" | "myanimelist" | undefined>();
+
+    const anilistUser: UserProfile | null = nextAuthSession?.user
         ? {
               id: nextAuthSession.id ?? "",
               name: nextAuthSession.user.name ?? "",
               image: nextAuthSession.user.image ?? undefined,
               accessToken: nextAuthSession.accessToken ?? "",
+              provider: "anilist",
           }
         : null;
 
-    // Check for MAL user in cookies on client side
-    const checkMALUser = useCallback(() => {
+    const checkMALAuth = useCallback(() => {
         if (typeof window !== "undefined") {
-            // Check URL for MAL auth success
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get("mal_auth") === "success") {
-                // Remove the URL parameter
                 const newUrl = window.location.pathname;
                 window.history.replaceState({}, "", newUrl);
-
-                // Refresh to get updated session with MAL data
                 window.location.reload();
                 return;
             }
 
-            // Check for MAL auth errors
             const error = urlParams.get("error");
             if (error) {
                 setError(`Authentication error: ${error}`);
-                // Clean up URL
                 const newUrl = window.location.pathname;
                 window.history.replaceState({}, "", newUrl);
             }
         }
     }, []);
 
-    // Fetch MAL user data from server
     const fetchMALUser = useCallback(async () => {
         try {
             const response = await fetch("/api/auth/mal/user");
             if (response.ok) {
                 const data = await response.json();
-                setMalUser(data.user);
+                if (data.user) {
+                    setMalUser({
+                        ...data.user,
+                        provider: "myanimelist",
+                    });
+                } else {
+                    setMalUser(null);
+                }
             } else {
                 setMalUser(null);
             }
@@ -87,57 +82,102 @@ export function useUnifiedSession(): UnifiedSession & {
     }, []);
 
     useEffect(() => {
-        checkMALUser();
+        checkMALAuth();
         fetchMALUser();
-    }, [checkMALUser, fetchMALUser]);
+    }, [checkMALAuth, fetchMALUser]);
 
-    // Also check MAL user from NextAuth session if available
     useEffect(() => {
         if (nextAuthSession?.malUser) {
-            setMalUser(nextAuthSession.malUser);
+            setMalUser({
+                ...nextAuthSession.malUser,
+                provider: "myanimelist",
+            });
         }
     }, [nextAuthSession?.malUser]);
 
-    const loginWithAniList = useCallback(() => {
+    useEffect(() => {
+        if (!activeProvider) {
+            if (anilistUser) {
+                setActiveProvider("anilist");
+            } else if (malUser) {
+                setActiveProvider("myanimelist");
+            }
+        }
+    }, [anilistUser, malUser, activeProvider]);
+
+    useEffect(() => {
         if (typeof window !== "undefined") {
-            window.location.href = "/api/auth/signin/anilist";
+            const storedProvider = localStorage.getItem("aniwheel-active-provider") as "anilist" | "myanimelist" | null;
+            if (storedProvider) {
+                setActiveProvider(storedProvider);
+            }
         }
     }, []);
 
-    const loginWithMAL = useCallback(() => {
-        if (typeof window !== "undefined") {
+    const users: UserProfile[] = [];
+    if (anilistUser) users.push(anilistUser);
+    if (malUser) users.push(malUser);
+
+    let user: UserProfile | UserProfile[] | null = null;
+    if (users.length === 1) {
+        user = users[0];
+    } else if (users.length > 1) {
+        user = users;
+    }
+
+    const login = useCallback((provider: "anilist" | "myanimelist") => {
+        if (typeof window === "undefined") return;
+
+        setActiveProvider(provider);
+        localStorage.setItem("aniwheel-active-provider", provider);
+
+        if (provider === "anilist") {
+            signIn("anilist", { callbackUrl: window.location.href });
+        } else if (provider === "myanimelist") {
             window.location.href = "/api/auth/mal/login";
         }
     }, []);
 
-    const logoutAniList = useCallback(async () => {
-        if (typeof window !== "undefined") {
-            window.location.href = "/api/auth/signout";
-        }
-    }, []);
+    const logout = useCallback(
+        async (provider?: "anilist" | "myanimelist") => {
+            const logoutProvider = provider || activeProvider;
 
-    const logoutMAL = useCallback(async () => {
-        try {
-            await fetch("/api/auth/mal/logout", { method: "POST" });
-            setMalUser(null);
-        } catch (error) {
-            console.error("Failed to logout from MAL:", error);
-        }
-    }, []);
+            if (!logoutProvider || logoutProvider === "anilist") {
+                try {
+                    await signOut({ redirect: false });
+                } catch (error) {
+                    console.error("Failed to logout from AniList:", error);
+                }
+            }
+
+            if (!logoutProvider || logoutProvider === "myanimelist") {
+                try {
+                    await fetch("/api/auth/mal/logout", { method: "POST" });
+                    setMalUser(null);
+                } catch (error) {
+                    console.error("Failed to logout from MAL:", error);
+                }
+            }
+
+            if (typeof window !== "undefined") {
+                window.location.reload();
+            }
+        },
+        [activeProvider],
+    );
 
     const refresh = useCallback(() => {
         fetchMALUser();
     }, [fetchMALUser]);
 
     return {
-        anilistUser,
-        malUser,
-        loading: status === "loading",
+        user,
+        isAuthenticated: users.length > 0,
+        isLoading: status === "loading",
         error,
-        loginWithAniList,
-        loginWithMAL,
-        logoutAniList,
-        logoutMAL,
+        activeProvider,
+        login,
+        logout,
         refresh,
     };
 }

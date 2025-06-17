@@ -6,7 +6,6 @@ declare module "next-auth" {
         accessToken?: string;
         provider?: string;
         id?: string;
-        // Add MAL data to session
         malUser?: {
             id: string;
             name: string;

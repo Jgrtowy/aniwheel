@@ -147,16 +147,14 @@ export function SpinWheel({ items, onResult, onClose, titleLanguage }: SpinWheel
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white border-4 border-gray-300 rounded-full" />
                 </div>
 
-                {selectedItem && (
-                    <div className="text-center mb-4">
-                        <p className="text-lg font-semibold text-green-600">Selected: {selectedItem}</p>
-                    </div>
-                )}
-
                 <div className="text-center">
                     <Button onClick={spin} disabled={isSpinning} size="lg" className="w-full">
                         {isSpinning ? "Spinning..." : "Spin!"}
                     </Button>
+                </div>
+
+                <div className="flex items-center justify-center my-4 h-12">
+                    <p className="text-lg font-semibold text-white">{!selectedItem || isSpinning ? "???" : selectedItem}</p>
                 </div>
             </div>
         </div>
