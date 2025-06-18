@@ -1,7 +1,5 @@
-import { getServerSession } from "next-auth";
 import { getSession } from "~/lib/session";
 import type { PlannedItem } from "~/lib/types";
-import { authOptions } from "~/server/auth";
 
 export async function GET(request: Request, { params }: { params: Promise<{ service: string }> }) {
     const { service } = await params;
@@ -58,12 +56,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ serv
             },
             body: JSON.stringify({
                 query: `
-query ($userName: String, $statusIn: [MediaListStatus], $type: MediaType) {
+query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType) {
   MediaListCollection(userName: $userName, status_in: $statusIn, type: $type) {
     lists {
       entries {
         id
         media {
+          averageScore
+          episodes
           title {
             english
             romaji
@@ -83,6 +83,7 @@ query ($userName: String, $statusIn: [MediaListStatus], $type: MediaType) {
             airingAt
             timeUntilAiring
           }
+          siteUrl
         }
       }
     }
@@ -105,7 +106,18 @@ query ($userName: String, $statusIn: [MediaListStatus], $type: MediaType) {
         const mediaList = (await data.json()).data.MediaListCollection.lists[0].entries;
 
         const formattedMediaList: PlannedItem[] = mediaList.map(
-            (item: { id: number; media: { title: { english: string; romaji: string; native: string }; coverImage: { extraLarge: string; large: string; medium: string }; startDate?: { day: number; month: number; year: number }; nextAiringEpisode?: { airingAt: number; timeUntilAiring: number } } }) => ({
+            (item: {
+                id: number;
+                media: {
+                    siteUrl: string;
+                    episodes: number;
+                    averageScore: number;
+                    title: { english: string; romaji: string; native: string };
+                    coverImage: { extraLarge: string; large: string; medium: string };
+                    startDate?: { day: number; month: number; year: number };
+                    nextAiringEpisode?: { airingAt: number; timeUntilAiring: number };
+                };
+            }) => ({
                 id: item.id,
                 title: item.media.title.english || item.media.title.romaji,
                 romajiTitle: item.media.title.romaji,
@@ -113,6 +125,9 @@ query ($userName: String, $statusIn: [MediaListStatus], $type: MediaType) {
                 nativeTitle: item.media.title.native,
                 startDate: item.media.startDate,
                 nextAiringEpisode: item.media.nextAiringEpisode,
+                episodes: item.media.episodes,
+                averageScore: item.media.averageScore,
+                siteUrl: item.media.siteUrl,
             }),
         );
         return new Response(JSON.stringify(formattedMediaList), {

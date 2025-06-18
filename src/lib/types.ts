@@ -6,4 +6,7 @@ export interface PlannedItem {
     nativeTitle?: string;
     startDate?: { day: number; month: number; year: number };
     nextAiringEpisode?: { airingAt: number; timeUntilAiring: number };
+    averageScore?: number;
+    episodes?: number;
+    siteUrl?: string;
 }

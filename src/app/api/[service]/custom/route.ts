@@ -1,14 +1,5 @@
 import { getSession } from "~/lib/session";
-
-export interface PlannedItem {
-    id: number;
-    title: string;
-    image?: string;
-    romajiTitle?: string;
-    nativeTitle?: string;
-    startDate?: { day: number; month: number; year: number };
-    nextAiringEpisode?: { airingAt: number; timeUntilAiring: number };
-}
+import type { PlannedItem } from "~/lib/types";
 
 export async function POST(request: Request, { params }: { params: Promise<{ service: string }> }) {
     const { service } = await params;
@@ -40,7 +31,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ser
         },
         body: JSON.stringify({
             query: `
-query ($search: String, $type: MediaType) {
+query Search($search: String, $type: MediaType) {
   Media(search: $search, type: $type) {
     id
     title {

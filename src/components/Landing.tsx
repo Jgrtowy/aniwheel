@@ -8,11 +8,11 @@ export default function Landing() {
 
     return (
         <>
-            <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+            <div className="flex flex-col items-center w-screen justify-center min-h-dvh gap-4 text-center sm:px-0 px-4">
                 <h1 className="text-6xl">AniWheel</h1>
-                <p className="text-3xl">Don't know what to watch next?</p>
-                <p className="text-3xl">Login with your favorite anime tracker and spin the wheel!</p>
-                <div className="flex gap-4">
+                <p className="sm:text-3xl text-xl">Don't know what to watch next?</p>
+                <p className="sm:text-3xl text-xl">Login with your favorite anime tracker and spin the wheel!</p>
+                <div className="flex sm:flex-row flex-col gap-4">
                     <div className="flex flex-col items-center gap-2">
                         <Button variant="outline" className="text-xl p-6" onClick={async () => login("anilist")}>
                             AniList

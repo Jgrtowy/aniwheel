@@ -7,15 +7,14 @@ import { Button } from "./ui/button";
 
 interface SpinWheelProps {
     items: PlannedItem[];
-    onResult: (result: string) => void;
     onClose: () => void;
     titleLanguage?: string;
 }
 
-export function SpinWheel({ items, onResult, onClose, titleLanguage }: SpinWheelProps) {
+export function SpinWheel({ items, onClose, titleLanguage }: SpinWheelProps) {
     const [isSpinning, setIsSpinning] = useState(false);
     const [rotation, setRotation] = useState(0);
-    const [selectedItem, setSelectedItem] = useState<string | null>(null);
+    const [selectedItem, setSelectedItem] = useState<PlannedItem | null>(null);
 
     const segmentAngle = 360 / items.length;
 
@@ -48,7 +47,8 @@ export function SpinWheel({ items, onResult, onClose, titleLanguage }: SpinWheel
             const pointerPosition = (270 - normalizedRotation + 360) % 360;
 
             const selectedIndex = Math.floor(pointerPosition / segmentAngle) % items.length;
-            return titleLanguage === "native" ? items[selectedIndex].nativeTitle || items[selectedIndex].title : titleLanguage === "romaji" ? items[selectedIndex].romajiTitle || items[selectedIndex].title : items[selectedIndex].title;
+            return items[selectedIndex];
+            // return titleLanguage === "native" ? items[selectedIndex].nativeTitle || items[selectedIndex].title : titleLanguage === "romaji" ? items[selectedIndex].romajiTitle || items[selectedIndex].title : items[selectedIndex].title;
         },
         [items, segmentAngle, titleLanguage],
     );
@@ -69,7 +69,6 @@ export function SpinWheel({ items, onResult, onClose, titleLanguage }: SpinWheel
         setTimeout(() => {
             setSelectedItem(winner);
             setIsSpinning(false);
-            onResult(winner);
         }, 3000);
     };
 
@@ -154,7 +153,16 @@ export function SpinWheel({ items, onResult, onClose, titleLanguage }: SpinWheel
                 </div>
 
                 <div className="flex items-center justify-center my-4 h-12">
-                    <p className="text-lg font-semibold text-white">{!selectedItem || isSpinning ? "???" : selectedItem}</p>
+                    <p className="text-lg font-semibold line-clamp-2 text-center">{!selectedItem || isSpinning ? "???" : titleLanguage === "native" ? selectedItem.nativeTitle || selectedItem.title : titleLanguage === "romaji" ? selectedItem.romajiTitle || selectedItem.title : selectedItem.title}</p>
+                    {selectedItem?.siteUrl && !isSpinning && (
+                        <div className="">
+                            <a href={selectedItem.siteUrl} target="_blank" rel="noopener noreferrer">
+                                <Button variant="outline" className="ml-4">
+                                    AniList
+                                </Button>
+                            </a>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

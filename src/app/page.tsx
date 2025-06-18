@@ -11,7 +11,7 @@ export default async function Home() {
     const session = await getSession();
 
     return (
-        <main className="flex flex-col min-h-dvh m-0 p-0 min-w-screen">
+        <main className="flex flex-col min-h-dvh m-0 p-0 min-w-screen overflow-x-hidden">
             {session.isAuthenticated ? (
                 <>
                     <Header />

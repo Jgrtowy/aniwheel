@@ -1,4 +1,5 @@
 "use client";
+import { LogOut } from "lucide-react";
 import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { ModeToggle } from "./DarkModeToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -21,8 +22,8 @@ export default function Header() {
                 </div>
                 <div className="flex items-center gap-2">
                     <ModeToggle />
-                    <Button variant="outline" className="hover:cursor-pointer" onClick={() => logout(activeProvider)}>
-                        Sign Out
+                    <Button variant="outline" size="icon" className="hover:cursor-pointer" onClick={() => logout(activeProvider)}>
+                        <LogOut className="w-4 h-4" />
                     </Button>
                 </div>
             </header>
