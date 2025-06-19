@@ -3,13 +3,14 @@
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUnifiedSession } from "~/hooks/useUnifiedSession";
-import { useAnimeStore } from "~/lib/store";
+import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import type { PlannedItem } from "~/lib/types";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 export default function PlannedList() {
     const { animeList, checkedAnime, setCheckedAnime, titleLanguage, setAnimeList, setFullAnimeList, fullAnimeList } = useAnimeStore();
+    const { imageSize, blurEffects } = useSettingsStore();
     const [fetchingCustom, setFetchingCustom] = useState(false);
     const [customTitle, setCustomTitle] = useState("");
     const { activeProvider } = useUnifiedSession();
@@ -42,7 +43,7 @@ export default function PlannedList() {
             newAnime = {
                 id: Date.now(),
                 title: customTitle,
-                image: "",
+                image: null,
                 romajiTitle: customTitle,
             };
         }
@@ -73,19 +74,21 @@ export default function PlannedList() {
                         key={anime.id}
                         className={`rounded-lg p-3 transition-all sm:w-full sm:aspect-square duration-200 bg-primary-foreground ${checkedAnime.has(anime.id) ? "brightness-100 sm:scale-100 aspect-[4]" : "brightness-75 sm:scale-90 aspect-[6]"}`}
                         onClick={() => handleCheckChange(anime.id, !checkedAnime.has(anime.id))}
-                        style={{ cursor: "pointer", backgroundImage: anime.image ? `url(${anime.image})` : "none", backgroundSize: "cover", backgroundPosition: "center" }}
+                        style={{ cursor: "pointer", backgroundImage: anime.image ? `url(${anime.image[imageSize]})` : anime.imageMal ? `url(${anime.imageMal})` : "none", backgroundSize: "cover", backgroundPosition: "center" }}
                     >
                         <div className="flex lg:flex-col flex-row-reverse justify-between sm:items-baseline items-end gap-3 h-full">
                             <div className="flex items-center justify-end gap-1 sm:max-h-full max-h-max">
                                 {anime.averageScore && (
-                                    <div className="flex items-center leading-tight gap-1 text-xs backdrop-blur-2xl text-white backdrop-brightness-75 p-1 border rounded-lg">
+                                    <div className={`flex items-center leading-tight gap-1 text-xs ${blurEffects ? "backdrop-blur-2xl" : "bg-black"} text-white backdrop-brightness-75 p-1 border rounded-lg`}>
                                         <Star className="h-3 w-3" />
                                         <h3 className="font-medium sm:text-sm text-xs">{anime.averageScore}</h3>
                                     </div>
                                 )}
-                                {anime.episodes && <h3 className="font-medium max-w-fit sm:text-sm text-xs min-w-max leading-tight backdrop-blur-2xl text-white backdrop-brightness-75 p-1 border rounded-lg">{anime.episodes !== 1 ? `${anime.episodes} eps` : "1 ep"}</h3>}
+                                {anime.episodes && <h3 className={`font-medium max-w-fit sm:text-sm text-xs min-w-max leading-tight ${blurEffects ? "backdrop-blur-2xl" : "bg-black"} text-white backdrop-brightness-75 p-1 border rounded-lg`}>{anime.episodes !== 1 ? `${anime.episodes} eps` : "1 ep"}</h3>}
                             </div>
-                            <h3 className="font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 backdrop-blur-2xl text-white backdrop-brightness-75 p-1 border rounded-lg">{titleLanguage === "english" ? anime.title : titleLanguage === "romaji" ? anime.romajiTitle : anime.nativeTitle}</h3>
+                            <h3 className={`font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 ${blurEffects ? "backdrop-blur-2xl" : "bg-black"} text-white backdrop-brightness-75 p-1 border rounded-lg`}>
+                                {titleLanguage === "english" ? anime.title : titleLanguage === "romaji" ? anime.romajiTitle : anime.nativeTitle}
+                            </h3>
                         </div>
                     </div>
                 ))}

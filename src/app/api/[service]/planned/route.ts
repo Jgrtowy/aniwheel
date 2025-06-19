@@ -131,7 +131,11 @@ query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType)
                 id: item.id,
                 title: item.media.title.english || item.media.title.romaji,
                 romajiTitle: item.media.title.romaji,
-                image: item.media.coverImage.extraLarge || item.media.coverImage.large || item.media.coverImage.medium,
+                image: {
+                    extraLarge: item.media.coverImage.extraLarge,
+                    large: item.media.coverImage.large,
+                    medium: item.media.coverImage.medium,
+                },
                 nativeTitle: item.media.title.native,
                 startDate: item.media.startDate,
                 nextAiringEpisode: item.media.nextAiringEpisode,

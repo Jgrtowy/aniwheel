@@ -1,7 +1,12 @@
 export interface PlannedItem {
     id: number;
     title: string;
-    image?: string;
+    image?: {
+        extraLarge?: string;
+        large?: string;
+        medium?: string;
+    } | null;
+    imageMal?: string | null;
     romajiTitle?: string;
     nativeTitle?: string;
     startDate?: { day: number; month: number; year: number };

@@ -1,6 +1,6 @@
 "use client";
 import { Shuffle } from "lucide-react";
-import { useAnimeStore } from "~/lib/store";
+import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import Recommendations from "./Recommendations";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
@@ -9,7 +9,6 @@ import { Separator } from "./ui/separator";
 
 export default function SidePanel() {
     const { fullAnimeList, checkedAnime, setCheckedAnime, titleLanguage, setShowWheel } = useAnimeStore();
-
     const handleCheckChange = (animeId: number, checked: boolean) => {
         const newChecked = new Set(checkedAnime);
         if (checked) {

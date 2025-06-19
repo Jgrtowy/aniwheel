@@ -4,6 +4,8 @@ import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { ModeToggle } from "./DarkModeToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import SettingsMenu from "./SettingsMenu";
 
 export default function Header() {
     const { user, logout, activeProvider } = useUnifiedSession();
@@ -21,6 +23,7 @@ export default function Header() {
                     <h1 className="text-2xl">{primaryUser?.name && <>{`hello, ${primaryUser.name}!`}</>}</h1>
                 </div>
                 <div className="flex items-center gap-2">
+                    <SettingsMenu />
                     <ModeToggle />
                     <Button variant="outline" size="icon" className="hover:cursor-pointer" onClick={() => logout(activeProvider)}>
                         <LogOut className="w-4 h-4" />

@@ -26,6 +26,18 @@ interface AnimeStore {
     setFetchingCustom: (fetching: boolean) => void;
 }
 
+interface SettingsStore {
+    titleLanguage: "english" | "romaji" | "native";
+    imageSize: "medium" | "large" | "extraLarge";
+    showRecommendations: boolean;
+    blurEffects: boolean;
+
+    setTitleLanguage: (lang: "english" | "romaji" | "native") => void;
+    setImageSize: (size: "medium" | "large" | "extraLarge") => void;
+    setShowRecommendations: (show: boolean) => void;
+    setBlurEffects: (blur: boolean) => void;
+}
+
 export const useAnimeStore = create<AnimeStore>((set, get) => ({
     animeList: [],
     fullAnimeList: [],
@@ -54,4 +66,16 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     setShowWheel: (show) => set({ showWheel: show }),
     setRecommendations: (recs) => set({ recommendations: recs }),
     setFetchingCustom: (fetching) => set({ fetchingCustom: fetching }),
+}));
+
+export const useSettingsStore = create<SettingsStore>((set) => ({
+    titleLanguage: "english",
+    imageSize: "medium",
+    showRecommendations: false,
+    blurEffects: false,
+
+    setTitleLanguage: (lang) => set({ titleLanguage: lang }),
+    setImageSize: (size) => set({ imageSize: size }),
+    setShowRecommendations: (show) => set({ showRecommendations: show }),
+    setBlurEffects: (blur) => set({ blurEffects: blur }),
 }));
