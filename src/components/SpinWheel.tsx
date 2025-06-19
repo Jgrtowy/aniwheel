@@ -2,12 +2,13 @@
 
 import { ChevronDown, X } from "lucide-react";
 import { useCallback, useState } from "react";
-import { useAnimeStore } from "~/lib/store";
+import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import type { PlannedItem } from "~/lib/types";
 import { Button } from "./ui/button";
 
 export function SpinWheel() {
     const { showWheel, checkedAnime, fullAnimeList, titleLanguage, setShowWheel } = useAnimeStore();
+    const { imageSize } = useSettingsStore();
     const items = fullAnimeList.filter((anime) => checkedAnime.has(anime.id));
 
     const [isSpinning, setIsSpinning] = useState(false);
@@ -133,7 +134,16 @@ export function SpinWheel() {
                                         <path d={pathData} />
                                     </clipPath>
 
-                                    <image href={item.image} x={imageX - imageDimensions.width / 2} y={imageY - imageDimensions.height / 2} width={imageDimensions.width} height={imageDimensions.height} preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-path-${index})`} opacity="0.8" />
+                                    <image
+                                        href={item.image ? item.image[imageSize] : ""}
+                                        x={imageX - imageDimensions.width / 2}
+                                        y={imageY - imageDimensions.height / 2}
+                                        width={imageDimensions.width}
+                                        height={imageDimensions.height}
+                                        preserveAspectRatio="xMidYMid slice"
+                                        clipPath={`url(#clip-path-${index})`}
+                                        opacity="0.8"
+                                    />
                                 </g>
                             );
                         })}
