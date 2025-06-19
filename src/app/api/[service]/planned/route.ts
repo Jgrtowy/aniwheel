@@ -8,6 +8,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ serv
     if (!session.isAuthenticated) {
         return new Response("Unauthorized", { status: 401 });
     }
+
     if (!service) {
         return new Response("Service not specified", { status: 400 });
     }
@@ -16,25 +17,34 @@ export async function GET(request: Request, { params }: { params: Promise<{ serv
         if (!session.accessToken) {
             return new Response("Access token not available", { status: 401 });
         }
+        const formattedItems: PlannedItem[] = [];
+        while (true) {
+            const data = await fetch(`https://api.myanimelist.net/v2/users/@me/animelist?status=plan_to_watch&limit=100&offset=${formattedItems.length}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${session.accessToken}`,
+                },
+            });
 
-        const data = await fetch("https://api.myanimelist.net/v2/users/@me/animelist?status=plan_to_watch", {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${session.accessToken}`,
-            },
-        });
+            if (!data.ok) {
+                return new Response("Failed to fetch planned items", { status: 500 });
+            }
 
-        if (!data.ok) {
-            return new Response("Failed to fetch planned items", { status: 500 });
+            const plannedItems = await data.json();
+
+            if (!plannedItems.data || plannedItems.data.length === 0) {
+                break;
+            }
+
+            for (const item of plannedItems.data) {
+                const anime = item.node;
+                formattedItems.push({
+                    id: anime.id,
+                    title: anime.title,
+                    image: anime.main_picture.large || anime.main_picture.medium,
+                });
+            }
         }
-
-        const plannedItems = await data.json();
-
-        const formattedItems: PlannedItem[] = plannedItems.data.map((item: { node: { title: string; id: string; main_picture: { medium: string; large: string } } }) => ({
-            id: item.node.id,
-            title: item.node.title,
-            image: item.node.main_picture ? (item.node.main_picture.large ? item.node.main_picture.large : item.node.main_picture.medium) : undefined,
-        }));
         return new Response(JSON.stringify(formattedItems), {
             status: 200,
             headers: {

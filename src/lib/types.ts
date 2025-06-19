@@ -10,3 +10,10 @@ export interface PlannedItem {
     episodes?: number;
     siteUrl?: string;
 }
+
+export interface Recommendations {
+    id: number;
+    media: PlannedItem;
+    mediaRecommendation: PlannedItem;
+    rating: number;
+}

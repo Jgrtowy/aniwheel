@@ -1,12 +1,5 @@
 import { getSession } from "~/lib/session";
-import type { PlannedItem } from "~/lib/types";
-
-export interface Recommendations {
-    id: number;
-    media: PlannedItem;
-    mediaRecommendation: PlannedItem;
-    rating: number;
-}
+import type { PlannedItem, Recommendations } from "~/lib/types";
 
 export async function GET(request: Request, { params }: { params: Promise<{ service: string }> }) {
     const { service } = await params;
@@ -77,7 +70,7 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
 
                 `,
             variables: {
-                onList: false,
+                onList: true,
                 sort: "RATING_DESC",
                 page: 2,
                 perPage: 10,
@@ -96,13 +89,14 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
             id: number;
             media: PlannedItem & { title: { romaji: string; native: string; english: string }; coverImage: { extraLarge?: string; large?: string; medium?: string } };
             mediaRecommendation: PlannedItem & { title: { romaji: string; native: string; english: string }; coverImage: { extraLarge?: string; large?: string; medium?: string } };
+            rating: number;
         }) => ({
             id: item.id,
             media: {
                 id: item.media.id,
                 title: item.media.title.english || item.media.title.romaji || item.media.title.native,
                 romajiTitle: item.media.title.romaji,
-                image: item.media.coverImage.extraLarge || item.media.coverImage.large || item.media.coverImage.medium,
+                image: item.media.coverImage.medium || item.media.coverImage.large || item.media.coverImage.extraLarge,
                 nativeTitle: item.media.title.native,
                 averageScore: item.media.averageScore,
                 episodes: item.media.episodes,
@@ -112,12 +106,13 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
                 id: item.mediaRecommendation.id,
                 title: item.mediaRecommendation.title.english || item.mediaRecommendation.title.romaji || item.mediaRecommendation.title.native,
                 romajiTitle: item.mediaRecommendation.title.romaji,
-                image: item.mediaRecommendation.coverImage.extraLarge || item.mediaRecommendation.coverImage.large || item.mediaRecommendation.coverImage.medium,
+                image: item.mediaRecommendation.coverImage.medium || item.mediaRecommendation.coverImage.large || item.mediaRecommendation.coverImage.extraLarge,
                 nativeTitle: item.mediaRecommendation.title.native,
                 averageScore: item.mediaRecommendation.averageScore,
                 episodes: item.mediaRecommendation.episodes,
                 siteUrl: item.mediaRecommendation.siteUrl,
             },
+            rating: item.rating,
         }),
     );
     return new Response(JSON.stringify(formattedList), {

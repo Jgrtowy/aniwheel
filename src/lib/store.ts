@@ -1,0 +1,57 @@
+import { create } from "zustand";
+import type { PlannedItem, Recommendations } from "~/lib/types";
+
+interface AnimeStore {
+    animeList: PlannedItem[];
+    fullAnimeList: PlannedItem[];
+    checkedAnime: Set<number>;
+    titleLanguage: "english" | "romaji" | "native";
+    scoreThreshold: number;
+    customTitle: string;
+    showWheel: boolean;
+    recommendations: Recommendations[];
+    fetchingCustom: boolean;
+
+    setAnimeList: (list: PlannedItem[]) => void;
+    setFullAnimeList: (list: PlannedItem[]) => void;
+    setCheckedAnime: (set: Set<number>) => void;
+    toggleCheckedAnime: (id: number) => void;
+    selectAll: () => void;
+    deselectAll: () => void;
+    setTitleLanguage: (lang: "english" | "romaji" | "native") => void;
+    setScoreThreshold: (score: number) => void;
+    setCustomTitle: (title: string) => void;
+    setShowWheel: (show: boolean) => void;
+    setRecommendations: (recs: Recommendations[]) => void;
+    setFetchingCustom: (fetching: boolean) => void;
+}
+
+export const useAnimeStore = create<AnimeStore>((set, get) => ({
+    animeList: [],
+    fullAnimeList: [],
+    checkedAnime: new Set(),
+    titleLanguage: "english",
+    scoreThreshold: 0,
+    customTitle: "",
+    showWheel: false,
+    recommendations: [],
+    fetchingCustom: false,
+
+    setAnimeList: (list) => set({ animeList: list }),
+    setFullAnimeList: (list) => set({ fullAnimeList: list }),
+    setCheckedAnime: (checked) => set({ checkedAnime: checked }),
+    toggleCheckedAnime: (id) => {
+        const checked = new Set(get().checkedAnime);
+        if (checked.has(id)) checked.delete(id);
+        else checked.add(id);
+        set({ checkedAnime: checked });
+    },
+    selectAll: () => set({ checkedAnime: new Set(get().animeList.map((a) => a.id)) }),
+    deselectAll: () => set({ checkedAnime: new Set() }),
+    setTitleLanguage: (lang) => set({ titleLanguage: lang }),
+    setScoreThreshold: (score) => set({ scoreThreshold: score }),
+    setCustomTitle: (title) => set({ customTitle: title }),
+    setShowWheel: (show) => set({ showWheel: show }),
+    setRecommendations: (recs) => set({ recommendations: recs }),
+    setFetchingCustom: (fetching) => set({ fetchingCustom: fetching }),
+}));

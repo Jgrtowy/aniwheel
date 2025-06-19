@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 
 export default function RepoLink() {
     return (
-        <Button variant="outline" size="icon" className="hover:cursor-pointer backdrop-blur-2xl backdrop-brightness-75" onClick={() => window.open("https://github.com/Jgrtowy/aniwheel", "_blank")}>
+        <Button variant="outline" size="icon" className="fixed bottom-4 right-4 hover:cursor-pointer backdrop-blur-2xl backdrop-brightness-75" onClick={() => window.open("https://github.com/Jgrtowy/aniwheel", "_blank")}>
             <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <title>GitHub</title>
                 <path

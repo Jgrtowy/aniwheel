@@ -5,7 +5,7 @@ simple app created for those who can't decide which anime from their planned lis
 select your candidates and spin the wheel!
 
 roadmap:
-- [x] fix mal oauth
+- [ ] fix recommendations causes lag
 - [ ] support for kitsu
 - [ ] sounds when spinning
 - [ ] guest mode with local list

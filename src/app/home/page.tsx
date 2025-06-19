@@ -8,24 +8,21 @@ import { getSession } from "~/lib/session";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata = {
-    title: "AniWheel | Login",
-};
-
 export default async function Home() {
     const session = await getSession();
 
-    if (session.isAuthenticated) {
-        return redirect("/home");
+    if (!session.isAuthenticated) {
+        return redirect("/");
     }
 
     return (
-        <main className="flex flex-col justify-center items-center min-h-dvh min-w-screen m-0 p-0 overflow-x-hidden">
-            {!session.isAuthenticated && (
-                <div className="">
-                    <Landing />
+        <main className="flex flex-col min-h-dvh m-0 p-0 min-w-screen overflow-x-hidden">
+            {session.isAuthenticated && (
+                <>
+                    <Header />
+                    <MainContent />
                     <RepoLink />
-                </div>
+                </>
             )}
         </main>
     );

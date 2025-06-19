@@ -2,16 +2,14 @@
 
 import { ChevronDown, X } from "lucide-react";
 import { useCallback, useState } from "react";
+import { useAnimeStore } from "~/lib/store";
 import type { PlannedItem } from "~/lib/types";
 import { Button } from "./ui/button";
 
-interface SpinWheelProps {
-    items: PlannedItem[];
-    onClose: () => void;
-    titleLanguage?: string;
-}
+export function SpinWheel() {
+    const { showWheel, checkedAnime, fullAnimeList, titleLanguage, setShowWheel } = useAnimeStore();
+    const items = fullAnimeList.filter((anime) => checkedAnime.has(anime.id));
 
-export function SpinWheel({ items, onClose, titleLanguage }: SpinWheelProps) {
     const [isSpinning, setIsSpinning] = useState(false);
     const [rotation, setRotation] = useState(0);
     const [selectedItem, setSelectedItem] = useState<PlannedItem | null>(null);
@@ -72,8 +70,10 @@ export function SpinWheel({ items, onClose, titleLanguage }: SpinWheelProps) {
         }, 3000);
     };
 
+    if (!showWheel) return null;
+
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xl flex items-center justify-center z-50 p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xl flex items-center justify-center z-50 p-4" onClick={() => setShowWheel(false)}>
             <div className="rounded-lg p-6 max-w-md w-full bg-primary-foreground border" onClick={(e) => e.stopPropagation()}>
                 <div className="relative w-80 h-80 mx-auto my-6">
                     <svg

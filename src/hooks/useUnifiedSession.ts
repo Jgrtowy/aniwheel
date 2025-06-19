@@ -1,4 +1,5 @@
 import { signIn, signOut, useSession as useNextAuthSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 export interface UserProfile {
@@ -153,7 +154,6 @@ export function useUnifiedSession(): SessionState {
             if (!logoutProvider || logoutProvider === "myanimelist") {
                 try {
                     await fetch("/api/auth/mal/logout", { method: "POST" });
-                    setMalUser(null);
                 } catch (error) {
                     console.error("Failed to logout from MAL:", error);
                 }
