@@ -1,29 +1,34 @@
 "use client";
 
 import { Star } from "lucide-react";
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
 import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import type { PlannedItem } from "~/lib/types";
+import AnimeCard from "./AnimeCard";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 export default function PlannedList() {
     const { animeList, checkedAnime, setCheckedAnime, titleLanguage, setAnimeList, setFullAnimeList, fullAnimeList } = useAnimeStore();
-    const { imageSize, blurEffects } = useSettingsStore();
+    const { imageSize, backdropEffects: blurEffects } = useSettingsStore();
     const [fetchingCustom, setFetchingCustom] = useState(false);
     const [customTitle, setCustomTitle] = useState("");
     const { activeProvider } = useUnifiedSession();
 
-    const handleCheckChange = (animeId: number, checked: boolean) => {
-        const newChecked = new Set(checkedAnime);
-        if (checked) {
-            newChecked.add(animeId);
-        } else {
-            newChecked.delete(animeId);
-        }
-        setCheckedAnime(newChecked);
-    };
+    const handleCheckChange = useCallback(
+        (animeId: number, checked: boolean) => {
+            const newChecked = new Set(checkedAnime);
+            if (checked) {
+                newChecked.add(animeId);
+            } else {
+                newChecked.delete(animeId);
+            }
+            setCheckedAnime(newChecked);
+        },
+        [checkedAnime, setCheckedAnime],
+    );
 
     const handleAddAnime = async () => {
         if (fetchingCustom) return;
@@ -70,27 +75,7 @@ export default function PlannedList() {
         <div className="flex flex-col gap-4 max-h-fit">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:lg-grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 w-full gap-4 h-full">
                 {animeList.map((anime) => (
-                    <div
-                        key={anime.id}
-                        className={`rounded-lg p-3 transition-all sm:w-full sm:aspect-square duration-200 bg-primary-foreground ${checkedAnime.has(anime.id) ? "brightness-100 sm:scale-100 aspect-[4]" : "brightness-75 sm:scale-90 aspect-[6]"}`}
-                        onClick={() => handleCheckChange(anime.id, !checkedAnime.has(anime.id))}
-                        style={{ cursor: "pointer", backgroundImage: anime.image ? `url(${anime.image[imageSize]})` : anime.imageMal ? `url(${anime.imageMal})` : "none", backgroundSize: "cover", backgroundPosition: "center" }}
-                    >
-                        <div className="flex lg:flex-col flex-row-reverse justify-between sm:items-baseline items-end gap-3 h-full">
-                            <div className="flex items-center justify-end gap-1 sm:max-h-full max-h-max">
-                                {anime.averageScore && (
-                                    <div className={`flex items-center leading-tight gap-1 text-xs ${blurEffects ? "backdrop-blur-2xl" : "bg-black"} text-white backdrop-brightness-75 p-1 border rounded-lg`}>
-                                        <Star className="h-3 w-3" />
-                                        <h3 className="font-medium sm:text-sm text-xs">{anime.averageScore}</h3>
-                                    </div>
-                                )}
-                                {anime.episodes && <h3 className={`font-medium max-w-fit sm:text-sm text-xs min-w-max leading-tight ${blurEffects ? "backdrop-blur-2xl" : "bg-black"} text-white backdrop-brightness-75 p-1 border rounded-lg`}>{anime.episodes !== 1 ? `${anime.episodes} eps` : "1 ep"}</h3>}
-                            </div>
-                            <h3 className={`font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 ${blurEffects ? "backdrop-blur-2xl" : "bg-black"} text-white backdrop-brightness-75 p-1 border rounded-lg`}>
-                                {titleLanguage === "english" ? anime.title : titleLanguage === "romaji" ? anime.romajiTitle : anime.nativeTitle}
-                            </h3>
-                        </div>
-                    </div>
+                    <AnimeCard key={anime.id} anime={anime} checked={checkedAnime.has(anime.id)} onCheck={handleCheckChange} imageSize={imageSize} titleLanguage={titleLanguage} />
                 ))}
 
                 {activeProvider === "anilist" && (

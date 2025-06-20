@@ -41,7 +41,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ serv
                 formattedItems.push({
                     id: anime.id,
                     title: anime.title,
-                    image: anime.main_picture.large || anime.main_picture.medium,
+                    imageMal: {
+                        medium: anime.main_picture?.medium || null,
+                        large: anime.main_picture?.large || null,
+                    },
                 });
             }
         }

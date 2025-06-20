@@ -1,6 +1,9 @@
 "use client";
 import { Shuffle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { useAnimeStore, useSettingsStore } from "~/lib/store";
+import type { Recommendations as IRecommendations } from "~/lib/types";
 import Recommendations from "./Recommendations";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
@@ -9,6 +12,36 @@ import { Separator } from "./ui/separator";
 
 export default function SidePanel() {
     const { fullAnimeList, checkedAnime, setCheckedAnime, titleLanguage, setShowWheel } = useAnimeStore();
+    const { showRecommendations } = useSettingsStore();
+    const [recommendations, setRecommendations] = useState<IRecommendations[]>([]);
+    const { activeProvider } = useUnifiedSession();
+
+    const [hasFetched, setHasFetched] = useState(false);
+
+    useEffect(() => {
+        if (activeProvider !== "anilist" || hasFetched) return;
+        const fetchRecommendations = async () => {
+            const response = await fetch(`/api/${activeProvider}/recommendations`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                console.error("Failed to fetch recommendations");
+                return [];
+            }
+
+            const data = await response.json();
+            return data || [];
+        };
+        fetchRecommendations().then((recommendations) => {
+            setRecommendations(recommendations);
+            setHasFetched(true);
+        });
+    }, [activeProvider, hasFetched]);
+
     const handleCheckChange = (animeId: number, checked: boolean) => {
         const newChecked = new Set(checkedAnime);
         if (checked) {
@@ -63,7 +96,7 @@ export default function SidePanel() {
                     )}
                 </CardContent>
             </Card>
-            <Recommendations />
+            {showRecommendations && <Recommendations items={recommendations} />}
         </div>
     );
 }

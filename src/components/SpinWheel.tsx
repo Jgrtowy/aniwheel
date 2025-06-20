@@ -135,7 +135,7 @@ export function SpinWheel() {
                                     </clipPath>
 
                                     <image
-                                        href={item.image ? item.image[imageSize] : ""}
+                                        href={item.image?.[imageSize] || item.imageMal?.[imageSize === "extraLarge" ? "large" : imageSize] || ""}
                                         x={imageX - imageDimensions.width / 2}
                                         y={imageY - imageDimensions.height / 2}
                                         width={imageDimensions.width}

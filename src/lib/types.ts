@@ -6,7 +6,10 @@ export interface PlannedItem {
         large?: string;
         medium?: string;
     } | null;
-    imageMal?: string | null;
+    imageMal?: {
+        medium?: string;
+        large?: string;
+    } | null;
     romajiTitle?: string;
     nativeTitle?: string;
     startDate?: { day: number; month: number; year: number };

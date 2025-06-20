@@ -7,7 +7,7 @@ export default function Landing() {
     const { login } = useUnifiedSession();
 
     return (
-        <div className="flex flex-col items-center justify-center p-4 text-center backdrop-blur-sm bg-primary-foreground/20 rounded-lg border gap-2">
+        <div className="flex flex-col items-center justify-center p-4 text-center rounded-lg gap-2">
             <div className="flex items-center justify-center w-24 h-24 sm:w-32 sm:h-32 mb-4">
                 <svg viewBox="0 0 150 143" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <title>運 (un)</title>
