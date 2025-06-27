@@ -16,7 +16,7 @@ export default async function Home() {
     }
 
     return (
-        <main className="flex flex-col min-h-dvh m-0 p-0 min-w-screen overflow-x-hidden">
+        <main className="flex flex-col min-h-dvh m-0 p-0 min-w-screen">
             {session.isAuthenticated && (
                 <>
                     <Header />

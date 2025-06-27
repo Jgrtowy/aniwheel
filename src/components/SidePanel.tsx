@@ -63,7 +63,7 @@ export default function SidePanel() {
     const checkedAnimeList = fullAnimeList.filter((anime) => checkedAnime.has(anime.id));
     return (
         <div className="flex flex-col gap-4 md:max-w-sm w-full">
-            <Card className="sticky top-4">
+            <Card>
                 <CardContent className="space-y-4">
                     <div className="text-center">
                         <Button onClick={handleRoll} disabled={checkedAnime.size < 2} size="lg" className="w-full">

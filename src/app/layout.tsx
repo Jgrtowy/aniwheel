@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={`${comfortaa.className} antialiased`}>
+            <body className={`${comfortaa.className} antialiased overflow-x-hidden m-0 p-0 min-w-screen`}>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <ClientSessionProvider>{children}</ClientSessionProvider>
                 </ThemeProvider>
