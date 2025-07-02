@@ -1,16 +1,15 @@
 import { Settings } from "lucide-react";
-import React, { useEffect } from "react";
+import React from "react";
+import { Button } from "~/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { useSettingsStore } from "~/lib/store";
-import { Button } from "./ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { Label } from "./ui/label";
-import { Switch } from "./ui/switch";
-import { Toggle } from "./ui/toggle";
-import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
 export default function SettingsMenu() {
-    const { imageSize, setImageSize, showRecommendations, setShowRecommendations, backdropEffects: blurEffects, setBackdropEffects: setBlurEffects } = useSettingsStore();
+    const { imageSize, setImageSize, showRecommendations, setShowRecommendations, backdropEffects: blurEffects, setBackdropEffects: setBlurEffects, skipLandingAnimation, setSkipLandingAnimation } = useSettingsStore();
     const { activeProvider } = useUnifiedSession();
 
     return (
@@ -59,6 +58,15 @@ export default function SettingsMenu() {
                     <div className="flex items-center gap-2">
                         <Switch checked={blurEffects} onCheckedChange={setBlurEffects} />
                         <span className="text-xs text-muted-foreground">(May cause lag!)</span>
+                    </div>
+                </div>
+                <DropdownMenuSeparator className="my-1" />
+                <div className="flex flex-col p-2 gap-2">
+                    <Label className="text-xs">Skip landing page animation</Label>
+                    <span className="text-xs text-muted-foreground">Completely skips the long landing page animation.</span>
+                    <div className="flex items-center gap-2">
+                        <Switch checked={skipLandingAnimation} onCheckedChange={setSkipLandingAnimation} />
+                        <span className="text-xs text-muted-foreground">(I'll be sad if you do 🥺)</span>
                     </div>
                 </div>
             </DropdownMenuContent>

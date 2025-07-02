@@ -2,12 +2,14 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Aurora from "~/components/Aurora";
 import KanjiAnimation from "~/components/KanjiAnimation";
 import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import { useReducedMotion } from "~/hooks/useReducedMotion";
 import { type UserProfile, useUnifiedSession } from "~/hooks/useUnifiedSession";
+import { useSettingsStore } from "~/lib/store";
 import PlaceholderWheel from "./PlaceholderWheel";
 
 export default function Landing() {
@@ -16,10 +18,29 @@ export default function Landing() {
     const [renderButtons, setRenderButtons] = useState(false);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
 
+    const prefersReducedMotion = useReducedMotion();
+    const { skipLandingAnimation } = useSettingsStore();
+    const shouldSkipAnimations = prefersReducedMotion || skipLandingAnimation;
+
     const kanjiSizeTransitionDuration = 0.4;
     const titleAnimationDuration = 0.6;
 
+    useEffect(() => {
+        if (shouldSkipAnimations) {
+            setKanjiPathAnimationComplete(true);
+            setRenderTitle(true);
+            setRenderButtons(true);
+        }
+    }, [shouldSkipAnimations]);
+
     const handleKanjiPathAnimationComplete = async () => {
+        if (shouldSkipAnimations) {
+            setKanjiPathAnimationComplete(true);
+            setRenderTitle(true);
+            setRenderButtons(true);
+            return;
+        }
+
         setKanjiPathAnimationComplete(true);
         await new Promise((resolve) => setTimeout(resolve, kanjiSizeTransitionDuration * 1000));
         setRenderTitle(true);
@@ -40,13 +61,20 @@ export default function Landing() {
 
     return (
         <div className="flex items-center justify-center flex-col">
-            <motion.div className="flex items-center justify-center gap-4" layout>
-                <motion.div layout transition={{ type: "spring", stiffness: 300, damping: 30 }} className="flex">
+            <motion.div className="flex items-center justify-center gap-4" layout={!shouldSkipAnimations}>
+                <motion.div layout={!shouldSkipAnimations} transition={!shouldSkipAnimations ? { type: "spring", stiffness: 300, damping: 30 } : { duration: 0 }} className="flex">
                     <Tooltip>
                         <TooltipTrigger>
-                            <KanjiAnimation className={`flex-shrink-0 transition duration-[${kanjiSizeTransitionDuration * 1000}ms] ${kanjiPathAnimationComplete ? "scale-100" : "scale-[300%]"}`} size={100} duration={0.175} delayBetween={0.01} strokeWidth={5} onAnimationComplete={handleKanjiPathAnimationComplete} />
+                            <KanjiAnimation
+                                className={`flex-shrink-0 transition ${shouldSkipAnimations ? "" : `duration-[${kanjiSizeTransitionDuration * 1000}ms]`} ${kanjiPathAnimationComplete ? "scale-100" : shouldSkipAnimations ? "scale-100" : "scale-[300%]"}`}
+                                size={100}
+                                duration={shouldSkipAnimations ? 0 : 0.175}
+                                delayBetween={shouldSkipAnimations ? 0 : 0.01}
+                                strokeWidth={5}
+                                onAnimationComplete={handleKanjiPathAnimationComplete}
+                            />
                         </TooltipTrigger>
-                        {renderButtons && (
+                        {(renderButtons || shouldSkipAnimations) && (
                             <TooltipContent>
                                 <p>(うん) - luck/fate</p>
                             </TooltipContent>
@@ -55,8 +83,15 @@ export default function Landing() {
                 </motion.div>
 
                 <AnimatePresence>
-                    {renderTitle && (
-                        <motion.h1 layout initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: titleAnimationDuration }} className="text-7xl font-bold text-center">
+                    {(renderTitle || shouldSkipAnimations) && (
+                        <motion.h1
+                            layout={!shouldSkipAnimations}
+                            initial={shouldSkipAnimations ? undefined : { opacity: 0, x: 60 }}
+                            animate={shouldSkipAnimations ? undefined : { opacity: 1, x: 0 }}
+                            exit={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                            transition={shouldSkipAnimations ? { duration: 0 } : { duration: titleAnimationDuration }}
+                            className="text-7xl font-bold text-center"
+                        >
                             Aniwheel
                         </motion.h1>
                     )}
@@ -64,8 +99,15 @@ export default function Landing() {
             </motion.div>
 
             <AnimatePresence>
-                {renderButtons && (
-                    <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: titleAnimationDuration, delay: titleAnimationDuration / 2 }} className="flex flex-col items-center justify-center gap-4">
+                {(renderButtons || shouldSkipAnimations) && (
+                    <motion.div
+                        layout={!shouldSkipAnimations}
+                        initial={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                        animate={shouldSkipAnimations ? undefined : { opacity: 1 }}
+                        exit={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                        transition={shouldSkipAnimations ? { duration: 0 } : { duration: titleAnimationDuration, delay: titleAnimationDuration / 2 }}
+                        className="flex flex-col items-center justify-center gap-4"
+                    >
                         <div className="flex flex-col items-center gap-1 mt-4 text-center">
                             <p className="text-4xl font-semibold">Stuck on what anime to watch next?</p>
                             <p className="text-lg">
@@ -98,21 +140,28 @@ export default function Landing() {
             </AnimatePresence>
 
             <AnimatePresence>
-                {renderTitle && (
-                    <motion.div layout initial={{ opacity: 0, y: -300 }} animate={{ opacity: 0.5, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: titleAnimationDuration * 4 }} className="fixed top-0 inset-0 -z-10 pointer-events-none">
+                {(renderTitle || shouldSkipAnimations) && (
+                    <motion.div
+                        layout={!shouldSkipAnimations}
+                        initial={shouldSkipAnimations ? undefined : { opacity: 0, y: -300 }}
+                        animate={shouldSkipAnimations ? undefined : { opacity: 0.5, y: 0 }}
+                        exit={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                        transition={shouldSkipAnimations ? { duration: 0 } : { duration: titleAnimationDuration * 4 }}
+                        className="fixed top-0 inset-0 -z-10 pointer-events-none"
+                    >
                         <Aurora colorStops={["#3A29FF", "#FF94B4", "#FF3232"]} blend={0.75} amplitude={0.75} speed={0.4} />
                     </motion.div>
                 )}
             </AnimatePresence>
 
             <AnimatePresence>
-                {renderButtons && (
+                {(renderButtons || shouldSkipAnimations) && (
                     <motion.div
-                        layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: titleAnimationDuration, delay: titleAnimationDuration / 2 }}
+                        layout={!shouldSkipAnimations}
+                        initial={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                        animate={shouldSkipAnimations ? undefined : { opacity: 1 }}
+                        exit={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                        transition={shouldSkipAnimations ? { duration: 0 } : { duration: titleAnimationDuration, delay: titleAnimationDuration / 2 }}
                         className="fixed -rotate-45 bottom-0 right-0 translate-x-1/3 translate-y-1/3 z-10 hover:translate-x-1/4 hover:translate-y-1/4 transition-all duration-300"
                     >
                         <div className="opacity-25 hover:opacity-100 transition-opacity duration-300">

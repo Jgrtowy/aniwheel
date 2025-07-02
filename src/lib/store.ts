@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { PlannedItem, Recommendations } from "~/lib/types";
 
 interface AnimeStore {
@@ -31,11 +32,13 @@ interface SettingsStore {
     imageSize: "medium" | "large" | "extraLarge";
     showRecommendations: boolean;
     backdropEffects: boolean;
+    skipLandingAnimation: boolean;
 
     setTitleLanguage: (lang: "english" | "romaji" | "native") => void;
     setImageSize: (size: "medium" | "large" | "extraLarge") => void;
     setShowRecommendations: (show: boolean) => void;
     setBackdropEffects: (blur: boolean) => void;
+    setSkipLandingAnimation: (skip: boolean) => void;
 }
 
 export const useAnimeStore = create<AnimeStore>((set, get) => ({
@@ -68,14 +71,23 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     setFetchingCustom: (fetching) => set({ fetchingCustom: fetching }),
 }));
 
-export const useSettingsStore = create<SettingsStore>((set) => ({
-    titleLanguage: "english",
-    imageSize: "large",
-    showRecommendations: true,
-    backdropEffects: false,
+export const useSettingsStore = create<SettingsStore>()(
+    persist(
+        (set) => ({
+            titleLanguage: "english",
+            imageSize: "large",
+            showRecommendations: true,
+            backdropEffects: false,
+            skipLandingAnimation: false,
 
-    setTitleLanguage: (lang) => set({ titleLanguage: lang }),
-    setImageSize: (size) => set({ imageSize: size }),
-    setShowRecommendations: (show) => set({ showRecommendations: show }),
-    setBackdropEffects: (backdropEffects) => set({ backdropEffects: backdropEffects }),
-}));
+            setTitleLanguage: (lang) => set({ titleLanguage: lang }),
+            setImageSize: (size) => set({ imageSize: size }),
+            setShowRecommendations: (show) => set({ showRecommendations: show }),
+            setBackdropEffects: (backdropEffects) => set({ backdropEffects: backdropEffects }),
+            setSkipLandingAnimation: (skip) => set({ skipLandingAnimation: skip }),
+        }),
+        {
+            name: "aniwheel-settings",
+        },
+    ),
+);
