@@ -1,7 +1,5 @@
 import { redirect } from "next/navigation";
-import Header from "~/components/Header";
 import Landing from "~/components/Landing";
-import MainContent from "~/components/MainContent";
 import RepoLink from "~/components/RepoLink";
 import { getSession } from "~/lib/session";
 
@@ -20,13 +18,9 @@ export default async function Home() {
     }
 
     return (
-        <main className="flex flex-col justify-center items-center min-h-dvh min-w-screen m-0 p-0 overflow-x-hidden">
-            {!session.isAuthenticated && (
-                <div className="">
-                    <Landing />
-                    <RepoLink />
-                </div>
-            )}
+        <main className="flex flex-col justify-center items-center min-h-dvh">
+            <Landing />
+            <RepoLink className="fixed top-4 right-4" />
         </main>
     );
 }
