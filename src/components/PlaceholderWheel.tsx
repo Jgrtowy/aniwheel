@@ -2,8 +2,9 @@
 
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
+import { cn } from "~/lib/utils";
 
-export default function PlaceholderWheel() {
+export default function PlaceholderWheel({ className }: { className?: string }) {
     const [rotation, setRotation] = useState(0);
     const [isSpinning, setIsSpinning] = useState(false);
 
@@ -30,7 +31,7 @@ export default function PlaceholderWheel() {
     }, []);
 
     return (
-        <div className="relative size-80" onClick={spinWheel}>
+        <div className={cn("relative", className)} onClick={spinWheel}>
             <svg
                 viewBox="0 0 302 302"
                 fill="none"
