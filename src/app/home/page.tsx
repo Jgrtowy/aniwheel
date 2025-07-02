@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import Header from "~/components/Header";
-import Landing from "~/components/Landing";
 import MainContent from "~/components/MainContent";
 import RepoLink from "~/components/RepoLink";
 import { getSession } from "~/lib/session";
@@ -21,7 +20,7 @@ export default async function Home() {
                 <>
                     <Header />
                     <MainContent />
-                    <RepoLink />
+                    <RepoLink className="fixed bottom-4 right-4" />
                 </>
             )}
         </main>

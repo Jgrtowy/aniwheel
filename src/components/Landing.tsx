@@ -1,46 +1,178 @@
 "use client";
-import React from "react";
-import { useUnifiedSession } from "~/hooks/useUnifiedSession";
-import { Button } from "./ui/button";
+
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import Aurora from "~/components/Aurora";
+import KanjiAnimation from "~/components/KanjiAnimation";
+import { Button } from "~/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import useMediaQuery from "~/hooks/useMediaQuery";
+import { useReducedMotion } from "~/hooks/useReducedMotion";
+import { type UserProfile, useUnifiedSession } from "~/hooks/useUnifiedSession";
+import { useSettingsStore } from "~/lib/store";
+import PlaceholderWheel from "./PlaceholderWheel";
 
 export default function Landing() {
+    const [kanjiPathAnimationComplete, setKanjiPathAnimationComplete] = useState(false);
+    const [renderTitle, setRenderTitle] = useState(false);
+    const [renderButtons, setRenderButtons] = useState(false);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+    const prefersReducedMotion = useReducedMotion();
+    const { skipLandingAnimation } = useSettingsStore();
+    const shouldSkipAnimations = prefersReducedMotion || skipLandingAnimation;
+
+    const isDesktop = useMediaQuery("(width >= 40rem)");
+
+    const kanjiSizeTransitionDuration = 0.4;
+    const titleAnimationDuration = 0.6;
+
+    useEffect(() => {
+        if (shouldSkipAnimations) {
+            setKanjiPathAnimationComplete(true);
+            setRenderTitle(true);
+            setRenderButtons(true);
+        }
+    }, [shouldSkipAnimations]);
+
+    const handleKanjiPathAnimationComplete = async () => {
+        if (shouldSkipAnimations) {
+            setKanjiPathAnimationComplete(true);
+            setRenderTitle(true);
+            setRenderButtons(true);
+            return;
+        }
+
+        setKanjiPathAnimationComplete(true);
+        await new Promise((resolve) => setTimeout(resolve, kanjiSizeTransitionDuration * 1000));
+        setRenderTitle(true);
+        await new Promise((resolve) => setTimeout(resolve, titleAnimationDuration * 1000 + 250));
+        setRenderButtons(true);
+    };
+
     const { login } = useUnifiedSession();
 
-    return (
-        <div className="flex flex-col items-center justify-center p-4 text-center rounded-lg gap-2">
-            <div className="flex items-center justify-center w-24 h-24 sm:w-32 sm:h-32 mb-4">
-                <svg viewBox="0 0 150 143" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <title>運 (un)</title>
-                    <path
-                        d="M31.4815 21.7792C30.8081 21.7792 29.9102 21.5541 28.7879 21.1039C27.7778 20.5411 26.431 19.8095 24.7475 18.9091C23.2884 18.0087 21.6049 17.1082 19.697 16.2078C17.789 15.3074 15.881 14.4069 13.9731 13.5065C10.1571 11.7056 8.24916 9.34199 8.24916 6.41559C8.24916 2.13853 10.3255 0 14.4781 0C16.4983 0 20.8754 1.57576 27.6094 4.72727C34.4557 8.1039 37.8788 11.4805 37.8788 14.8571C37.8788 19.4719 35.7464 21.7792 31.4815 21.7792ZM93.771 127.805C89.8429 127.805 87.8788 125.498 87.8788 120.883V110.584H47.4747C43.3221 110.584 41.2458 108.784 41.2458 105.182C41.2458 101.58 43.3221 99.7792 47.4747 99.7792H87.8788V90.6623H61.6162C57.1268 90.6623 53.8721 89.7056 51.8519 87.7922C49.8317 85.7662 48.9338 82.6147 49.1582 78.3377V55.039C49.1582 50.6494 50.1122 47.4416 52.0202 45.4156C53.9282 43.3896 57.1268 42.4892 61.6162 42.7143H87.8788V34.7792H64.4781C61.1111 34.7792 59.4276 33.1472 59.4276 29.8831C59.4276 26.5065 61.1111 24.8182 64.4781 24.8182H87.8788V13.6753H59.2593C56.1167 13.6753 54.5455 15.3074 54.5455 18.5714V28.026C54.5455 32.5281 52.413 34.7792 48.1481 34.7792C43.9955 34.7792 41.9192 32.5281 41.9192 28.026V15.7013C41.9192 11.0866 42.9293 7.70996 44.9495 5.57144C46.9697 3.4329 50.3367 2.47619 55.0505 2.70131H133.165C137.879 2.70131 141.358 3.71429 143.603 5.74027C145.847 7.76624 146.801 11.0866 146.465 15.7013V27.8571C146.465 32.4719 144.332 34.7792 140.067 34.7792C135.915 34.7792 133.838 32.4719 133.838 27.8571V18.5714C133.838 15.3074 132.211 13.6753 128.956 13.6753H99.8316V24.8182H123.569C126.824 24.8182 128.451 26.5065 128.451 29.8831C128.451 33.1472 126.824 34.7792 123.569 34.7792H99.8316V42.7143H127.441C131.706 42.7143 134.848 43.671 136.869 45.5844C139.001 47.4978 139.955 50.6494 139.731 55.039V78.3377C139.731 82.6147 138.721 85.8225 136.7 87.961C134.792 89.987 131.706 90.8874 127.441 90.6623H99.8316V99.7792H140.404C144.669 99.7792 146.801 101.58 146.801 105.182C146.801 108.784 144.669 110.584 140.404 110.584H99.8316V120.883C99.8316 125.498 97.8114 127.805 93.771 127.805ZM25.5892 53.6883C24.4669 53.6883 22.615 52.9567 20.0337 51.4935L6.56566 45.5844C3.19865 44.1212 1.51515 41.9827 1.51515 39.1688C1.51515 34.8918 3.59147 32.7532 7.74411 32.7532C8.75421 32.7532 10.3816 33.1472 12.6263 33.9351C14.9832 34.7229 17.9574 35.8485 21.5488 37.3117C28.6195 40.3507 32.1549 43.5584 32.1549 46.9351C32.1549 51.4372 29.9663 53.6883 25.5892 53.6883ZM61.6162 61.961H87.8788V52.5065H65.4882C62.9068 52.5065 61.6162 53.9134 61.6162 56.7273V61.961ZM99.8316 61.961H127.273V56.7273C127.273 53.9134 125.926 52.5065 123.232 52.5065H99.8316V61.961ZM65.4882 80.7013H87.8788V71.5844H61.6162V76.8182C61.6162 79.4069 62.9068 80.7013 65.4882 80.7013ZM99.8316 80.7013H123.232C125.926 80.7013 127.273 79.4069 127.273 76.8182V71.5844H99.8316V80.7013ZM140.572 143C132.043 143 123.569 143 115.152 143C106.734 143 98.2604 142.944 89.7306 142.831C79.9663 142.719 71.5488 142.437 64.4781 141.987C57.5196 141.537 52.0763 140.749 48.1481 139.623C39.9551 137.26 33.2772 133.489 28.1145 128.312C16.7789 137.541 9.70819 142.156 6.90236 142.156C2.30079 142.156 0 139.623 0 134.558C0 132.758 0.617283 131.238 1.85185 130C3.19865 128.649 4.76992 127.636 6.56566 126.961C8.36139 126.286 10.3816 125.329 12.6263 124.091C14.9832 122.853 17.7329 121.333 20.8754 119.532V88.974C20.8754 85.5974 19.1358 83.9091 15.6566 83.9091H6.39731C2.13244 83.9091 0 81.8831 0 77.8312C0 73.8918 2.13244 71.9221 6.39731 71.9221H19.697C24.2985 71.9221 27.7217 72.8788 29.9663 74.7922C32.211 76.7056 33.2211 79.9697 32.9966 84.5844V118.013C36.0269 120.489 39.0572 122.571 42.0875 124.26C45.2301 125.948 48.7093 127.299 52.5253 128.312C56.3412 129.212 60.8866 129.887 66.1616 130.338C71.5488 130.675 78.0022 130.844 85.5219 130.844C95.174 130.844 104.882 130.788 114.646 130.675C124.411 130.45 134.119 130.281 143.771 130.169C147.924 130.169 150 132.195 150 136.247C150 140.749 146.857 143 140.572 143Z"
-                        fill="white"
-                    />
-                </svg>
-            </div>
+    const handleLogin = async (provider: UserProfile["provider"]) => {
+        setIsLoggingIn(true);
+        try {
+            login(provider);
+        } catch (error) {
+            setIsLoggingIn(false);
+        }
+    };
 
-            <i className="text-muted-foreground sm:text-3xl text-xl">(luck, fate, randomness)</i>
-            <p className="sm:text-3xl text-xl">Struggling with your planned animes?</p>
-            <p className="sm:text-3xl text-xl">Login with your favorite anime tracker and let the luck decide!</p>
-            <div className="flex sm:flex-row flex-col gap-4">
-                <div className="flex flex-col items-center gap-2">
-                    <Button variant="outline" className="text-xl p-6 cursor-pointer" onClick={async () => login("anilist")}>
-                        AniList
-                    </Button>
-                    <span className="text-sm text-muted-foreground">most features!</span>
-                </div>
-                <div className="flex flex-col items-center gap-2">
-                    <Button variant="outline" className="text-xl p-6 cursor-pointer" onClick={async () => login("myanimelist")}>
-                        MyAnimeList
-                    </Button>
-                    <span className="text-sm text-muted-foreground">less features!</span>
-                </div>
-                <div className="flex flex-col items-center gap-2">
-                    <Button variant="outline" className="text-xl p-6" disabled>
-                        Kitsu
-                    </Button>
-                    <span className="text-sm text-muted-foreground">stay tuned!</span>
-                </div>
-            </div>
+    return (
+        <div className="flex items-center justify-center flex-col p-4">
+            <motion.div className="flex items-center justify-center gap-2 sm:gap-4" layout={!shouldSkipAnimations}>
+                <motion.div layout={!shouldSkipAnimations} transition={!shouldSkipAnimations ? { type: "spring", stiffness: 300, damping: 30 } : { duration: 0 }} className="flex">
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <KanjiAnimation
+                                className={`flex-shrink-0 transition ${shouldSkipAnimations ? "" : `duration-[${kanjiSizeTransitionDuration * 1000}ms]`} ${kanjiPathAnimationComplete ? "scale-100" : shouldSkipAnimations ? "scale-100" : "scale-[300%]"}`}
+                                size={isDesktop ? 100 : 75}
+                                duration={shouldSkipAnimations ? 0 : 0.175}
+                                delayBetween={shouldSkipAnimations ? 0 : 0.01}
+                                strokeWidth={5}
+                                onAnimationComplete={handleKanjiPathAnimationComplete}
+                            />
+                        </TooltipTrigger>
+                        {(renderButtons || shouldSkipAnimations) && (
+                            <TooltipContent>
+                                <p>(うん) - luck/fate</p>
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                </motion.div>
+
+                <AnimatePresence>
+                    {(renderTitle || shouldSkipAnimations) && (
+                        <motion.h1
+                            layout={!shouldSkipAnimations}
+                            initial={shouldSkipAnimations ? undefined : { opacity: 0, x: 60 }}
+                            animate={shouldSkipAnimations ? undefined : { opacity: 1, x: 0 }}
+                            exit={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                            transition={shouldSkipAnimations ? { duration: 0 } : { duration: titleAnimationDuration }}
+                            className="text-5xl sm:text-6xl font-bold text-center"
+                        >
+                            Aniwheel
+                        </motion.h1>
+                    )}
+                </AnimatePresence>
+            </motion.div>
+
+            <AnimatePresence>
+                {(renderButtons || shouldSkipAnimations) && (
+                    <motion.div
+                        layout={!shouldSkipAnimations}
+                        initial={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                        animate={shouldSkipAnimations ? undefined : { opacity: 1 }}
+                        exit={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                        transition={shouldSkipAnimations ? { duration: 0 } : { duration: titleAnimationDuration, delay: titleAnimationDuration / 2 }}
+                        className="flex flex-col items-center justify-center gap-6 sm:gap-4"
+                    >
+                        <div className="flex flex-col items-center gap-2 mt-4 text-center">
+                            <p className="text-2xl sm:text-4xl font-semibold text-balance">Stuck on what to watch next?</p>
+                            <p className="text-sm sm:text-base text-balance">
+                                Log in with your favorite tracker and let <span className="peer italic">fate</span> pick your next binge!
+                                <Image src="/Rider_of_black.webp" alt="Rider of Black" width={150} height={150} className="fixed rotate-45 transition-[750ms] -bottom-72 -left-46 peer-hover:-bottom-23 peer-hover:-left-12 size-auto" />
+                            </p>
+                        </div>
+                        <div className="flex sm:flex-row flex-col gap-4 items-stretch">
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                                <Button variant="outline" className="px-5 py-6 text-xl cursor-pointer w-full" onClick={async () => handleLogin("anilist")} disabled={isLoggingIn}>
+                                    AniList
+                                </Button>
+                                <span className="text-xs text-muted-foreground">most features</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                                <Button variant="outline" className="px-5 py-6 text-xl cursor-pointer w-full" onClick={async () => handleLogin("myanimelist")} disabled={isLoggingIn}>
+                                    MyAnimeList
+                                </Button>
+                                <span className="text-xs text-muted-foreground">less features</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                                <Button variant="outline" className="px-5 py-6 text-xl cursor-not-allowed w-full" disabled>
+                                    Kitsu
+                                </Button>
+                                <span className="text-xs text-muted-foreground">stay tuned</span>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {(renderTitle || shouldSkipAnimations) && (
+                    <motion.div
+                        layout={!shouldSkipAnimations}
+                        initial={shouldSkipAnimations ? undefined : { opacity: 0, y: -300 }}
+                        animate={shouldSkipAnimations ? undefined : { opacity: 0.5, y: 0 }}
+                        exit={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                        transition={shouldSkipAnimations ? { duration: 0 } : { duration: titleAnimationDuration * 4 }}
+                        className="fixed top-0 h-1/2 w-[200%] sm:h-full sm:w-full -z-10 pointer-events-none"
+                    >
+                        <Aurora colorStops={isDesktop ? ["#1100c8", "#b33796", "#a410ff"] : ["#1100c8", "#b33796"]} blend={0.75} amplitude={0.75} speed={0.5} />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {(renderButtons || shouldSkipAnimations) && (
+                    <motion.div
+                        layout={!shouldSkipAnimations}
+                        initial={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                        animate={shouldSkipAnimations ? undefined : { opacity: 1 }}
+                        exit={shouldSkipAnimations ? undefined : { opacity: 0 }}
+                        transition={shouldSkipAnimations ? { duration: 0 } : { duration: titleAnimationDuration, delay: titleAnimationDuration / 2 }}
+                        className="fixed -rotate-45 bottom-0 right-0 translate-x-1/3 translate-y-1/3 z-10 hover:translate-x-1/4 hover:translate-y-1/4 transition-all duration-300"
+                    >
+                        <div className="opacity-25 hover:opacity-100 transition-opacity duration-300">
+                            <PlaceholderWheel className="size-48 sm:size-80" />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
