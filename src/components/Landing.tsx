@@ -115,7 +115,7 @@ export default function Landing() {
                             <p className="text-2xl sm:text-4xl font-semibold text-balance">Stuck on what to watch next?</p>
                             <p className="text-sm sm:text-base text-balance">
                                 Log in with your favorite tracker and let <span className="peer italic">fate</span> pick your next binge!
-                                <Image src="/Rider_of_black.webp" alt="Rider of Black" width={150} height={150} className="fixed rotate-45 transition-[750ms] -bottom-69 -left-36 peer-hover:-bottom-23 peer-hover:-left-12 size-auto" />
+                                <Image src="/Rider_of_black.webp" alt="Rider of Black" width={150} height={150} className="fixed rotate-45 transition-[750ms] -bottom-72 -left-46 peer-hover:-bottom-23 peer-hover:-left-12 size-auto" />
                             </p>
                         </div>
                         <div className="flex sm:flex-row flex-col gap-4 items-stretch">
