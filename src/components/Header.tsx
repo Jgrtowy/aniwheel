@@ -19,7 +19,7 @@ export default function Header() {
                     <AvatarImage src={primaryUser?.image ?? ""} alt="Profile Picture" />
                     <AvatarFallback>{primaryUser?.name?.charAt(0) || "U"}</AvatarFallback>
                 </Avatar>
-                <h1 className="text-2xl">{primaryUser?.name && <>{`hello, ${primaryUser.name}!`}</>}</h1>
+                <h1 className="text-2xl text-white">{primaryUser?.name && <>{`hello, ${primaryUser.name}!`}</>}</h1>
             </div>
             <div className="flex items-center gap-2">
                 <SettingsMenu />

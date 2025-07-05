@@ -12,7 +12,7 @@ import { Separator } from "./ui/separator";
 
 export default function SidePanel() {
     const { fullAnimeList, checkedAnime, setCheckedAnime, titleLanguage, setShowWheel } = useAnimeStore();
-    const { showRecommendations } = useSettingsStore();
+    const { showRecommendations, backdropEffects } = useSettingsStore();
     const [recommendations, setRecommendations] = useState<IRecommendations[]>([]);
     const { activeProvider } = useUnifiedSession();
 
@@ -61,9 +61,11 @@ export default function SidePanel() {
     };
 
     const checkedAnimeList = fullAnimeList.filter((anime) => checkedAnime.has(anime.id));
+    const effectClass = backdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-primary-foreground";
+
     return (
         <div className="flex flex-col gap-4 md:max-w-sm w-full">
-            <Card>
+            <Card className={`w-full ${effectClass}`}>
                 <CardContent className="space-y-4">
                     <div className="text-center">
                         <Button onClick={handleRoll} disabled={checkedAnime.size < 2} size="lg" className="w-full">

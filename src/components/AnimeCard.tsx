@@ -1,7 +1,8 @@
-import { Star } from "lucide-react";
+import { Clapperboard, ExternalLink, Star } from "lucide-react";
 import { memo } from "react";
 import { useSettingsStore } from "~/lib/store";
 import type { PlannedItem } from "~/lib/types";
+import { Button } from "./ui/button";
 
 const AnimeCard = memo(function AnimeCard({
     anime,
@@ -36,15 +37,37 @@ const AnimeCard = memo(function AnimeCard({
             onClick={handleClick}
             style={{ cursor: "pointer", backgroundImage, backgroundSize: "cover", backgroundPosition: "center" }}
         >
-            <div className="flex lg:flex-col flex-row-reverse justify-between sm:items-baseline items-end gap-3 h-full">
-                <div className="flex items-center justify-end gap-1 sm:max-h-full max-h-max">
-                    {anime.averageScore && (
-                        <div className={`flex items-center leading-tight gap-1 text-xs ${effectClass} text-white p-1 border rounded-lg`}>
-                            <Star className="h-3 w-3" />
-                            <h3 className="font-medium sm:text-sm text-xs">{anime.averageScore}</h3>
+            <div className="flex sm:flex-col flex-row-reverse justify-between sm:items-baseline items-end gap-3 h-full">
+                <div className="flex items-center justify-end sm:justify-between sm:max-h-full max-h-max w-full">
+                    {anime.siteUrl && (
+                        <div>
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className={`${effectClass} sm:scale-100 scale-75 rounded-lg text-white`}
+                                onClick={(e) => {
+                                    window.open(anime.siteUrl, "_blank");
+                                    e.stopPropagation();
+                                }}
+                            >
+                                <ExternalLink />
+                            </Button>
                         </div>
                     )}
-                    {anime.episodes && <h3 className={`font-medium max-w-fit sm:text-sm text-xs min-w-max leading-tight ${effectClass} text-white p-1 border rounded-lg`}>{anime.episodes !== 1 ? `${anime.episodes} eps` : "1 ep"}</h3>}
+                    <div className="flex items-center gap-1">
+                        {anime.averageScore && (
+                            <div className={`flex items-center leading-tight gap-1 text-xs ${effectClass} text-white p-1 border rounded-lg min-h-8`}>
+                                <Star className="h-3 w-3" />
+                                <h3 className="font-medium sm:text-sm text-xs">{anime.averageScore}</h3>
+                            </div>
+                        )}
+                        {anime.episodes && (
+                            <div className={`flex items-center leading-tight gap-1 text-xs ${effectClass} text-white p-1 border rounded-lg min-h-8`}>
+                                <Clapperboard className="h-3 w-3" />
+                                <h3 className="font-medium sm:text-sm text-xs">{anime.episodes !== 1 ? `${anime.episodes} eps` : "1 ep"}</h3>
+                            </div>
+                        )}
+                    </div>
                 </div>
                 <h3 className={`font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 ${effectClass} text-white p-1 border rounded-lg`}>{titleLanguage === "english" ? anime.title : titleLanguage === "romaji" ? anime.romajiTitle : anime.nativeTitle}</h3>
             </div>

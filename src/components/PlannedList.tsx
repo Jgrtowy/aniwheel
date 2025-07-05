@@ -12,7 +12,7 @@ import { Input } from "./ui/input";
 
 export default function PlannedList() {
     const { animeList, checkedAnime, setCheckedAnime, titleLanguage, setAnimeList, setFullAnimeList, fullAnimeList } = useAnimeStore();
-    const { imageSize, backdropEffects: blurEffects } = useSettingsStore();
+    const { imageSize } = useSettingsStore();
     const [fetchingCustom, setFetchingCustom] = useState(false);
     const [customTitle, setCustomTitle] = useState("");
     const { activeProvider } = useUnifiedSession();

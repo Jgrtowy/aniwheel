@@ -23,12 +23,13 @@ export default function Recommendations({ items }: { items?: IRecommendations[] 
         setCheckedAnime(new Set([...checkedAnime, anime.id]));
     };
 
-    const backdropEffectsClasses = backdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-black/80";
+    const cardBackdropEffects = backdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-black/80";
+    const contentBackdropEffects = backdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-primary-foreground";
 
     return (
         <>
             {activeProvider === "anilist" && (
-                <Card className="w-full">
+                <Card className={`w-full ${contentBackdropEffects}`}>
                     <CardHeader>
                         <CardTitle>Recommendations</CardTitle>
                     </CardHeader>
@@ -39,7 +40,7 @@ export default function Recommendations({ items }: { items?: IRecommendations[] 
                                 .map((rec) => (
                                     <div key={rec.mediaRecommendation.id} className="flex justify-between">
                                         <div className="flex items-end mb-2 rounded-lg p-1 w-1/3 aspect-square" style={{ backgroundImage: rec.media.image ? `url(${rec.media.image[imageSize]})` : "none", backgroundSize: "cover", backgroundPosition: "center" }}>
-                                            <h3 className={`font-medium w-fit max-w-full text-xs leading-tight sm:line-clamp-2 line-clamp-1 ${backdropEffectsClasses} text-white p-1 border rounded-lg`}>
+                                            <h3 className={`font-medium w-fit max-w-full text-xs leading-tight sm:line-clamp-2 line-clamp-1 ${cardBackdropEffects} text-white p-1 border rounded-lg`}>
                                                 {titleLanguage === "english" ? rec.media.title : titleLanguage === "romaji" ? rec.media.romajiTitle : rec.media.nativeTitle}
                                             </h3>
                                         </div>
@@ -58,19 +59,19 @@ export default function Recommendations({ items }: { items?: IRecommendations[] 
                                         <div className="flex flex-col justify-between w-1/3 aspect-square mb-2 rounded-lg p-1" style={{ backgroundImage: rec.mediaRecommendation.image ? `url(${rec.mediaRecommendation.image[imageSize]})` : "none", backgroundSize: "cover", backgroundPosition: "center" }}>
                                             <div className="flex items-center justify-between gap-1 sm:max-h-full max-h-max">
                                                 {rec.mediaRecommendation.averageScore && (
-                                                    <div className={`flex items-center leading-tight gap-1 text-xs ${backdropEffectsClasses} text-white p-1 border rounded-lg`}>
+                                                    <div className={`flex items-center leading-tight gap-1 text-xs ${cardBackdropEffects} text-white p-1 border rounded-lg`}>
                                                         <Star className="h-2 w-2" />
                                                         <h3 className="font-medium text-xs">{rec.mediaRecommendation.averageScore}</h3>
                                                     </div>
                                                 )}
                                                 {rec.mediaRecommendation.episodes && (
-                                                    <div className={`flex items-center leading-tight gap-1 text-xs ${backdropEffectsClasses} text-white p-1 border rounded-lg`}>
+                                                    <div className={`flex items-center leading-tight gap-1 text-xs ${cardBackdropEffects} text-white p-1 border rounded-lg`}>
                                                         <Clapperboard className="h-2 w-2" />
                                                         <h3 className="font-medium text-xs">{rec.mediaRecommendation.episodes}</h3>
                                                     </div>
                                                 )}
                                             </div>
-                                            <h3 className={`font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 ${backdropEffectsClasses} text-white p-1 border rounded-lg`}>
+                                            <h3 className={`font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 ${cardBackdropEffects} text-white p-1 border rounded-lg`}>
                                                 {titleLanguage === "english" ? rec.mediaRecommendation.title : titleLanguage === "romaji" ? rec.mediaRecommendation.romajiTitle : rec.mediaRecommendation.nativeTitle}
                                             </h3>
                                         </div>
