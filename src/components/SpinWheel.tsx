@@ -32,7 +32,7 @@ const BASE_ROTATION_RANGE = 1440; // Additional random rotations
 
 export function SpinWheel() {
     const { showWheel, checkedAnime, fullAnimeList, titleLanguage, setShowWheel } = useAnimeStore();
-    const { imageSize } = useSettingsStore();
+    const { imageSize, enableTickSounds } = useSettingsStore();
     const items = fullAnimeList.filter((anime) => checkedAnime.has(anime.id));
 
     const [isSpinning, setIsSpinning] = useState(false);
@@ -103,14 +103,14 @@ export function SpinWheel() {
     const playTickSound = useCallback(() => {
         const now = performance.now();
         
-        if (audioRef.current && now - lastSoundPlayTimeRef.current >= SOUND_COOLDOWN) {
+        if (enableTickSounds && audioRef.current && now - lastSoundPlayTimeRef.current >= SOUND_COOLDOWN) {
             audioRef.current.currentTime = 0;
             audioRef.current.play().catch(() => {
                 console.warn("Failed to play sound, you may need to interact with the page first.");
             });
             lastSoundPlayTimeRef.current = now;
         }
-    }, []);
+    }, [enableTickSounds]);
 
     const calculateWinner = useCallback(
         (finalRotation: number) => {
