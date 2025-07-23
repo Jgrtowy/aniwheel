@@ -33,12 +33,14 @@ interface SettingsStore {
     showRecommendations: boolean;
     backdropEffects: boolean;
     skipLandingAnimation: boolean;
+    enableTickSounds: boolean;
 
     setTitleLanguage: (lang: "english" | "romaji" | "native") => void;
     setImageSize: (size: "medium" | "large" | "extraLarge") => void;
     setShowRecommendations: (show: boolean) => void;
     setBackdropEffects: (blur: boolean) => void;
     setSkipLandingAnimation: (skip: boolean) => void;
+    setEnableTickSounds: (enable: boolean) => void;
 }
 
 export const useAnimeStore = create<AnimeStore>((set, get) => ({
@@ -79,12 +81,14 @@ export const useSettingsStore = create<SettingsStore>()(
             showRecommendations: true,
             backdropEffects: false,
             skipLandingAnimation: false,
+            enableTickSounds: true,
 
             setTitleLanguage: (lang) => set({ titleLanguage: lang }),
             setImageSize: (size) => set({ imageSize: size }),
             setShowRecommendations: (show) => set({ showRecommendations: show }),
             setBackdropEffects: (backdropEffects) => set({ backdropEffects: backdropEffects }),
             setSkipLandingAnimation: (skip) => set({ skipLandingAnimation: skip }),
+            setEnableTickSounds: (enable) => set({ enableTickSounds: enable }),
         }),
         {
             name: "aniwheel-settings",

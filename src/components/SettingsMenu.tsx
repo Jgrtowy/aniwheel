@@ -9,7 +9,7 @@ import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { useSettingsStore } from "~/lib/store";
 
 export default function SettingsMenu() {
-    const { imageSize, setImageSize, showRecommendations, setShowRecommendations, backdropEffects: blurEffects, setBackdropEffects: setBlurEffects, skipLandingAnimation, setSkipLandingAnimation } = useSettingsStore();
+    const { imageSize, setImageSize, showRecommendations, setShowRecommendations, backdropEffects: blurEffects, setBackdropEffects: setBlurEffects, skipLandingAnimation, setSkipLandingAnimation, enableTickSounds, setEnableTickSounds } = useSettingsStore();
     const { activeProvider } = useUnifiedSession();
 
     return (
@@ -58,6 +58,14 @@ export default function SettingsMenu() {
                     <div className="flex items-center gap-2">
                         <Switch checked={blurEffects} onCheckedChange={setBlurEffects} />
                         <span className="text-xs text-muted-foreground">(May cause lag!)</span>
+                    </div>
+                </div>
+                <DropdownMenuSeparator className="my-1" />
+                <div className="flex flex-col p-2 gap-2">
+                    <Label className="text-xs">Enable Tick Sounds</Label>
+                    <span className="text-xs text-muted-foreground">Plays sound when the wheel passes through segments.</span>
+                    <div className="flex items-center gap-2">
+                        <Switch checked={enableTickSounds} onCheckedChange={setEnableTickSounds} />
                     </div>
                 </div>
                 <DropdownMenuSeparator className="my-1" />
