@@ -1,7 +1,8 @@
 "use client";
 import React from "react";
 import { useUnifiedSession } from "~/hooks/useUnifiedSession";
-import { useAnimeStore } from "~/lib/store";
+import { useAnimeStore, useSettingsStore } from "~/lib/store";
+import type { TitleLanguage } from "~/lib/types";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -10,7 +11,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger } from ".
 import { Slider } from "./ui/slider";
 
 export default function Filters() {
-    const { animeList, fullAnimeList, checkedAnime, setAnimeList, setCheckedAnime, titleLanguage, setTitleLanguage } = useAnimeStore();
+    const { animeList, fullAnimeList, checkedAnime, setAnimeList, setCheckedAnime } = useAnimeStore();
+    const { titleLanguage, setTitleLanguage } = useSettingsStore();
     const { activeProvider } = useUnifiedSession();
     const [scoreThreshold, setScoreThreshold] = React.useState(0);
 
@@ -62,9 +64,9 @@ export default function Filters() {
                     {activeProvider === "anilist" && (
                         <div className="flex items-center flex-wrap gap-2">
                             <Select
-                                defaultValue="english"
+                                value={titleLanguage}
                                 onValueChange={(value) => {
-                                    setTitleLanguage(value as "english" | "romaji" | "native");
+                                    setTitleLanguage(value as TitleLanguage);
                                 }}
                             >
                                 <SelectTrigger className="w-36">

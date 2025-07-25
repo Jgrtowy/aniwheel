@@ -1,7 +1,8 @@
 import { Clapperboard, ExternalLink, Star } from "lucide-react";
 import { memo } from "react";
 import { useSettingsStore } from "~/lib/store";
-import type { PlannedItem } from "~/lib/types";
+import type { PlannedItem, TitleLanguage } from "~/lib/types";
+import { getTitleWithPreference } from "~/lib/utils";
 import { Button } from "./ui/button";
 
 const AnimeCard = memo(function AnimeCard({
@@ -15,7 +16,7 @@ const AnimeCard = memo(function AnimeCard({
     checked: boolean;
     onCheck: (id: number, checked: boolean) => void;
     imageSize: "medium" | "large" | "extraLarge";
-    titleLanguage: "english" | "romaji" | "native";
+    titleLanguage: TitleLanguage;
 }) {
     const { backdropEffects: blurEffects } = useSettingsStore();
     const handleClick = () => onCheck(anime.id, !checked);
@@ -69,7 +70,7 @@ const AnimeCard = memo(function AnimeCard({
                         )}
                     </div>
                 </div>
-                <h3 className={`font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 ${effectClass} text-white p-1 border rounded-lg`}>{titleLanguage === "english" ? anime.title : titleLanguage === "romaji" ? anime.romajiTitle : anime.nativeTitle}</h3>
+                <h3 className={`font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 ${effectClass} text-white p-1 border rounded-lg`}>{getTitleWithPreference(anime, titleLanguage)}</h3>
             </div>
         </div>
     );

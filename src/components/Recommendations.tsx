@@ -4,14 +4,15 @@ import React, { useEffect, useState } from "react";
 import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import type { Recommendations as IRecommendations, PlannedItem } from "~/lib/types";
+import { getTitleWithPreference } from "~/lib/utils";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
 
 export default function Recommendations({ items }: { items?: IRecommendations[] }) {
     const { activeProvider } = useUnifiedSession();
-    const { titleLanguage, setFullAnimeList, fullAnimeList, animeList, setAnimeList, checkedAnime, setCheckedAnime } = useAnimeStore();
-    const { imageSize, backdropEffects } = useSettingsStore();
+    const { setFullAnimeList, fullAnimeList, animeList, setAnimeList, checkedAnime, setCheckedAnime } = useAnimeStore();
+    const { imageSize, backdropEffects, titleLanguage } = useSettingsStore();
 
     const handleAddToList = (anime: PlannedItem) => {
         if (animeList.some((a) => a.id === anime.id)) {
@@ -40,9 +41,7 @@ export default function Recommendations({ items }: { items?: IRecommendations[] 
                                 .map((rec) => (
                                     <div key={rec.mediaRecommendation.id} className="flex justify-between">
                                         <div className="flex items-end mb-2 rounded-lg p-1 w-1/3 aspect-square" style={{ backgroundImage: rec.media.image ? `url(${rec.media.image[imageSize]})` : "none", backgroundSize: "cover", backgroundPosition: "center" }}>
-                                            <h3 className={`font-medium w-fit max-w-full text-xs leading-tight sm:line-clamp-2 line-clamp-1 ${cardBackdropEffects} text-white p-1 border rounded-lg`}>
-                                                {titleLanguage === "english" ? rec.media.title : titleLanguage === "romaji" ? rec.media.romajiTitle : rec.media.nativeTitle}
-                                            </h3>
+                                            <h3 className={`font-medium w-fit max-w-full text-xs leading-tight sm:line-clamp-2 line-clamp-1 ${cardBackdropEffects} text-white p-1 border rounded-lg`}>{getTitleWithPreference(rec.media, titleLanguage)}</h3>
                                         </div>
                                         <div className="flex flex-col w-1/3 justify-center items-center">
                                             <ChevronRight className="h-6 w-6" />
@@ -71,9 +70,7 @@ export default function Recommendations({ items }: { items?: IRecommendations[] 
                                                     </div>
                                                 )}
                                             </div>
-                                            <h3 className={`font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 ${cardBackdropEffects} text-white p-1 border rounded-lg`}>
-                                                {titleLanguage === "english" ? rec.mediaRecommendation.title : titleLanguage === "romaji" ? rec.mediaRecommendation.romajiTitle : rec.mediaRecommendation.nativeTitle}
-                                            </h3>
+                                            <h3 className={`font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 ${cardBackdropEffects} text-white p-1 border rounded-lg`}>{getTitleWithPreference(rec.mediaRecommendation, titleLanguage)}</h3>
                                         </div>
                                     </div>
                                 ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ExternalLink, Star } from "lucide-react";
+import { ChevronDown, Clapperboard, ExternalLink, Star } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LightRays from "~/components/LightRays";
@@ -35,8 +35,8 @@ const BASE_ROTATION_MIN = 1440; // Minimum 4 full rotations
 const BASE_ROTATION_RANGE = 1440; // Additional random rotations
 
 export function SpinWheelContent() {
-    const { checkedAnime, fullAnimeList, titleLanguage } = useAnimeStore();
-    const { imageSize } = useSettingsStore();
+    const { checkedAnime, fullAnimeList } = useAnimeStore();
+    const { imageSize, titleLanguage } = useSettingsStore();
     const items = fullAnimeList.filter((anime) => checkedAnime.has(anime.id));
 
     const { activeProvider } = useUnifiedSession();
@@ -132,10 +132,6 @@ export function SpinWheelContent() {
         return () => currentAnimationRef.current?.cancel();
     }, []);
 
-    useEffect(() => {
-        console.log(selectedItem);
-    }, [selectedItem]);
-
     return (
         <>
             <AnimatePresence>
@@ -209,12 +205,15 @@ export function SpinWheelContent() {
                                         <div className="flex items-center gap-2 flex-wrap">
                                             {selectedItem.averageScore && (
                                                 <Badge variant="secondary" className="bg-yellow-500 text-accent">
-                                                    <Star className="w-3 h-3 lg:w-4 lg:h-4" /> <span className="translate-y-0.25">{selectedItem.averageScore}%</span>
+                                                    <Star className="w-3 h-3 lg:w-4 lg:h-4" /> <span>{selectedItem.averageScore}%</span>
                                                 </Badge>
                                             )}
                                             {selectedItem.episodes && (
                                                 <Badge variant="secondary" className="bg-blue-500 text-primary">
-                                                    {selectedItem.episodes} episode{selectedItem.episodes > 1 ? "s" : ""}
+                                                    <Clapperboard className="w-3 h-3 lg:w-4 lg:h-4" />
+                                                    <span>
+                                                        {selectedItem.episodes} ep{selectedItem.episodes > 1 ? "s" : ""}
+                                                    </span>
                                                 </Badge>
                                             )}
                                         </div>
