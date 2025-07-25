@@ -1,10 +1,11 @@
 "use client";
 import { Shuffle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import type { Recommendations as IRecommendations } from "~/lib/types";
 import Recommendations from "./Recommendations";
+import { SpinWheelDialog } from "./SpinWheelDialog";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
@@ -68,10 +69,7 @@ export default function SidePanel() {
             <Card className={`w-full ${effectClass}`}>
                 <CardContent className="space-y-4">
                     <div className="text-center">
-                        <Button onClick={handleRoll} disabled={checkedAnime.size < 2} size="lg" className="w-full">
-                            <Shuffle className="w-5 h-5 mr-2" />
-                            Spin the wheel!
-                        </Button>
+                        <SpinWheelDialog />
                         <p className="text-sm my-2">{checkedAnime.size} selected</p>
                     </div>
 
