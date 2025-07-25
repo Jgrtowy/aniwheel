@@ -25,3 +25,5 @@ export interface Recommendations {
     mediaRecommendation: PlannedItem;
     rating: number;
 }
+
+export type TitleLanguage = "english" | "romaji" | "native";

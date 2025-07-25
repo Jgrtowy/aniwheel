@@ -1,18 +1,20 @@
 "use client";
 import { Shuffle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import type { Recommendations as IRecommendations } from "~/lib/types";
+import { getTitleWithPreference } from "~/lib/utils";
 import Recommendations from "./Recommendations";
+import { SpinWheelDialog } from "./SpinWheelDialog";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
 import { Separator } from "./ui/separator";
 
 export default function SidePanel() {
-    const { fullAnimeList, checkedAnime, setCheckedAnime, titleLanguage, setShowWheel } = useAnimeStore();
-    const { showRecommendations, backdropEffects } = useSettingsStore();
+    const { fullAnimeList, checkedAnime, setCheckedAnime, setShowWheel } = useAnimeStore();
+    const { showRecommendations, backdropEffects, titleLanguage } = useSettingsStore();
     const [recommendations, setRecommendations] = useState<IRecommendations[]>([]);
     const { activeProvider } = useUnifiedSession();
 
@@ -68,10 +70,7 @@ export default function SidePanel() {
             <Card className={`w-full ${effectClass}`}>
                 <CardContent className="space-y-4">
                     <div className="text-center">
-                        <Button onClick={handleRoll} disabled={checkedAnime.size < 2} size="lg" className="w-full">
-                            <Shuffle className="w-5 h-5 mr-2" />
-                            Spin the wheel!
-                        </Button>
+                        <SpinWheelDialog />
                         <p className="text-sm my-2">{checkedAnime.size} selected</p>
                     </div>
 
@@ -83,7 +82,7 @@ export default function SidePanel() {
                                     {checkedAnimeList.map((anime) => (
                                         <div key={anime.id}>
                                             <span className="text-xs rounded hover:text-red-500 transition-colors cursor-pointer" onClick={() => handleCheckChange(anime.id, !checkedAnime.has(anime.id))}>
-                                                {titleLanguage === "english" ? anime.title : titleLanguage === "romaji" ? anime.romajiTitle : anime.nativeTitle}
+                                                {getTitleWithPreference(anime, titleLanguage)}
                                             </span>
                                             <Separator className="my-1" />
                                         </div>

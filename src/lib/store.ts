@@ -1,12 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { PlannedItem, Recommendations } from "~/lib/types";
+import type { PlannedItem, Recommendations, TitleLanguage } from "~/lib/types";
 
 interface AnimeStore {
     animeList: PlannedItem[];
     fullAnimeList: PlannedItem[];
     checkedAnime: Set<number>;
-    titleLanguage: "english" | "romaji" | "native";
     scoreThreshold: number;
     customTitle: string;
     showWheel: boolean;
@@ -19,7 +18,6 @@ interface AnimeStore {
     toggleCheckedAnime: (id: number) => void;
     selectAll: () => void;
     deselectAll: () => void;
-    setTitleLanguage: (lang: "english" | "romaji" | "native") => void;
     setScoreThreshold: (score: number) => void;
     setCustomTitle: (title: string) => void;
     setShowWheel: (show: boolean) => void;
@@ -28,14 +26,14 @@ interface AnimeStore {
 }
 
 interface SettingsStore {
-    titleLanguage: "english" | "romaji" | "native";
+    titleLanguage: TitleLanguage;
     imageSize: "medium" | "large" | "extraLarge";
     showRecommendations: boolean;
     backdropEffects: boolean;
     skipLandingAnimation: boolean;
     enableTickSounds: boolean;
 
-    setTitleLanguage: (lang: "english" | "romaji" | "native") => void;
+    setTitleLanguage: (lang: TitleLanguage) => void;
     setImageSize: (size: "medium" | "large" | "extraLarge") => void;
     setShowRecommendations: (show: boolean) => void;
     setBackdropEffects: (blur: boolean) => void;
@@ -47,7 +45,6 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     animeList: [],
     fullAnimeList: [],
     checkedAnime: new Set(),
-    titleLanguage: "english",
     scoreThreshold: 0,
     customTitle: "",
     showWheel: false,
@@ -65,7 +62,6 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     },
     selectAll: () => set({ checkedAnime: new Set(get().animeList.map((a) => a.id)) }),
     deselectAll: () => set({ checkedAnime: new Set() }),
-    setTitleLanguage: (lang) => set({ titleLanguage: lang }),
     setScoreThreshold: (score) => set({ scoreThreshold: score }),
     setCustomTitle: (title) => set({ customTitle: title }),
     setShowWheel: (show) => set({ showWheel: show }),

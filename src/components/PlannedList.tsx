@@ -11,8 +11,8 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 export default function PlannedList() {
-    const { animeList, checkedAnime, setCheckedAnime, titleLanguage, setAnimeList, setFullAnimeList, fullAnimeList } = useAnimeStore();
-    const { imageSize } = useSettingsStore();
+    const { animeList, checkedAnime, setCheckedAnime, setAnimeList, setFullAnimeList, fullAnimeList } = useAnimeStore();
+    const { imageSize, titleLanguage } = useSettingsStore();
     const [fetchingCustom, setFetchingCustom] = useState(false);
     const [customTitle, setCustomTitle] = useState("");
     const { activeProvider } = useUnifiedSession();

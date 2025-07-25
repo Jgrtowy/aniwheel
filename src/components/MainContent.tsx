@@ -2,7 +2,6 @@ import { useSettingsStore } from "~/lib/store";
 import Filters from "./Filters";
 import PlannedList from "./PlannedList";
 import SidePanel from "./SidePanel";
-import { SpinWheel } from "./SpinWheel";
 import { Card, CardContent, CardHeader } from "./ui/card";
 
 export default function MainContent() {
@@ -28,7 +27,6 @@ export default function MainContent() {
                     </div>
                 </div>
             </div>
-            <SpinWheel />
         </div>
     );
 }
