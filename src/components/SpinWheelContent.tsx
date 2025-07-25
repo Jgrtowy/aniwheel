@@ -24,7 +24,6 @@ const calculateImageDimensions = (segmentAngle: number, radius: number) => {
     return { width: imageSize, height: imageSize, segmentWidth, segmentHeight };
 };
 
-// Responsive wheel sizes for different screen sizes
 const WHEEL_SIZE_MOBILE = 280;
 const WHEEL_SIZE_TABLET = 350;
 const WHEEL_SIZE_DESKTOP = 375;
@@ -34,14 +33,15 @@ const EASEING_FUNCTION = "cubic-bezier(0.2, -0.2, 0.05, 1)";
 const BASE_ROTATION_MIN = 1440; // Minimum 4 full rotations
 const BASE_ROTATION_RANGE = 1440; // Additional random rotations
 
+const TICK_SOUND_DELAY = 30;
+
 export function SpinWheelContent() {
     const { checkedAnime, fullAnimeList } = useAnimeStore();
-    const { imageSize, titleLanguage } = useSettingsStore();
+    const { imageSize, titleLanguage, enableTickSounds } = useSettingsStore();
     const items = fullAnimeList.filter((anime) => checkedAnime.has(anime.id));
 
     const { activeProvider } = useUnifiedSession();
 
-    // Media queries for responsive design
     const isMobile = useMediaQuery("(max-width: 640px)");
     const isTablet = useMediaQuery("(max-width: 1024px)");
 
@@ -52,7 +52,11 @@ export function SpinWheelContent() {
     const wheelRef = useRef<SVGSVGElement>(null);
     const currentAnimationRef = useRef<Animation | null>(null);
 
-    // Calculate responsive wheel size
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const audioBufferRef = useRef<AudioBuffer | null>(null);
+    const lastTickTimeRef = useRef<number>(0);
+    const lastCrossedSegmentRef = useRef<number>(-1);
+
     const wheelSize = useMemo(() => {
         if (isMobile) return WHEEL_SIZE_MOBILE;
         if (isTablet) return WHEEL_SIZE_TABLET;
@@ -62,6 +66,71 @@ export function SpinWheelContent() {
     const WHEEL_RADIUS = wheelSize * 0.5;
     const WHEEL_CENTER = wheelSize * 0.5;
     const segmentAngle = 360 / items.length;
+
+    useEffect(() => {
+        if (!enableTickSounds) return;
+
+        const initAudio = async () => {
+            try {
+                if (!audioContextRef.current) {
+                    audioContextRef.current = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+                }
+
+                if (!audioBufferRef.current) {
+                    const response = await fetch("/tick.mp3");
+                    const arrayBuffer = await response.arrayBuffer();
+                    audioBufferRef.current = await audioContextRef.current.decodeAudioData(arrayBuffer);
+                }
+            } catch (error) {
+                console.warn("Failed to initialize audio:", error);
+            }
+        };
+
+        initAudio();
+
+        return () => {
+            if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+                audioContextRef.current.close();
+                audioContextRef.current = null;
+                audioBufferRef.current = null;
+            }
+        };
+    }, [enableTickSounds]);
+
+    const playTickSound = useCallback(() => {
+        if (!enableTickSounds || !audioContextRef.current || !audioBufferRef.current) return;
+        if (audioContextRef.current.state === "closed") return;
+
+        const now = Date.now();
+        if (now - lastTickTimeRef.current < TICK_SOUND_DELAY) return;
+
+        try {
+            const source = audioContextRef.current.createBufferSource();
+            source.buffer = audioBufferRef.current;
+            source.connect(audioContextRef.current.destination);
+            source.start();
+            lastTickTimeRef.current = now;
+        } catch (error) {
+            console.warn("Failed to play tick sound:", error);
+        }
+    }, [enableTickSounds]);
+
+    const checkSegmentCrossing = useCallback(
+        (currentRotation: number) => {
+            if (items.length === 0) return;
+
+            const normalizedRotation = ((currentRotation % 360) + 360) % 360;
+            const pointerPosition = (270 - normalizedRotation + 360) % 360;
+            const currentSegment = Math.floor(pointerPosition / segmentAngle) % items.length;
+
+            if (lastCrossedSegmentRef.current !== -1 && currentSegment !== lastCrossedSegmentRef.current) {
+                playTickSound();
+            }
+
+            lastCrossedSegmentRef.current = currentSegment;
+        },
+        [items.length, segmentAngle, playTickSound],
+    );
 
     const wheelSegments = useMemo(() => {
         return items.map((item, index) => {
@@ -109,6 +178,10 @@ export function SpinWheelContent() {
         setIsSpinning(true);
         setSelectedItem(null);
 
+        const normalizedCurrentRotation = ((rotation % 360) + 360) % 360;
+        const currentPointerPosition = (270 - normalizedCurrentRotation + 360) % 360;
+        lastCrossedSegmentRef.current = Math.floor(currentPointerPosition / segmentAngle) % items.length;
+
         if (currentAnimationRef.current) currentAnimationRef.current.cancel();
 
         const baseRotation = BASE_ROTATION_MIN + Math.random() * BASE_ROTATION_RANGE;
@@ -119,6 +192,32 @@ export function SpinWheelContent() {
 
             currentAnimationRef.current = animation;
 
+            const startTime = performance.now();
+            const startRotation = rotation;
+            let lastUpdateTime = startTime;
+
+            const trackRotation = () => {
+                if (!animation || animation.playState === "finished") return;
+
+                const now = performance.now();
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
+
+                const easedProgress = cubicBezierEasing(progress);
+                const currentRotation = startRotation + (targetRotation - startRotation) * easedProgress;
+
+                if (now - lastUpdateTime >= 16) {
+                    checkSegmentCrossing(currentRotation);
+                    lastUpdateTime = now;
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(trackRotation);
+                }
+            };
+
+            requestAnimationFrame(trackRotation);
+
             animation.addEventListener("finish", () => {
                 const winner = calculateWinner(targetRotation);
                 setSelectedItem(winner);
@@ -128,8 +227,44 @@ export function SpinWheelContent() {
         }
     };
 
+    const cubicBezierEasing = (t: number): number => {
+        if (t <= 0) return 0;
+        if (t >= 1) return 1;
+
+        const cx = 3 * 0.2;
+        const bx = 3 * (0.05 - 0.2) - cx;
+        const ax = 1 - cx - bx;
+
+        const cy = 3 * -0.2;
+        const by = 3 * (1 - -0.2) - cy;
+        const ay = 1 - cy - by;
+
+        let start = 0;
+        let end = 1;
+        let mid = t;
+
+        for (let i = 0; i < 10; i++) {
+            const currentX = ((ax * mid + bx) * mid + cx) * mid;
+            if (Math.abs(currentX - t) < 0.001) break;
+
+            if (currentX < t) {
+                start = mid;
+            } else {
+                end = mid;
+            }
+            mid = (start + end) / 2;
+        }
+
+        return ((ay * mid + by) * mid + cy) * mid;
+    };
+
     useEffect(() => {
-        return () => currentAnimationRef.current?.cancel();
+        return () => {
+            currentAnimationRef.current?.cancel();
+            if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+                audioContextRef.current.close();
+            }
+        };
     }, []);
 
     return (
