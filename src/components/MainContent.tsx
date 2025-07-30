@@ -3,6 +3,7 @@ import Filters from "./Filters";
 import PlannedList from "./PlannedList";
 import SidePanel from "./SidePanel";
 import { Card, CardContent, CardHeader } from "./ui/card";
+import { Separator } from "./ui/separator";
 
 export default function MainContent() {
     const { backdropEffects } = useSettingsStore();
@@ -13,10 +14,12 @@ export default function MainContent() {
                 <div className="flex flex-col-reverse md:flex-row gap-6">
                     <div className="flex-1">
                         <Card className={effectClass}>
-                            <CardHeader>
+                            {/* <CardHeader className="gap-0">
                                 <Filters />
-                            </CardHeader>
-                            <CardContent className="space-y-4">
+                            </CardHeader> */}
+                            <CardContent className="space-y-4 p-0">
+                                <Filters />
+                                <Separator className="my-4" />
                                 <PlannedList />
                             </CardContent>
                         </Card>

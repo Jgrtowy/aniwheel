@@ -17,6 +17,7 @@ export interface PlannedItem {
     averageScore?: number;
     episodes?: number;
     siteUrl?: string;
+    genres?: string[];
 }
 
 export interface Recommendations {

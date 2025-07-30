@@ -97,6 +97,7 @@ query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType)
             timeUntilAiring
           }
           siteUrl
+          genres
         }
       }
     }
@@ -122,29 +123,31 @@ query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType)
             (item: {
                 id: number;
                 media: {
-                    siteUrl: string;
-                    episodes: number;
-                    averageScore: number;
                     title: { english: string; romaji: string; native: string };
                     coverImage: { extraLarge: string; large: string; medium: string };
                     startDate?: { day: number; month: number; year: number };
                     nextAiringEpisode?: { airingAt: number; timeUntilAiring: number };
+                    episodes: number;
+                    averageScore: number;
+                    siteUrl: string;
+                    genres: string[];
                 };
             }) => ({
                 id: item.id,
                 title: item.media.title.english || item.media.title.romaji,
                 romajiTitle: item.media.title.romaji,
+                nativeTitle: item.media.title.native,
                 image: {
                     extraLarge: item.media.coverImage.extraLarge,
                     large: item.media.coverImage.large,
                     medium: item.media.coverImage.medium,
                 },
-                nativeTitle: item.media.title.native,
                 startDate: item.media.startDate,
                 nextAiringEpisode: item.media.nextAiringEpisode,
                 episodes: item.media.episodes,
                 averageScore: item.media.averageScore,
                 siteUrl: item.media.siteUrl,
+                genres: item.media.genres,
             }),
         );
         return new Response(JSON.stringify(formattedMediaList), {
