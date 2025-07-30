@@ -11,7 +11,7 @@ import useMediaQuery from "~/hooks/useMediaQuery";
 import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import type { PlannedItem } from "~/lib/types";
-import { cn } from "~/lib/utils";
+import { cn, getTitleWithPreference } from "~/lib/utils";
 import { authOptions } from "~/server/auth";
 
 const calculateImageDimensions = (segmentAngle: number, radius: number) => {
@@ -24,8 +24,8 @@ const calculateImageDimensions = (segmentAngle: number, radius: number) => {
     return { width: imageSize, height: imageSize, segmentWidth, segmentHeight };
 };
 
-const WHEEL_SIZE_MOBILE = 280;
-const WHEEL_SIZE_TABLET = 350;
+const WHEEL_SIZE_MOBILE = 200;
+const WHEEL_SIZE_TABLET = 275;
 const WHEEL_SIZE_DESKTOP = 375;
 
 const ANIMATION_DURATION = 10000; // 10 seconds
@@ -211,9 +211,7 @@ export function SpinWheelContent() {
                     lastUpdateTime = now;
                 }
 
-                if (progress < 1) {
-                    requestAnimationFrame(trackRotation);
-                }
+                if (progress < 1) requestAnimationFrame(trackRotation);
             };
 
             requestAnimationFrame(trackRotation);
@@ -247,11 +245,8 @@ export function SpinWheelContent() {
             const currentX = ((ax * mid + bx) * mid + cx) * mid;
             if (Math.abs(currentX - t) < 0.001) break;
 
-            if (currentX < t) {
-                start = mid;
-            } else {
-                end = mid;
-            }
+            if (currentX < t) start = mid;
+            else end = mid;
             mid = (start + end) / 2;
         }
 
@@ -261,9 +256,7 @@ export function SpinWheelContent() {
     useEffect(() => {
         return () => {
             currentAnimationRef.current?.cancel();
-            if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-                audioContextRef.current.close();
-            }
+            if (audioContextRef.current && audioContextRef.current.state !== "closed") audioContextRef.current.close();
         };
     }, []);
 
@@ -287,7 +280,7 @@ export function SpinWheelContent() {
                         disabled={isSpinning}
                         aria-label={isSpinning ? "Spinning..." : "Spin the wheel!"}
                         layout
-                        animate={{ scale: selectedItem ? 1 : isMobile ? 1.1 : 1.25 }}
+                        animate={{ scale: selectedItem ? 1 : isMobile || isTablet ? 1.6 : 1.3 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.2 }}
                     >
                         <img src="/Click_to_spin.svg" alt="Click to spin!" className={cn("absolute inset-0 w-full h-full object-cover z-10 rounded-full opacity-100 pointer-events-none transition-opacity", isSpinning && "opacity-0")} />
@@ -336,7 +329,7 @@ export function SpinWheelContent() {
                                     <img src={selectedItem.image?.[imageSize]} alt={selectedItem.title} className="w-full h-72 lg:h-96 object-cover" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-card/95 via-card/60 to-transparent" />
                                     <div className="absolute bottom-0 left-0 right-0 text-primary flex flex-col gap-2 p-2 pb-4">
-                                        <h3 className="text-xl lg:text-2xl font-bold line-clamp-2">{selectedItem.title}</h3>
+                                        <h3 className="text-xl lg:text-2xl font-bold line-clamp-2">{getTitleWithPreference(selectedItem, titleLanguage)}</h3>
                                         <div className="flex items-center gap-2 flex-wrap">
                                             {selectedItem.averageScore && (
                                                 <Badge variant="secondary" className="bg-yellow-500 text-accent">
