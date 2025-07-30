@@ -8,9 +8,10 @@ interface AnimeStore {
     checkedAnime: Set<number>;
     scoreThreshold: number;
     customTitle: string;
-    showWheel: boolean;
     recommendations: Recommendations[];
     fetchingCustom: boolean;
+    showAiredOnly: boolean;
+    selectedGenres: string[];
 
     setAnimeList: (list: PlannedItem[]) => void;
     setFullAnimeList: (list: PlannedItem[]) => void;
@@ -20,9 +21,12 @@ interface AnimeStore {
     deselectAll: () => void;
     setScoreThreshold: (score: number) => void;
     setCustomTitle: (title: string) => void;
-    setShowWheel: (show: boolean) => void;
     setRecommendations: (recs: Recommendations[]) => void;
     setFetchingCustom: (fetching: boolean) => void;
+    setShowAiredOnly: (show: boolean) => void;
+    setSelectedGenres: (genres: string[]) => void;
+    addGenre: (genre: string) => void;
+    removeGenre: (genre: string) => void;
 }
 
 interface SettingsStore {
@@ -47,9 +51,10 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     checkedAnime: new Set(),
     scoreThreshold: 0,
     customTitle: "",
-    showWheel: false,
     recommendations: [],
     fetchingCustom: false,
+    showAiredOnly: false,
+    selectedGenres: [],
 
     setAnimeList: (list) => set({ animeList: list }),
     setFullAnimeList: (list) => set({ fullAnimeList: list }),
@@ -64,9 +69,18 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     deselectAll: () => set({ checkedAnime: new Set() }),
     setScoreThreshold: (score) => set({ scoreThreshold: score }),
     setCustomTitle: (title) => set({ customTitle: title }),
-    setShowWheel: (show) => set({ showWheel: show }),
     setRecommendations: (recs) => set({ recommendations: recs }),
     setFetchingCustom: (fetching) => set({ fetchingCustom: fetching }),
+    setShowAiredOnly: (show) => set({ showAiredOnly: show }),
+    setSelectedGenres: (genres) => set({ selectedGenres: genres }),
+    addGenre: (genre) => {
+        const current = get().selectedGenres;
+        if (!current.includes(genre)) set({ selectedGenres: [...current, genre] });
+    },
+    removeGenre: (genre) => {
+        const current = get().selectedGenres;
+        set({ selectedGenres: current.filter((g) => g !== genre) });
+    },
 }));
 
 export const useSettingsStore = create<SettingsStore>()(

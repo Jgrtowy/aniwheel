@@ -1,7 +1,5 @@
 "use client";
 
-import { Star } from "lucide-react";
-import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { useAnimeStore, useSettingsStore } from "~/lib/store";
@@ -11,7 +9,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 export default function PlannedList() {
-    const { animeList, checkedAnime, setCheckedAnime, setAnimeList, setFullAnimeList, fullAnimeList } = useAnimeStore();
+    const { animeList, checkedAnime, setCheckedAnime, setAnimeList, setFullAnimeList, fullAnimeList, setSelectedGenres } = useAnimeStore();
     const { imageSize, titleLanguage } = useSettingsStore();
     const [fetchingCustom, setFetchingCustom] = useState(false);
     const [customTitle, setCustomTitle] = useState("");
@@ -66,13 +64,14 @@ export default function PlannedList() {
             const data = await response.json();
             setAnimeList(data);
             setFullAnimeList(data);
+            setSelectedGenres([]);
         };
 
         fetchPlannedList();
-    }, [activeProvider]);
+    }, [activeProvider, setAnimeList, setFullAnimeList, setSelectedGenres]);
 
     return (
-        <div className="flex flex-col gap-4 max-h-fit">
+        <div className="flex flex-col gap-4 max-h-fit px-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:lg-grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 w-full gap-4 h-full">
                 {animeList.map((anime) => (
                     <AnimeCard key={anime.id} anime={anime} checked={checkedAnime.has(anime.id)} onCheck={handleCheckChange} imageSize={imageSize} titleLanguage={titleLanguage} />

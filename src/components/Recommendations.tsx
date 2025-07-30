@@ -70,7 +70,7 @@ export default function Recommendations({ items }: { items?: IRecommendations[] 
                                                     </div>
                                                 )}
                                             </div>
-                                            <h3 className={`font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 ${cardBackdropEffects} text-white p-1 border rounded-lg`}>{getTitleWithPreference(rec.mediaRecommendation, titleLanguage)}</h3>
+                                            <h3 className={`font-medium w-fit max-w-full text-xs leading-tight sm:line-clamp-2 line-clamp-1 ${cardBackdropEffects} text-white p-1 border rounded-lg`}>{getTitleWithPreference(rec.mediaRecommendation, titleLanguage)}</h3>
                                         </div>
                                     </div>
                                 ))}
