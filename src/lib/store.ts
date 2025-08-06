@@ -1,107 +1,248 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { PlannedItem, Recommendations, TitleLanguage } from "~/lib/types";
+import type { ImageSize, MediaItem, SortField, SortOrder, TitleLanguage } from "~/lib/types";
+import { getTitleWithPreference } from "~/lib/utils";
 
 interface AnimeStore {
-    animeList: PlannedItem[];
-    fullAnimeList: PlannedItem[];
-    checkedAnime: Set<number>;
-    scoreThreshold: number;
-    customTitle: string;
-    recommendations: Recommendations[];
-    fetchingCustom: boolean;
-    showAiredOnly: boolean;
-    selectedGenres: string[];
+    // Full, unfiltered list of titles
+    fullMediaList: MediaItem[];
 
-    setAnimeList: (list: PlannedItem[]) => void;
-    setFullAnimeList: (list: PlannedItem[]) => void;
-    setCheckedAnime: (set: Set<number>) => void;
-    toggleCheckedAnime: (id: number) => void;
-    selectAll: () => void;
-    deselectAll: () => void;
-    setScoreThreshold: (score: number) => void;
-    setCustomTitle: (title: string) => void;
-    setRecommendations: (recs: Recommendations[]) => void;
-    setFetchingCustom: (fetching: boolean) => void;
+    // Currently displayed titles list, can be filtered
+    mediaList: MediaItem[];
+
+    // Set of title IDs that are checked (e.g., for bulk actions)
+    checkedMedia: Set<number>;
+
+    // Filters
+    searchTerm: string;
+    activeGenres: string[];
+    score: { from: number; to: number };
+    showAiredOnly: boolean;
+
+    // Sorting
+    sortField: SortField;
+    sortOrder: SortOrder;
+
+    setFullMediaList: (list: MediaItem[]) => void;
+
+    setMediaList: (list: MediaItem[]) => void;
+
+    setSelectedMedia: (set: Set<number>) => void;
+    addSelectedMedia: (id: number | number[]) => void;
+    toggleSelectedMedia: (id: number) => void;
+    selectAllMedia: () => void;
+    deselectAllMedia: () => void;
+
+    setSearchTerm: (term: string) => void;
+
+    setActiveGenres: (genres: string[]) => void;
+    addActiveGenre: (genre: string) => void;
+    removeActiveGenre: (genre: string) => void;
+
+    setScore: (from: number | null, to: number | null) => void;
+
     setShowAiredOnly: (show: boolean) => void;
-    setSelectedGenres: (genres: string[]) => void;
-    addGenre: (genre: string) => void;
-    removeGenre: (genre: string) => void;
+
+    setSortField: (field: SortField) => void;
+    setSortOrder: (order: SortOrder) => void;
+    setSorting: (field: SortField, order: SortOrder) => void;
+
+    applyFilters: () => void;
+    clearFilters: () => void;
+    hasActiveFilters: () => boolean;
+    getActiveFilterCount: () => number;
 }
 
 interface SettingsStore {
-    titleLanguage: TitleLanguage;
-    imageSize: "medium" | "large" | "extraLarge";
-    showRecommendations: boolean;
-    backdropEffects: boolean;
+    preferredTitleLanguage: TitleLanguage;
+    preferredImageSize: ImageSize;
+    showMediaRecommendations: boolean;
+    showBackdropEffects: boolean;
     skipLandingAnimation: boolean;
     enableTickSounds: boolean;
 
-    setTitleLanguage: (lang: TitleLanguage) => void;
-    setImageSize: (size: "medium" | "large" | "extraLarge") => void;
-    setShowRecommendations: (show: boolean) => void;
-    setBackdropEffects: (blur: boolean) => void;
+    setPreferredTitleLanguage: (lang: TitleLanguage) => void;
+    setPreferredImageSize: (size: ImageSize) => void;
+    setShowMediaRecommendations: (show: boolean) => void;
+    setShowBackdropEffects: (blur: boolean) => void;
     setSkipLandingAnimation: (skip: boolean) => void;
     setEnableTickSounds: (enable: boolean) => void;
 }
 
 export const useAnimeStore = create<AnimeStore>((set, get) => ({
-    animeList: [],
-    fullAnimeList: [],
-    checkedAnime: new Set(),
-    scoreThreshold: 0,
-    customTitle: "",
-    recommendations: [],
-    fetchingCustom: false,
+    fullMediaList: [],
+    mediaList: [],
+    checkedMedia: new Set(),
+    searchTerm: "",
+    activeGenres: [],
+    score: { from: 0, to: 10 },
     showAiredOnly: false,
-    selectedGenres: [],
+    sortField: "date",
+    sortOrder: "desc",
 
-    setAnimeList: (list) => set({ animeList: list }),
-    setFullAnimeList: (list) => set({ fullAnimeList: list }),
-    setCheckedAnime: (checked) => set({ checkedAnime: checked }),
-    toggleCheckedAnime: (id) => {
-        const checked = new Set(get().checkedAnime);
+    setFullMediaList: (list) => {
+        set({ fullMediaList: list });
+        get().applyFilters();
+    },
+    setMediaList: (list) => set({ mediaList: list }),
+    setSelectedMedia: (checked) => set({ checkedMedia: checked }),
+    toggleSelectedMedia: (id) => {
+        const checked = new Set(get().checkedMedia);
         if (checked.has(id)) checked.delete(id);
         else checked.add(id);
-        set({ checkedAnime: checked });
+        set({ checkedMedia: checked });
     },
-    selectAll: () => set({ checkedAnime: new Set(get().animeList.map((a) => a.id)) }),
-    deselectAll: () => set({ checkedAnime: new Set() }),
-    setScoreThreshold: (score) => set({ scoreThreshold: score }),
-    setCustomTitle: (title) => set({ customTitle: title }),
-    setRecommendations: (recs) => set({ recommendations: recs }),
-    setFetchingCustom: (fetching) => set({ fetchingCustom: fetching }),
-    setShowAiredOnly: (show) => set({ showAiredOnly: show }),
-    setSelectedGenres: (genres) => set({ selectedGenres: genres }),
-    addGenre: (genre) => {
-        const current = get().selectedGenres;
-        if (!current.includes(genre)) set({ selectedGenres: [...current, genre] });
+    addSelectedMedia: (id) => {
+        const checked = new Set(get().checkedMedia);
+        if (Array.isArray(id)) for (const itemId of id) checked.add(itemId);
+        else checked.add(id);
+        set({ checkedMedia: checked });
     },
-    removeGenre: (genre) => {
-        const current = get().selectedGenres;
-        set({ selectedGenres: current.filter((g) => g !== genre) });
+    selectAllMedia: () => set({ checkedMedia: new Set(get().mediaList.map((a) => a.id)) }),
+    deselectAllMedia: () => set({ checkedMedia: new Set() }),
+    setSearchTerm: (term) => {
+        set({ searchTerm: term });
+        get().applyFilters();
+    },
+    setActiveGenres: (genres) => {
+        set({ activeGenres: genres });
+        get().applyFilters();
+    },
+    addActiveGenre: (genre) => {
+        const current = get().activeGenres;
+        if (!current.includes(genre)) {
+            set({ activeGenres: [...current, genre] });
+            get().applyFilters();
+        }
+    },
+    removeActiveGenre: (genre) => {
+        const current = get().activeGenres;
+        set({ activeGenres: current.filter((g) => g !== genre) });
+        get().applyFilters();
+    },
+    setScore: (from, to) => {
+        set({ score: { from: from ?? get().score.from, to: to ?? get().score.to } });
+        get().applyFilters();
+    },
+    setShowAiredOnly: (show) => {
+        set({ showAiredOnly: show });
+        get().applyFilters();
+    },
+    setSortField: (field) => {
+        set({ sortField: field });
+        get().applyFilters();
+    },
+    setSortOrder: (order) => {
+        set({ sortOrder: order });
+        get().applyFilters();
+    },
+    setSorting: (field, order) => {
+        set({ sortField: field, sortOrder: order });
+        get().applyFilters();
+    },
+    applyFilters: () => {
+        const state = get();
+        let filteredAnime = state.fullMediaList;
+
+        // Search term filter
+        if (state.searchTerm) filteredAnime = filteredAnime.filter((anime) => anime.title.en?.toLowerCase().includes(state.searchTerm.toLowerCase()) || anime.title.romaji?.toLowerCase().includes(state.searchTerm.toLowerCase()) || anime.title.jp?.toLowerCase().includes(state.searchTerm.toLowerCase()));
+
+        // Genre filter
+        if (state.activeGenres.length > 0) {
+            filteredAnime = filteredAnime.filter((anime) => {
+                if (!anime.genres || anime.genres.length === 0) return false;
+                return state.activeGenres.every((selectedGenre) => anime.genres?.includes(selectedGenre) ?? false);
+            });
+        }
+
+        // Aired only filter
+        if (state.showAiredOnly) {
+            const currentDate = Date.now();
+            filteredAnime = filteredAnime.filter((anime) => {
+                if (!anime.startDate) return false;
+                return new Date(anime.startDate).getTime() <= currentDate;
+            });
+        }
+
+        // Score range filter
+        if (state.score.from > 0 || state.score.to < 10) {
+            filteredAnime = filteredAnime.filter((anime) => {
+                const score = anime.averageScore;
+                if (score === null) return false;
+                return score >= state.score.from && score <= state.score.to;
+            });
+        }
+
+        // Apply sorting
+        filteredAnime = filteredAnime.slice().sort((a, b) => {
+            let comparison: number;
+
+            switch (state.sortField) {
+                case "date": {
+                    comparison = (a.entryCreatedAt ?? 0) < (b.entryCreatedAt ?? 0) ? -1 : (a.entryCreatedAt ?? 0) > (b.entryCreatedAt ?? 0) ? 1 : 1; // I will personally fight a duck-sized horse on live television if you're able to tell me why I put a "1" here despite it should be "0" for the sorting to be correct
+                    break;
+                }
+                case "title": {
+                    comparison = getTitleWithPreference(a).localeCompare(getTitleWithPreference(b));
+                    break;
+                }
+                case "score": {
+                    comparison = (a.averageScore || 0) < (b.averageScore || 0) ? -1 : (a.averageScore || 0) > (b.averageScore || 0) ? 1 : 0; // Note: Inverted sort order for better UX (asc is high to low and desc is low to high)
+                    break;
+                }
+            }
+
+            return state.sortOrder === "asc" ? comparison : -comparison;
+        });
+
+        set({ mediaList: filteredAnime });
+
+        // Update checked media to only include items that are still in the filtered list
+        if (state.checkedMedia.size > 0) {
+            const filteredAnimeIds = new Set(filteredAnime.map((anime) => anime.id));
+            const updatedCheckedAnime = new Set<number>();
+
+            for (const animeId of state.checkedMedia) {
+                if (filteredAnimeIds.has(animeId)) updatedCheckedAnime.add(animeId);
+            }
+
+            if (updatedCheckedAnime.size !== state.checkedMedia.size) {
+                set({ checkedMedia: updatedCheckedAnime });
+            }
+        }
+    },
+    clearFilters: () => {
+        set({ activeGenres: [], score: { from: 0, to: 10 }, showAiredOnly: false });
+        get().applyFilters();
+    },
+
+    hasActiveFilters: () => {
+        const state = get();
+        return state.activeGenres.length > 0 || state.showAiredOnly || state.score.from > 0 || state.score.to < 10;
+    },
+    getActiveFilterCount: () => {
+        const state = get();
+        return (state.activeGenres.length > 0 ? 1 : 0) + (state.showAiredOnly ? 1 : 0) + (state.score.from > 0 || state.score.to < 10 ? 1 : 0);
     },
 }));
 
 export const useSettingsStore = create<SettingsStore>()(
     persist(
         (set) => ({
-            titleLanguage: "english",
-            imageSize: "large",
-            showRecommendations: true,
-            backdropEffects: false,
+            preferredTitleLanguage: "en",
+            preferredImageSize: "large",
+            showMediaRecommendations: true,
+            showBackdropEffects: false,
             skipLandingAnimation: false,
             enableTickSounds: true,
 
-            setTitleLanguage: (lang) => set({ titleLanguage: lang }),
-            setImageSize: (size) => set({ imageSize: size }),
-            setShowRecommendations: (show) => set({ showRecommendations: show }),
-            setBackdropEffects: (backdropEffects) => set({ backdropEffects: backdropEffects }),
+            setPreferredTitleLanguage: (lang) => set({ preferredTitleLanguage: lang }),
+            setPreferredImageSize: (size) => set({ preferredImageSize: size }),
+            setShowMediaRecommendations: (show) => set({ showMediaRecommendations: show }),
+            setShowBackdropEffects: (backdropEffects) => set({ showBackdropEffects: backdropEffects }),
             setSkipLandingAnimation: (skip) => set({ skipLandingAnimation: skip }),
             setEnableTickSounds: (enable) => set({ enableTickSounds: enable }),
         }),
-        {
-            name: "aniwheel-settings",
-        },
+        { name: "aniwheel-settings" },
     ),
 );

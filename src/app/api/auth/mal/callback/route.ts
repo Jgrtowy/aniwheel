@@ -1,88 +1,103 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+
+interface MALTokenResponse {
+    token_type: string;
+    expires_in: number;
+    access_token: string;
+    refresh_token: string;
+}
+
+interface MALUserResponse {
+    id: number;
+    name: string;
+    picture?: string;
+}
 
 export async function GET(request: NextRequest) {
-    const { searchParams } = new URL(request.url);
-    const code = searchParams.get("code");
-    const state = searchParams.get("state");
-    const error = searchParams.get("error");
-
-    if (error) {
-        return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?error=oauth_error`);
-    }
-
-    if (!code || !state) {
-        return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?error=missing_parameters`);
-    }
-
-    const pkceData = request.cookies.get(`mal-pkce-${state}`)?.value;
-
-    if (!pkceData) {
-        return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?error=pkce_not_found`);
-    }
-
     try {
-        const { code_verifier, timestamp } = JSON.parse(pkceData);
+        const { searchParams } = new URL(request.url);
+        const code = searchParams.get("code");
+        const state = searchParams.get("state");
+        const error = searchParams.get("error");
 
-        if (Date.now() - timestamp > 10 * 60 * 1000) {
-            return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?error=pkce_expired`);
+        if (error) {
+            console.error("MAL OAuth error:", error);
+            return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/?error=OAuthCallback`);
         }
 
+        if (!code || !state) return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/?error=OAuthCallback`);
+
+        const cookieStore = await cookies();
+        const storedCodeVerifier = cookieStore.get("mal_code_verifier")?.value;
+        const storedState = cookieStore.get("mal_state")?.value;
+        const callbackUrl = cookieStore.get("mal_callback_url")?.value || "/";
+
+        if (!storedCodeVerifier || !storedState || state !== storedState) return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/?error=OAuthCallback`);
+
+        // Exchange authorization code for tokens
         const tokenResponse = await fetch("https://myanimelist.net/v1/oauth2/token", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({
+                client_id: process.env.MAL_CLIENT_ID,
+                client_secret: process.env.MAL_CLIENT_SECRET,
                 grant_type: "authorization_code",
                 code,
                 redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/mal/callback`,
-                code_verifier,
-                client_id: process.env.MAL_CLIENT_ID ?? "",
+                code_verifier: storedCodeVerifier,
             }),
         });
 
         if (!tokenResponse.ok) {
             const errorText = await tokenResponse.text();
             console.error("MAL token exchange failed:", errorText);
-            return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?error=token_exchange_failed`);
+            return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/?error=OAuthCallback`);
         }
 
-        const tokenData = await tokenResponse.json();
+        const tokens: MALTokenResponse = await tokenResponse.json();
 
-        const profileResponse = await fetch("https://api.myanimelist.net/v2/users/@me", {
-            headers: {
-                Authorization: `Bearer ${tokenData.access_token}`,
-            },
+        const userResponse = await fetch("https://api.myanimelist.net/v2/users/@me", {
+            headers: { Authorization: `Bearer ${tokens.access_token}` },
         });
 
-        if (!profileResponse.ok) {
-            console.error("MAL profile fetch failed");
-            return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?error=profile_fetch_failed`);
+        if (!userResponse.ok) {
+            console.error("MAL user info fetch failed");
+            return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/?error=OAuthCallback`);
         }
 
-        const profile = await profileResponse.json();
+        const user: MALUserResponse = await userResponse.json();
 
-        const userData = {
-            id: profile.id,
-            name: profile.name,
-            image: profile.picture,
-            accessToken: tokenData.access_token,
+        const sessionData = {
+            user: {
+                id: user.id.toString(),
+                name: user.name,
+                image: user.picture || null,
+            },
+            accessToken: tokens.access_token,
+            refreshToken: tokens.refresh_token,
+            accessTokenExpires: Date.now() + tokens.expires_in * 1000,
+            activeProvider: "myanimelist" as const,
         };
 
-        const response = NextResponse.redirect(`${process.env.NEXTAUTH_URL}?mal_auth=success`);
+        const redirectUrl = callbackUrl.startsWith("/") ? `${process.env.NEXTAUTH_URL}${callbackUrl}` : callbackUrl;
+        const response = NextResponse.redirect(redirectUrl);
 
-        response.cookies.delete(`mal-pkce-${state}`);
+        response.cookies.delete("mal_code_verifier");
+        response.cookies.delete("mal_state");
+        response.cookies.delete("mal_callback_url");
 
-        response.cookies.set("mal-user", encodeURIComponent(JSON.stringify(userData)), {
+        response.cookies.set("mal_session", btoa(JSON.stringify(sessionData)), {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60, // 7 days
+            maxAge: 30 * 24 * 60 * 60, // 30 days
         });
 
         return response;
     } catch (error) {
         console.error("MAL callback error:", error);
-        return NextResponse.redirect(`${process.env.NEXTAUTH_URL}?error=callback_error`);
+        return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/?error=OAuthCallback`);
     }
 }

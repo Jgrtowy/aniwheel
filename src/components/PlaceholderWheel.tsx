@@ -32,19 +32,8 @@ export default function PlaceholderWheel({ className }: { className?: string }) 
 
     return (
         <div className={cn("relative", className)} onClick={spinWheel}>
-            <svg
-                viewBox="0 0 302 302"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-label="Placeholder wheel"
-                role="img"
-                className="absolute inset-0 cursor-pointer"
-                style={{
-                    transform: `rotate(${rotation}deg)`,
-                    transformOrigin: "center",
-                    transition: isSpinning ? "transform 3s cubic-bezier(0.23, 1, 0.32, 1)" : "none",
-                }}
-            >
+            <svg viewBox="0 0 302 302" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" className="absolute inset-0 cursor-pointer origin-center" style={{ transform: `rotate(${rotation}deg)`, transition: isSpinning ? "transform 3s cubic-bezier(0.23, 1, 0.32, 1)" : "none" }}>
+                <title>Placeholder wheel</title>
                 <path d="M151 151H301C301 177.33 294.069 203.197 280.904 226L151 151Z" fill="#4A90E2" stroke="white" strokeWidth="2" />
                 <path d="M151 151L280.904 226C267.739 248.803 248.803 267.739 226 280.904L151 151Z" fill="#D64550" stroke="white" strokeWidth="2" />
                 <path d="M151 151L226 280.904C203.197 294.069 177.33 301 151 301V151Z" fill="#F9C80E" stroke="white" strokeWidth="2" />

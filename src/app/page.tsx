@@ -1,26 +1,14 @@
-import { redirect } from "next/navigation";
+import Home from "~/components/Home";
 import Landing from "~/components/Landing";
-import RepoLink from "~/components/RepoLink";
-import { getSession } from "~/lib/session";
+import { getServerSession } from "~/server/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata = {
-    title: "AniWheel | Login",
-};
+export const metadata = { title: "Aniwheel" };
 
-export default async function Home() {
-    const session = await getSession();
+export default async function Page() {
+    const session = await getServerSession();
 
-    if (session.isAuthenticated) {
-        return redirect("/home");
-    }
-
-    return (
-        <main className="flex flex-col justify-center items-center min-h-dvh">
-            <Landing />
-            <RepoLink className="fixed top-4 right-4" />
-        </main>
-    );
+    return <main>{session ? <Home /> : <Landing />}</main>;
 }

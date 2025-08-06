@@ -1,8 +1,6 @@
 {
-    "$schema": "https://biomejs.dev/schemas/1.6.0/schema.json",
-    "files": {
-        "ignore": ["node_modules"]
-    },
+    "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+    "files": { "ignore": ["node_modules"] },
     "formatter": {
         "indentStyle": "space",
         "indentWidth": 4,
@@ -21,7 +19,8 @@
                 "useImportType": "warn"
             },
             "a11y": {
-                "useKeyWithClickEvents": "off"
+                "useKeyWithClickEvents": "off",
+                "noSvgWithoutTitle": "off"
             },
             "suspicious": {
                 "noArrayIndexKey": "off"

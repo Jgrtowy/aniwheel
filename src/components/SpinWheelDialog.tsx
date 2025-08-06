@@ -7,17 +7,13 @@ import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle, Dialog
 import { useAnimeStore } from "~/lib/store";
 
 export function SpinWheelDialog() {
-    const { fullAnimeList, checkedAnime } = useAnimeStore();
-
-    const selectedAnime = fullAnimeList.filter((anime) => checkedAnime.has(anime.id));
-
-    const isDisabled = selectedAnime.length < 2;
+    const { checkedMedia } = useAnimeStore();
 
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button disabled={isDisabled} size="lg" className="w-full">
-                    <Shuffle className="w-5 h-5 mr-2" />
+                <Button disabled={checkedMedia.size < 2} size="lg" className="w-full">
+                    <Shuffle className="size-5 mr-2" />
                     Spin the wheel!
                 </Button>
             </DialogTrigger>
@@ -31,7 +27,7 @@ export function SpinWheelDialog() {
                 </VisuallyHidden>
                 <SpinWheelContent />
                 <DialogClose asChild>
-                    <Button variant="outline" className="fixed top-2 right-2 lg:top-4 lg:right-4 h-10 w-10 lg:h-12 lg:w-12 z-10 cursor-pointer">
+                    <Button variant="outline" className="fixed top-2 right-2 lg:top-4 lg:right-4 h-10 w-10 lg:h-12 lg:w-12 z-10">
                         <XIcon className="size-5 lg:size-6" />
                         <span className="sr-only">Close dialog</span>
                     </Button>

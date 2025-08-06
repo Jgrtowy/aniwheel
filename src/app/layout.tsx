@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Comfortaa } from "next/font/google";
-import { ClientSessionProvider } from "~/providers/seesion-provider";
+import { Toaster } from "~/components/ui/sonner";
+import { ClientSessionProvider } from "~/providers/session-provider";
 import { ThemeProvider } from "~/providers/theme-provider";
 import "./globals.css";
 
@@ -13,8 +14,8 @@ const comfortaa = Comfortaa({
 });
 
 export const metadata: Metadata = {
-    title: "AniWheel",
-    description: "Don't know what to watch next? AniWheel will help you decide!",
+    title: "Aniwheel",
+    description: "Don't know what to watch next? Aniwheel will help you decide!",
     icons: {
         icon: "/icon.svg",
         shortcut: "/icon.svg",
@@ -28,17 +29,14 @@ export const metadata: Metadata = {
     },
 };
 
-export default function RootLayout({
-    children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={`${comfortaa.className} antialiased overflow-x-hidden m-0 p-0 min-w-screen`}>
+            <body className={`${comfortaa.className} antialiased`}>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <ClientSessionProvider>{children}</ClientSessionProvider>
                 </ThemeProvider>
+                <Toaster richColors />
             </body>
         </html>
     );

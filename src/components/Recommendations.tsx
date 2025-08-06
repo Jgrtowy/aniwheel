@@ -1,85 +1,153 @@
-"use client";
-import { ChevronRight, Clapperboard, ExternalLink, Plus, Star } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useUnifiedSession } from "~/hooks/useUnifiedSession";
+import { BadgePlus, ChevronRight, ChevronsDown, LoaderCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import AnimeCard from "~/components/AnimeCard";
+import { Button } from "~/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "~/components/ui/collapsible";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import useMediaQuery from "~/hooks/useMediaQuery";
 import { useAnimeStore, useSettingsStore } from "~/lib/store";
-import type { Recommendations as IRecommendations, PlannedItem } from "~/lib/types";
-import { getTitleWithPreference } from "~/lib/utils";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { ScrollArea } from "./ui/scroll-area";
+import type { MediaRecommendation } from "~/lib/types";
+import { cn } from "~/lib/utils";
+import { useSession } from "~/providers/session-provider";
 
-export default function Recommendations({ items }: { items?: IRecommendations[] }) {
-    const { activeProvider } = useUnifiedSession();
-    const { setFullAnimeList, fullAnimeList, animeList, setAnimeList, checkedAnime, setCheckedAnime } = useAnimeStore();
-    const { imageSize, backdropEffects, titleLanguage } = useSettingsStore();
+const DESKTOP_DISPLAY_COUNT = 8;
+const MOBILE_DISPLAY_COUNT = 4;
 
-    const handleAddToList = (anime: PlannedItem) => {
-        if (animeList.some((a) => a.id === anime.id)) {
-            console.warn("Anime already exists in the list");
-            return;
+export default function Recommendations() {
+    const { showBackdropEffects, showMediaRecommendations, setShowMediaRecommendations } = useSettingsStore();
+    const { fullMediaList, clearFilters, setFullMediaList, addSelectedMedia } = useAnimeStore();
+    const session = useSession();
+
+    const [filteredRecommendations, setFilteredRecommendations] = useState<MediaRecommendation[]>([]);
+    const [fullRecommendations, setFullRecommendations] = useState<MediaRecommendation[]>([]);
+    const [loadingIds, setLoadingIds] = useState<number[]>([]);
+
+    const [displayCount, setDisplayCount] = useState(DESKTOP_DISPLAY_COUNT);
+    const [mobileIsOpen, setMobileIsOpen] = useState(false);
+    const isMobile = useMediaQuery("(max-width: 768px)");
+
+    // Fetch recommendations "along" with planned list then filter when it's done, instead of waiting for planned media to be fetched before fetching recommendations -> s m a r t
+    useEffect(() => {
+        if (session?.activeProvider !== "anilist") return;
+        (async () => {
+            const response = await fetch("/api/recommendations");
+            if (!response.ok) console.error("Failed to fetch media recommendations");
+            const data: MediaRecommendation[] = await response.json();
+            setFullRecommendations(data);
+        })();
+    }, [session?.activeProvider]);
+
+    useEffect(() => {
+        if (fullRecommendations.length === 0) return;
+
+        const userFullMediaIds = new Set(fullMediaList.map((media) => media.id));
+        const filteredRecommendations = fullRecommendations.filter((rec) => !userFullMediaIds.has(rec.mediaRecommendation.id));
+
+        setFilteredRecommendations(filteredRecommendations);
+        setDisplayCount(isMobile ? MOBILE_DISPLAY_COUNT : DESKTOP_DISPLAY_COUNT); // Reset display count when recommendations change
+    }, [fullRecommendations, fullMediaList, isMobile]);
+
+    const refreshPlannedList = async (animeId: number) => {
+        if (!session?.activeProvider) return;
+
+        try {
+            const response = await fetch("/api/planned");
+            if (response.ok) {
+                const data = await response.json();
+                clearFilters();
+                setFullMediaList(data);
+                addSelectedMedia(animeId);
+            }
+        } catch (error) {
+            console.error("Failed to refresh planned list:", error);
         }
-        setFullAnimeList([...fullAnimeList, anime]);
-        setAnimeList([...animeList, anime]);
-        setCheckedAnime(new Set([...checkedAnime, anime.id]));
     };
 
-    const cardBackdropEffects = backdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-black/80";
-    const contentBackdropEffects = backdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-primary-foreground";
+    const handleAddTitle = async (id: number) => {
+        setLoadingIds((prev) => [...prev, id]);
+
+        try {
+            const response = await fetch("/api/setPlanned", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ animeIds: id }),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+
+                toast.success(`Successfully added ${result.success} title${result.success > 1 ? "s" : ""} to your planning list!`);
+
+                await refreshPlannedList(id);
+            } else {
+                console.error("Failed to add titles:", response.statusText);
+                toast.error(`Failed to add titles: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error("Error adding titles:", error);
+            toast.error(`Error adding titles: ${error instanceof Error ? error.message : "Unknown error"}`);
+        } finally {
+            setLoadingIds((prev) => prev.filter((titleId) => titleId !== id));
+        }
+    };
+
+    const shouldShowRecommendations = isMobile ? mobileIsOpen : showMediaRecommendations;
+
+    const handleOpenChange = (open: boolean) => {
+        if (isMobile) setMobileIsOpen(open);
+        else setShowMediaRecommendations(open);
+    };
+
+    const displayedRecommendations = filteredRecommendations.slice(0, displayCount);
+    const hasMoreRecommendations = filteredRecommendations.length > displayCount;
+
+    const handleShowMore = () => {
+        const increment = isMobile ? MOBILE_DISPLAY_COUNT : DESKTOP_DISPLAY_COUNT;
+        setDisplayCount((prev) => Math.min(prev + increment, filteredRecommendations.length));
+    };
+
+    const bgClass = showBackdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-background/75";
+
+    const isDisabled = !!session && session.activeProvider !== "anilist";
 
     return (
-        <>
-            {activeProvider === "anilist" && (
-                <Card className={`w-full ${contentBackdropEffects}`}>
-                    <CardHeader>
-                        <CardTitle>Recommendations</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm md:max-h-dvh max-h-48 overflow-y-scroll">
-                        <ScrollArea className="h-full">
-                            {items
-                                ?.filter((rec) => !animeList.some((a) => a.id === rec.mediaRecommendation.id))
-                                .map((rec) => (
-                                    <div key={rec.mediaRecommendation.id} className="flex justify-between">
-                                        <div className="flex items-end mb-2 rounded-lg p-1 w-1/3 aspect-square" style={{ backgroundImage: rec.media.image ? `url(${rec.media.image[imageSize]})` : "none", backgroundSize: "cover", backgroundPosition: "center" }}>
-                                            <h3 className={`font-medium w-fit max-w-full text-xs leading-tight sm:line-clamp-2 line-clamp-1 ${cardBackdropEffects} text-white p-1 border rounded-lg`}>{getTitleWithPreference(rec.media, titleLanguage)}</h3>
-                                        </div>
-                                        <div className="flex flex-col w-1/3 justify-center items-center">
-                                            <ChevronRight className="h-6 w-6" />
-                                            <p className="text-xs">Rating: {rec.rating}</p>
-                                            <div className="flex items-center gap-1">
-                                                <Button variant="outline" size="icon" className="text-xs hover:underline" onClick={() => window.open(rec.mediaRecommendation.siteUrl, "_blank")}>
-                                                    <ExternalLink />
-                                                </Button>
-                                                <Button variant="outline" size="icon" className="text-xs hover:underline" onClick={() => handleAddToList(rec.mediaRecommendation)}>
-                                                    <Plus />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col justify-between w-1/3 aspect-square mb-2 rounded-lg p-1" style={{ backgroundImage: rec.mediaRecommendation.image ? `url(${rec.mediaRecommendation.image[imageSize]})` : "none", backgroundSize: "cover", backgroundPosition: "center" }}>
-                                            <div className="flex items-center justify-between gap-1 sm:max-h-full max-h-max">
-                                                {rec.mediaRecommendation.averageScore && (
-                                                    <div className={`flex items-center leading-tight gap-1 text-xs ${cardBackdropEffects} text-white p-1 border rounded-lg`}>
-                                                        <Star className="h-2 w-2" />
-                                                        <h3 className="font-medium text-xs">{rec.mediaRecommendation.averageScore}</h3>
-                                                    </div>
-                                                )}
-                                                {rec.mediaRecommendation.episodes && (
-                                                    <div className={`flex items-center leading-tight gap-1 text-xs ${cardBackdropEffects} text-white p-1 border rounded-lg`}>
-                                                        <Clapperboard className="h-2 w-2" />
-                                                        <h3 className="font-medium text-xs">{rec.mediaRecommendation.episodes}</h3>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <h3 className={`font-medium w-fit max-w-full text-xs leading-tight sm:line-clamp-2 line-clamp-1 ${cardBackdropEffects} text-white p-1 border rounded-lg`}>{getTitleWithPreference(rec.mediaRecommendation, titleLanguage)}</h3>
-                                        </div>
-                                    </div>
-                                ))}
-                        </ScrollArea>
-
-                        {!items && <p className="text-center text-sm text-gray-500">No recommendations available.</p>}
-                    </CardContent>
-                </Card>
-            )}
-        </>
+        <Collapsible open={shouldShowRecommendations && filteredRecommendations.length > 0} onOpenChange={handleOpenChange} disabled={isDisabled} className={cn("flex w-full flex-col text-card-foreground rounded-xl border shadow-sm overflow-hidden", bgClass)}>
+            <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="peer flex items-center justify-center gap-6 py-8 rounded-xl rounded-b-none focus-visible:ring-0">
+                    <h4 className="text-lg font-bold">Recommendations</h4>
+                    <ChevronsDown className={cn("transition-transform size-5", { "rotate-180": shouldShowRecommendations && filteredRecommendations.length > 0 })} />
+                </Button>
+            </CollapsibleTrigger>
+            {isDisabled && <div className="px-4 pb-3 text-sm text-muted-foreground text-center">This feature is currently only available with the AniList provider</div>}
+            <CollapsibleContent className="flex flex-col gap-4 px-4 pb-4 open overflow-hidden transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down peer-hover:bg-accent peer-hover:text-accent-foreground dark:peer-hover:bg-accent/50">
+                {displayedRecommendations.map((rec) => (
+                    <div key={rec.id} className="grid grid-cols-5">
+                        <AnimeCard isStatic={true} anime={rec.media} variant="compact" showDetails={false} className="col-span-2 rounded-md" />
+                        <div className="flex justify-center items-center px-2 col-span-1">
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="outline" className="flex flex-col gap-1.5 w-full h-fit" onClick={() => handleAddTitle(rec.mediaRecommendation.id)} disabled={loadingIds.includes(rec.mediaRecommendation.id)}>
+                                        <ChevronRight className="size-5" />
+                                        {loadingIds.includes(rec.mediaRecommendation.id) ? <LoaderCircle className="size-6 animate-spin" /> : <BadgePlus className="size-6" />}
+                                        <ChevronRight className="size-5" />
+                                        <span className="sr-only">Add to planning</span>
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <span className="text-sm">Add to planning</span>
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+                        <AnimeCard isStatic={true} anime={rec.mediaRecommendation} variant="compact" className="col-span-2 rounded-md" />
+                    </div>
+                ))}
+                {hasMoreRecommendations && (
+                    <Button variant="outline" onClick={handleShowMore}>
+                        Show More ({filteredRecommendations.length - displayCount} remaining)
+                    </Button>
+                )}
+            </CollapsibleContent>
+        </Collapsible>
     );
 }
