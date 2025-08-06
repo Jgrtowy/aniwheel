@@ -5,13 +5,16 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import Aurora from "~/components/Aurora";
 import KanjiAnimation from "~/components/KanjiAnimation";
+import PlaceholderWheel from "~/components/PlaceholderWheel";
+import RepoLink from "~/components/RepoLink";
 import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import { useReducedMotion } from "~/hooks/useReducedMotion";
-import { type UserProfile, useUnifiedSession } from "~/hooks/useUnifiedSession";
+import { signIn } from "~/lib/auth";
 import { useSettingsStore } from "~/lib/store";
-import PlaceholderWheel from "./PlaceholderWheel";
+import type { UserProfile } from "~/lib/types";
+import { cn } from "~/lib/utils";
 
 export default function Landing() {
     const [kanjiPathAnimationComplete, setKanjiPathAnimationComplete] = useState(false);
@@ -51,25 +54,24 @@ export default function Landing() {
         setRenderButtons(true);
     };
 
-    const { login } = useUnifiedSession();
-
     const handleLogin = async (provider: UserProfile["provider"]) => {
         setIsLoggingIn(true);
         try {
-            login(provider);
+            signIn(provider);
         } catch (error) {
             setIsLoggingIn(false);
         }
     };
 
     return (
-        <div className="flex items-center justify-center flex-col p-4">
+        <div className="flex items-center justify-center flex-col h-dvh p-4">
+            <RepoLink className="fixed top-4 right-4" />
             <motion.div className="flex items-center justify-center gap-2 sm:gap-4" layout={!shouldSkipAnimations}>
                 <motion.div layout={!shouldSkipAnimations} transition={!shouldSkipAnimations ? { type: "spring", stiffness: 300, damping: 30 } : { duration: 0 }} className="flex">
                     <Tooltip>
                         <TooltipTrigger>
                             <KanjiAnimation
-                                className={`flex-shrink-0 transition ${shouldSkipAnimations ? "" : `duration-[${kanjiSizeTransitionDuration * 1000}ms]`} ${kanjiPathAnimationComplete ? "scale-100" : shouldSkipAnimations ? "scale-100" : "scale-[300%]"}`}
+                                className={cn("shrink-0 transition", shouldSkipAnimations && `duration-[${kanjiSizeTransitionDuration * 1000}ms]`, kanjiPathAnimationComplete ? "scale-100" : shouldSkipAnimations ? "scale-100" : "scale-[300%]")}
                                 size={isDesktop ? 100 : 75}
                                 duration={shouldSkipAnimations ? 0 : 0.175}
                                 delayBetween={shouldSkipAnimations ? 0 : 0.01}
@@ -109,7 +111,7 @@ export default function Landing() {
                         animate={shouldSkipAnimations ? undefined : { opacity: 1 }}
                         exit={shouldSkipAnimations ? undefined : { opacity: 0 }}
                         transition={shouldSkipAnimations ? { duration: 0 } : { duration: titleAnimationDuration, delay: titleAnimationDuration / 2 }}
-                        className="flex flex-col items-center justify-center gap-6 sm:gap-4"
+                        className="flex flex-col items-center gap-6"
                     >
                         <div className="flex flex-col items-center gap-2 mt-4 text-center">
                             <p className="text-2xl sm:text-4xl font-semibold text-balance">Stuck on what to watch next?</p>
@@ -118,25 +120,13 @@ export default function Landing() {
                                 <Image src="/Rider_of_black.webp" alt="Rider of Black" width={150} height={150} className="fixed rotate-45 transition-[750ms] -bottom-72 -left-46 peer-hover:-bottom-23 peer-hover:-left-12 size-auto" />
                             </p>
                         </div>
-                        <div className="flex sm:flex-row flex-col gap-4 items-stretch">
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                                <Button variant="outline" className="px-5 py-6 text-xl cursor-pointer w-full" onClick={async () => handleLogin("anilist")} disabled={isLoggingIn}>
-                                    AniList
-                                </Button>
-                                <span className="text-xs text-muted-foreground">most features</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                                <Button variant="outline" className="px-5 py-6 text-xl cursor-pointer w-full" onClick={async () => handleLogin("myanimelist")} disabled={isLoggingIn}>
-                                    MyAnimeList
-                                </Button>
-                                <span className="text-xs text-muted-foreground">less features</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                                <Button variant="outline" className="px-5 py-6 text-xl cursor-not-allowed w-full" disabled>
-                                    Kitsu
-                                </Button>
-                                <span className="text-xs text-muted-foreground">stay tuned</span>
-                            </div>
+                        <div className="flex flex-col sm:flex-row gap-6">
+                            <Button variant="outline" size="lg" className="text-xl w-48 py-6 font-bold" onClick={async () => handleLogin("anilist")} disabled={isLoggingIn}>
+                                AniList
+                            </Button>
+                            <Button variant="outline" size="lg" className="text-xl w-48 py-6 font-bold" onClick={async () => handleLogin("myanimelist")} disabled={isLoggingIn}>
+                                MyAnimeList
+                            </Button>
                         </div>
                     </motion.div>
                 )}

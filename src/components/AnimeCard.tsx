@@ -1,78 +1,96 @@
 import { Clapperboard, ExternalLink, Star } from "lucide-react";
+import Image from "next/image";
 import { memo } from "react";
-import { useSettingsStore } from "~/lib/store";
-import type { PlannedItem, TitleLanguage } from "~/lib/types";
-import { getTitleWithPreference } from "~/lib/utils";
-import { Button } from "./ui/button";
+import { Button } from "~/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import { useAnimeStore, useSettingsStore } from "~/lib/store";
+import type { MediaItem } from "~/lib/types";
+import { cn, getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
+import { useSession } from "~/providers/session-provider";
 
-const AnimeCard = memo(function AnimeCard({
-    anime,
-    checked,
-    onCheck,
-    imageSize,
-    titleLanguage,
-}: {
-    anime: PlannedItem;
-    checked: boolean;
-    onCheck: (id: number, checked: boolean) => void;
-    imageSize: "medium" | "large" | "extraLarge";
-    titleLanguage: TitleLanguage;
-}) {
-    const { backdropEffects: blurEffects } = useSettingsStore();
-    const handleClick = () => onCheck(anime.id, !checked);
-    const imageSizeMap: Record<"medium" | "large" | "extraLarge", "medium" | "large" | "extraLarge"> = {
-        medium: "medium",
-        large: "large",
-        extraLarge: "extraLarge",
+type AnimeCardProps =
+    | {
+          anime: MediaItem;
+          checked: boolean;
+          isStatic?: false;
+          variant?: "default" | "compact";
+          showDetails?: boolean;
+          className?: string;
+      }
+    | {
+          anime: MediaItem;
+          isStatic: true;
+          variant?: "default" | "compact";
+          showDetails?: boolean;
+          className?: string;
+      };
+
+const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
+    const { anime, isStatic, variant = "default", showDetails = true, className } = props;
+    const checked = isStatic ? true : props.checked;
+
+    const { toggleSelectedMedia } = useAnimeStore();
+    const { showBackdropEffects } = useSettingsStore();
+    const session = useSession();
+
+    const bgClass = showBackdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-background/75";
+
+    const getCardClasses = () => {
+        if (variant === "compact") return cn("relative flex flex-col justify-between p-0.5 rounded-lg transition-all overflow-hidden aspect-square", !isStatic && "cursor-pointer", checked ? "brightness-100 opacity-100" : "brightness-75 opacity-75", className);
+        return cn(
+            "relative flex flex-col justify-between p-1 sm:p-2 rounded-lg transition-all overflow-hidden brightness-75 opacity-75 mx-4 sm:mx-0 sm:scale-90 aspect-[4] sm:aspect-square",
+            !isStatic && "cursor-pointer outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+            checked && "brightness-100 opacity-100 mx-0 sm:scale-100 aspect-[3.5]",
+            className,
+        );
     };
 
-    const imageUrl = anime.image?.[imageSizeMap[imageSize]] ? anime.image[imageSizeMap[imageSize]] : imageSizeMap[imageSize] === "medium" || imageSizeMap[imageSize] === "large" ? anime.imageMal?.[imageSizeMap[imageSize] as "medium" | "large"] : undefined;
-
-    const backgroundImage = imageUrl ? `url(${imageUrl})` : "none";
-
-    const effectClass = blurEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-black/80";
+    const CardElement = isStatic ? "div" : "button";
+    const cardProps = isStatic ? {} : { onClick: () => toggleSelectedMedia(anime.id), type: "button" as const };
 
     return (
-        <div
-            className={`rounded-lg p-3 transition-all sm:w-full sm:aspect-square duration-200 bg-primary-foreground ${checked ? "brightness-100 sm:scale-100 aspect-[4]" : "brightness-75 sm:scale-90 aspect-[6]"}`}
-            onClick={handleClick}
-            style={{ cursor: "pointer", backgroundImage, backgroundSize: "cover", backgroundPosition: "center" }}
-        >
-            <div className="flex sm:flex-col flex-row-reverse justify-between sm:items-baseline items-end gap-3 h-full">
-                <div className="flex items-center justify-end sm:justify-between sm:max-h-full max-h-max w-full">
-                    {anime.siteUrl && (
-                        <div>
-                            <Button
-                                variant="secondary"
-                                size="icon"
-                                className={`${effectClass} sm:scale-100 scale-75 rounded-lg text-white`}
-                                onClick={(e) => {
-                                    window.open(anime.siteUrl, "_blank");
-                                    e.stopPropagation();
-                                }}
-                            >
-                                <ExternalLink />
+        <CardElement className={getCardClasses()} {...cardProps}>
+            {!isStatic && <span className="sr-only">Select {getTitleWithPreference(anime)}</span>}
+            <Image className={cn("absolute inset-0 object-cover -z-10 transition scale-125", checked && "scale-100")} src={getImageUrlWithPreference(anime)} alt={getTitleWithPreference(anime)} fill sizes="100%" priority />
+            <div className="flex justify-between">
+                {anime.siteUrl && showDetails && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button asChild variant="secondary" className={cn("flex size-7 justify-center items-center aspect-square border rounded-md", bgClass)}>
+                                <a href={anime.siteUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                    <ExternalLink className={variant === "compact" ? "size-3" : "size-3"} />
+                                    <span className="sr-only">View on {session?.activeProvider}</span>
+                                </a>
                             </Button>
+                        </TooltipTrigger>
+                        {session?.activeProvider && (
+                            <TooltipContent>
+                                <p>View on {getPrettyProviderName(session?.activeProvider)}</p>
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                )}
+                <div className={cn("flex gap-1 font-medium leading-tight whitespace-nowrap", variant === "compact" ? "text-xs flex-col-reverse items-end gap-0.5" : "sm:text-sm text-xs")}>
+                    {anime.averageScore && showDetails && (
+                        <div className={cn("flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md", bgClass)}>
+                            <Star className="size-3" />
+                            <p>{anime.averageScore}</p>
+                            <span className="sr-only">Average score</span>
                         </div>
                     )}
-                    <div className="flex items-center gap-1">
-                        {anime.averageScore && (
-                            <div className={`flex items-center leading-tight gap-1 text-xs ${effectClass} text-white p-1 border rounded-lg min-h-8`}>
-                                <Star className="h-3 w-3" />
-                                <h3 className="font-medium sm:text-sm text-xs">{anime.averageScore}</h3>
-                            </div>
-                        )}
-                        {anime.episodes && (
-                            <div className={`flex items-center leading-tight gap-1 text-xs ${effectClass} text-white p-1 border rounded-lg min-h-8`}>
-                                <Clapperboard className="h-3 w-3" />
-                                <h3 className="font-medium sm:text-sm text-xs">{anime.episodes !== 1 ? `${anime.episodes} eps` : "1 ep"}</h3>
-                            </div>
-                        )}
-                    </div>
+                    {anime.episodes > 0 && showDetails && (
+                        <div className={cn("flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md", bgClass)}>
+                            <Clapperboard className="size-3" />
+                            <p>{anime.episodes !== 1 ? `${anime.episodes} eps` : "1 ep"}</p>
+                            <span className="sr-only">Number of episodes</span>
+                        </div>
+                    )}
                 </div>
-                <h3 className={`font-medium w-fit max-w-full text-sm leading-tight sm:line-clamp-2 line-clamp-1 ${effectClass} text-white p-1 border rounded-lg`}>{getTitleWithPreference(anime, titleLanguage)}</h3>
             </div>
-        </div>
+            <div className={cn("p-1 w-fit border rounded-md text-left", bgClass)}>
+                <p className={cn("font-medium leading-tight line-clamp-1 sm:line-clamp-2 overflow-hidden w-fit", variant === "compact" ? "text-xs" : "text-xs sm:text-sm")}>{getTitleWithPreference(anime)}</p>
+            </div>
+        </CardElement>
     );
 });
 

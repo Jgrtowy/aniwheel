@@ -51,8 +51,7 @@ export default function KanjiAnimation({ className = "", size = 100, duration = 
 
     return (
         <div className="flex justify-center items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 109 109" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} role="img" aria-label="Kanji for luck/fate">
-                <title>Animated kanji character drawing</title>
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 109 109" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} role="img">
                 {pathData.map((d, index) => (
                     <path
                         key={index}

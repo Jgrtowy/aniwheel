@@ -4,15 +4,13 @@ import { ChevronDown, Clapperboard, ExternalLink, Star } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LightRays from "~/components/LightRays";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import useMediaQuery from "~/hooks/useMediaQuery";
-import { useUnifiedSession } from "~/hooks/useUnifiedSession";
 import { useAnimeStore, useSettingsStore } from "~/lib/store";
-import type { PlannedItem } from "~/lib/types";
-import { cn, getTitleWithPreference } from "~/lib/utils";
-import { authOptions } from "~/server/auth";
+import type { MediaItem } from "~/lib/types";
+import { cn, getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
+import { useSession } from "~/providers/session-provider";
 
 const calculateImageDimensions = (segmentAngle: number, radius: number) => {
     const angleRad = (segmentAngle * Math.PI) / 180;
@@ -36,18 +34,18 @@ const BASE_ROTATION_RANGE = 1440; // Additional random rotations
 const TICK_SOUND_DELAY = 30;
 
 export function SpinWheelContent() {
-    const { checkedAnime, fullAnimeList } = useAnimeStore();
-    const { imageSize, titleLanguage, enableTickSounds } = useSettingsStore();
-    const items = fullAnimeList.filter((anime) => checkedAnime.has(anime.id));
+    const { checkedMedia, fullMediaList } = useAnimeStore();
+    const { enableTickSounds, showBackdropEffects } = useSettingsStore();
+    const items = fullMediaList.filter((anime) => checkedMedia.has(anime.id));
 
-    const { activeProvider } = useUnifiedSession();
+    const session = useSession();
 
     const isMobile = useMediaQuery("(max-width: 640px)");
     const isTablet = useMediaQuery("(max-width: 1024px)");
 
     const [isSpinning, setIsSpinning] = useState(false);
     const [rotation, setRotation] = useState(0);
-    const [selectedItem, setSelectedItem] = useState<PlannedItem | null>(null);
+    const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
 
     const wheelRef = useRef<SVGSVGElement>(null);
     const currentAnimationRef = useRef<Animation | null>(null);
@@ -169,7 +167,7 @@ export function SpinWheelContent() {
             const selectedIndex = Math.floor(pointerPosition / segmentAngle) % items.length;
             return items[selectedIndex];
         },
-        [items, segmentAngle, titleLanguage],
+        [items, segmentAngle],
     );
 
     const spin = () => {
@@ -260,6 +258,8 @@ export function SpinWheelContent() {
         };
     }, []);
 
+    const bgClass = showBackdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-background/75";
+
     return (
         <>
             <AnimatePresence>
@@ -299,15 +299,7 @@ export function SpinWheelContent() {
                                     <clipPath id={`clip-path-${index}`}>
                                         <path d={pathData} />
                                     </clipPath>
-                                    <image
-                                        href={item.image?.[imageSize] || item.imageMal?.[imageSize === "extraLarge" ? "large" : imageSize] || ""}
-                                        x={imageX - imageDimensions.width / 2}
-                                        y={imageY - imageDimensions.height / 2}
-                                        width={imageDimensions.width}
-                                        height={imageDimensions.height}
-                                        preserveAspectRatio="xMidYMid slice"
-                                        clipPath={`url(#clip-path-${index})`}
-                                    />
+                                    <image href={getImageUrlWithPreference(item, "large")} x={imageX - imageDimensions.width / 2} y={imageY - imageDimensions.height / 2} width={imageDimensions.width} height={imageDimensions.height} preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-path-${index})`} />
                                 </g>
                             ))}
                         </svg>
@@ -326,23 +318,24 @@ export function SpinWheelContent() {
                         >
                             <Card className="w-72 lg:w-80 overflow-hidden shadow-2xl p-0 gap-0">
                                 <div className="relative">
-                                    <img src={selectedItem.image?.[imageSize]} alt={selectedItem.title} className="w-full h-72 lg:h-96 object-cover" />
+                                    <img src={getImageUrlWithPreference(selectedItem)} alt={getTitleWithPreference(selectedItem)} className="w-full h-72 lg:h-96 object-cover" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-card/95 via-card/60 to-transparent" />
                                     <div className="absolute bottom-0 left-0 right-0 text-primary flex flex-col gap-2 p-2 pb-4">
-                                        <h3 className="text-xl lg:text-2xl font-bold line-clamp-2">{getTitleWithPreference(selectedItem, titleLanguage)}</h3>
-                                        <div className="flex items-center gap-2 flex-wrap">
+                                        <h3 className="text-xl lg:text-2xl font-bold line-clamp-2">{getTitleWithPreference(selectedItem)}</h3>
+                                        <div className="flex gap-2 font-medium leading-tight whitespace-nowrap">
                                             {selectedItem.averageScore && (
-                                                <Badge variant="secondary" className="bg-yellow-500 text-accent">
-                                                    <Star className="w-3 h-3 lg:w-4 lg:h-4" /> <span>{selectedItem.averageScore}%</span>
-                                                </Badge>
+                                                <div className={cn("flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md", bgClass)}>
+                                                    <Star className="size-3" />
+                                                    <p>{selectedItem.averageScore}</p>
+                                                    <span className="sr-only">Average score</span>
+                                                </div>
                                             )}
-                                            {selectedItem.episodes && (
-                                                <Badge variant="secondary" className="bg-blue-500 text-primary">
-                                                    <Clapperboard className="w-3 h-3 lg:w-4 lg:h-4" />
-                                                    <span>
-                                                        {selectedItem.episodes} ep{selectedItem.episodes > 1 ? "s" : ""}
-                                                    </span>
-                                                </Badge>
+                                            {selectedItem.episodes > 0 && (
+                                                <div className={cn("flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md", bgClass)}>
+                                                    <Clapperboard className="size-3" />
+                                                    <p>{selectedItem.episodes !== 1 ? `${selectedItem.episodes} eps` : "1 ep"}</p>
+                                                    <span className="sr-only">Number of episodes</span>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -350,7 +343,7 @@ export function SpinWheelContent() {
                                 <CardContent className="p-3 lg:p-4">
                                     <Button asChild className="w-full" size="lg">
                                         <a href={selectedItem.siteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
-                                            <span className="translate-y-0.25 text-sm lg:text-base">{authOptions.providers.find((p) => p.id === activeProvider)?.name || activeProvider}</span>
+                                            {session?.activeProvider && <span className="translate-y-0.25 text-sm lg:text-base">View on {getPrettyProviderName(session?.activeProvider)}</span>}
                                             <ExternalLink className="w-4 h-4" />
                                         </a>
                                     </Button>
