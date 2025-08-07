@@ -52,25 +52,27 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
         <CardElement className={getCardClasses()} {...cardProps}>
             {!isStatic && <span className="sr-only">Select {getTitleWithPreference(anime)}</span>}
             <Image className={cn("absolute inset-0 object-cover -z-10 transition scale-125", checked && "scale-100")} src={getImageUrlWithPreference(anime)} alt={getTitleWithPreference(anime)} fill sizes="100%" priority />
-            <div className="flex justify-between">
-                {anime.siteUrl && showDetails && (
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button asChild variant="secondary" className={cn("flex size-7 justify-center items-center aspect-square border rounded-md", bgClass)}>
-                                <a href={anime.siteUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                                    <ExternalLink className={variant === "compact" ? "size-3" : "size-3"} />
-                                    <span className="sr-only">View on {session?.activeProvider}</span>
-                                </a>
-                            </Button>
-                        </TooltipTrigger>
-                        {session?.activeProvider && (
-                            <TooltipContent>
-                                <p>View on {getPrettyProviderName(session?.activeProvider)}</p>
-                            </TooltipContent>
-                        )}
-                    </Tooltip>
-                )}
-                <div className={cn("flex gap-1 font-medium leading-tight whitespace-nowrap", variant === "compact" ? "text-xs flex-col-reverse items-end gap-0.5" : "sm:text-sm text-xs")}>
+            <div className="flex justify-between w-full">
+                <div className="flex-shrink-0">
+                    {anime.siteUrl && showDetails && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button asChild variant="secondary" className={cn("flex size-7 justify-center items-center aspect-square border rounded-md", bgClass)}>
+                                    <a href={anime.siteUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                        <ExternalLink className={variant === "compact" ? "size-3" : "size-3"} />
+                                        <span className="sr-only">View on {session?.activeProvider}</span>
+                                    </a>
+                                </Button>
+                            </TooltipTrigger>
+                            {session?.activeProvider && (
+                                <TooltipContent>
+                                    <p>View on {getPrettyProviderName(session?.activeProvider)}</p>
+                                </TooltipContent>
+                            )}
+                        </Tooltip>
+                    )}
+                </div>
+                <div className={cn("flex gap-1 font-medium leading-tight whitespace-nowrap flex-shrink-0", variant === "compact" ? "text-xs flex-col-reverse items-end gap-0.5" : "sm:text-sm text-xs")}>
                     {anime.averageScore && showDetails && (
                         <div className={cn("flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md", bgClass)}>
                             <Star className="size-3" />

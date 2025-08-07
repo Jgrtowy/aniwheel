@@ -39,8 +39,8 @@ export default function SidePanel() {
                         {checkedMedia.size} of {mediaList.length} selected
                     </Badge>
 
-                    {checkedMedia.size !== 0 ? (
-                        <div className="h-36 sm:h-44 my-2 w-full overflow-hidden">
+                    <div className="h-36 sm:h-44 my-2 w-full overflow-hidden">
+                        {checkedMedia.size !== 0 ? (
                             <ScrollArea className="h-full" type="auto">
                                 <div className="space-y-1">
                                     {checkedAnimeList.map((anime, i) => (
@@ -53,13 +53,13 @@ export default function SidePanel() {
                                     ))}
                                 </div>
                             </ScrollArea>
-                        </div>
-                    ) : (
-                        <h2 className="flex flex-col justify-center h-41 text-center">
-                            <span className="text-xl font-bold">No titles selected!</span>
-                            <span className="text-sm">Click one to select it</span>
-                        </h2>
-                    )}
+                        ) : (
+                            <h2 className="flex flex-col justify-center h-full text-center">
+                                <span className="text-xl font-bold">No titles selected!</span>
+                                <span className="text-sm">Click one to select it</span>
+                            </h2>
+                        )}
+                    </div>
                     <AddToPlannedSheet />
                 </CardContent>
             </Card>
