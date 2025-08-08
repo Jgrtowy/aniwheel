@@ -10,16 +10,13 @@ import SortingDropdown from "~/components/SortingDropdown";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import useMediaQuery from "~/hooks/useMediaQuery";
-import { useAnimeStore, useSettingsStore } from "~/lib/store";
+import { useAnimeStore } from "~/lib/store";
 import { cn } from "~/lib/utils";
 
 export default function Home() {
-    const { showBackdropEffects } = useSettingsStore();
     const { searchTerm, setSearchTerm } = useAnimeStore();
 
     const isDesktop = useMediaQuery("(width >= 40rem)");
-    const bgClass = showBackdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-background/75";
-
     return (
         <>
             <div className="fixed top-0 w-[200%] sm:h-full sm:w-full -z-10 pointer-events-none">
@@ -29,7 +26,7 @@ export default function Home() {
             <div className="p-2 sm:p-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex flex-col-reverse md:flex-row gap-4">
-                        <div className={cn("flex-1 flex-col rounded-xl border p-4 sm:p-6 space-y-6", bgClass)}>
+                        <div className={cn("flex-1 flex-col rounded-xl border p-4 sm:p-6 space-y-6 bg-background/75")}>
                             <div className="flex justify-between">
                                 <div className="relative shrink-0">
                                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />

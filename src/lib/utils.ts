@@ -21,13 +21,14 @@ export function aniListToMediaItem(item: AniListMediaItem): MediaItem {
             large: item.coverImage.large || null,
             medium: item.coverImage.medium || "/placeholder.webp",
         },
-        startDate: item.startDate ? new Date(`${item.startDate.year ?? 1970}-${`0${item.startDate.month ?? 1}`.slice(-2)}-${`0${item.startDate.day ?? 1}`.slice(-2)}T00:00:00Z`) : null,
+        startDate: item.startDate?.day && item.startDate?.month && item.startDate?.year ? new Date(`${item.startDate.year}-${`0${item.startDate.month}`.slice(-2)}-${`0${item.startDate.day}`.slice(-2)}T00:00:00Z`) : null,
         averageScore: Number.isFinite(item.averageScore) ? (item.averageScore as number) / 10 : null,
         episodes: item.episodes || 0,
         siteUrl: item.siteUrl || `https://anilist.co/anime/${item.id}`,
         genres: item.genres || [],
         entryCreatedAt: item.mediaListEntry?.createdAt || null,
         isCustom: false,
+        status: item.status || "UNKNOWN",
     };
 }
 
@@ -51,6 +52,7 @@ export function malToMediaItem(item: MALMediaItem): MediaItem {
         genres: item.genres?.map((genre: { name: string }) => genre.name) || [],
         entryCreatedAt: item.my_list_status?.updated_at ? new Date(item.my_list_status.updated_at).getTime() : null,
         isCustom: false,
+        status: item.my_list_status?.status || "UNKNOWN",
     };
 }
 

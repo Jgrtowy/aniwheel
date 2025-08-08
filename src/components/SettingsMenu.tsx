@@ -11,7 +11,7 @@ import type { ImageSize, TitleLanguage } from "~/lib/types";
 import { useSession } from "~/providers/session-provider";
 
 export default function SettingsMenu() {
-    const { preferredImageSize, setPreferredImageSize, preferredTitleLanguage, setPreferredTitleLanguage, showBackdropEffects, setShowBackdropEffects, skipLandingAnimation, setSkipLandingAnimation, enableTickSounds, setEnableTickSounds } = useSettingsStore();
+    const { preferredImageSize, setPreferredImageSize, preferredTitleLanguage, setPreferredTitleLanguage, skipLandingAnimation, setSkipLandingAnimation, enableTickSounds, setEnableTickSounds } = useSettingsStore();
     const session = useSession();
 
     useEffect(() => {
@@ -25,7 +25,7 @@ export default function SettingsMenu() {
                     <Settings className="w-4 h-4" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="bg-background/50 backdrop-blur-sm">
                 <div className="flex flex-col p-2 gap-2">
                     <Label className="text-xs">Image Size</Label>
                     <ToggleGroup type="single" variant="outline" value={preferredImageSize} onValueChange={(val) => val && setPreferredImageSize(val as ImageSize)} className="mt-1" aria-label="Image Size">
@@ -51,15 +51,6 @@ export default function SettingsMenu() {
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                    </div>
-                </div>
-                <DropdownMenuSeparator className="my-1" />
-                <div className="flex flex-col p-2 gap-2">
-                    <Label className="text-xs">Backdrop effects</Label>
-                    <span className="text-xs text-muted-foreground">Enables additional effects on cards and backgrounds.</span>
-                    <div className="flex items-center gap-2">
-                        <Switch checked={showBackdropEffects} onCheckedChange={setShowBackdropEffects} />
-                        <span className="text-xs text-muted-foreground">(May cause lag!)</span>
                     </div>
                 </div>
                 <DropdownMenuSeparator className="my-1" />

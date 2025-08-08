@@ -57,14 +57,12 @@ interface SettingsStore {
     preferredTitleLanguage: TitleLanguage;
     preferredImageSize: ImageSize;
     showMediaRecommendations: boolean;
-    showBackdropEffects: boolean;
     skipLandingAnimation: boolean;
     enableTickSounds: boolean;
 
     setPreferredTitleLanguage: (lang: TitleLanguage) => void;
     setPreferredImageSize: (size: ImageSize) => void;
     setShowMediaRecommendations: (show: boolean) => void;
-    setShowBackdropEffects: (blur: boolean) => void;
     setSkipLandingAnimation: (skip: boolean) => void;
     setEnableTickSounds: (enable: boolean) => void;
 }
@@ -159,6 +157,7 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         if (state.showAiredOnly) {
             const currentDate = Date.now();
             filteredAnime = filteredAnime.filter((anime) => {
+                console.log(Boolean(anime.startDate));
                 if (!anime.startDate) return false;
                 return new Date(anime.startDate).getTime() <= currentDate;
             });
@@ -232,14 +231,12 @@ export const useSettingsStore = create<SettingsStore>()(
             preferredTitleLanguage: "en",
             preferredImageSize: "large",
             showMediaRecommendations: true,
-            showBackdropEffects: false,
             skipLandingAnimation: false,
             enableTickSounds: true,
 
             setPreferredTitleLanguage: (lang) => set({ preferredTitleLanguage: lang }),
             setPreferredImageSize: (size) => set({ preferredImageSize: size }),
             setShowMediaRecommendations: (show) => set({ showMediaRecommendations: show }),
-            setShowBackdropEffects: (backdropEffects) => set({ showBackdropEffects: backdropEffects }),
             setSkipLandingAnimation: (skip) => set({ skipLandingAnimation: skip }),
             setEnableTickSounds: (enable) => set({ enableTickSounds: enable }),
         }),

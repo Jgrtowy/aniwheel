@@ -5,9 +5,8 @@ import { useSettingsStore } from "~/lib/store";
 import { cn } from "~/lib/utils";
 
 export default function RepoLink({ className = "" }: { className?: string }) {
-    const { showBackdropEffects } = useSettingsStore();
     return (
-        <Button asChild variant="outline" size="icon" className={cn(showBackdropEffects && "backdrop-blur-2xl backdrop-brightness-75", className)}>
+        <Button asChild variant="outline" size="icon" className={cn(className)}>
             <a href="https://github.com/Jgrtowy/aniwheel" target="_blank" rel="noopener noreferrer">
                 <span className="sr-only">GitHub repository link</span>
                 <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

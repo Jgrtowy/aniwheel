@@ -13,14 +13,11 @@ import { getTitleWithPreference } from "~/lib/utils";
 
 export default function SidePanel() {
     const { checkedMedia, mediaList, selectAllMedia, deselectAllMedia, toggleSelectedMedia } = useAnimeStore();
-    const { showBackdropEffects } = useSettingsStore();
 
     const checkedAnimeList = mediaList.filter((anime) => checkedMedia.has(anime.id));
-    const bgClass = showBackdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-background/75";
-
     return (
         <div className="flex flex-col gap-4 md:max-w-sm w-full">
-            <Card className={`w-full ${bgClass}`}>
+            <Card className="w-full bg-background/75">
                 <CardContent className="flex flex-col items-center gap-2">
                     <div className="flex flex-col gap-2 w-full">
                         <div className="flex gap-2">

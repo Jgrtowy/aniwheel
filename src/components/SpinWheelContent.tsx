@@ -35,7 +35,7 @@ const TICK_SOUND_DELAY = 30;
 
 export function SpinWheelContent() {
     const { checkedMedia, fullMediaList } = useAnimeStore();
-    const { enableTickSounds, showBackdropEffects } = useSettingsStore();
+    const { enableTickSounds } = useSettingsStore();
     const items = fullMediaList.filter((anime) => checkedMedia.has(anime.id));
 
     const session = useSession();
@@ -258,8 +258,6 @@ export function SpinWheelContent() {
         };
     }, []);
 
-    const bgClass = showBackdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-background/75";
-
     return (
         <>
             <AnimatePresence>
@@ -321,18 +319,18 @@ export function SpinWheelContent() {
                                     <img src={getImageUrlWithPreference(selectedItem)} alt={getTitleWithPreference(selectedItem)} className="w-full h-72 lg:h-96 object-cover" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-card/95 via-card/60 to-transparent" />
                                     <div className="absolute bottom-0 left-0 right-0 text-primary flex flex-col gap-2 p-2 pb-4">
-                                        <h3 className="text-xl lg:text-2xl font-bold line-clamp-2">{getTitleWithPreference(selectedItem)}</h3>
+                                        <h3 className="text-xl lg:text-2xl font-bold line-clamp-2 text-white">{getTitleWithPreference(selectedItem)}</h3>
                                         <div className="flex gap-2 font-medium leading-tight whitespace-nowrap">
                                             {selectedItem.averageScore && (
-                                                <div className={cn("flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md", bgClass)}>
-                                                    <Star className="size-3" />
+                                                <div className={cn("flex items-center gap-1 h-7 px-2 text-md text-white w-fit border rounded-md bg-background/75")}>
+                                                    <Star className="size-4" />
                                                     <p>{selectedItem.averageScore}</p>
                                                     <span className="sr-only">Average score</span>
                                                 </div>
                                             )}
                                             {selectedItem.episodes > 0 && (
-                                                <div className={cn("flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md", bgClass)}>
-                                                    <Clapperboard className="size-3" />
+                                                <div className={cn("flex items-center gap-1 h-7 px-2 text-md text-white w-fit border rounded-md bg-background/75")}>
+                                                    <Clapperboard className="size-4" />
                                                     <p>{selectedItem.episodes !== 1 ? `${selectedItem.episodes} eps` : "1 ep"}</p>
                                                     <span className="sr-only">Number of episodes</span>
                                                 </div>

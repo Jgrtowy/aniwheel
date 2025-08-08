@@ -17,6 +17,7 @@ export interface MediaItem {
     genres: string[];
     entryCreatedAt: number | null;
     isCustom: boolean;
+    status: string;
 }
 
 export interface MediaRecommendation {
@@ -50,6 +51,7 @@ export interface AniListMediaItem {
     mediaListEntry: {
         createdAt: number;
     } | null;
+    status?: string;
 }
 
 export interface AniListMediaRecommendation {
@@ -76,6 +78,7 @@ export interface MALMediaItem {
     genres: { id: number; name: string }[];
     my_list_status: {
         updated_at: string;
+        status: string;
         [key: string]: unknown;
     } | null;
 }

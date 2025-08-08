@@ -43,12 +43,13 @@ query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType)
             createdAt
           }
         }
+        status
       }
     }
   }
 }
 `,
-                variables: { userName: session.user.name, statusIn: "PLANNING", type: "ANIME" },
+                variables: { userName: session.user.name, statusIn: ["PLANNING", "DROPPED", "PAUSED"], type: "ANIME" },
             }),
         });
         if (!data.ok) return Response.json({ error: "Failed to fetch planned items from AniList" }, { status: 500 });
@@ -66,6 +67,11 @@ query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType)
 
         const formattedMediaList: MediaItem[] = [];
 
+        // uncomment along with line 80 after status can be determined in both providers
+        // const data = await fetch(`https://api.myanimelist.net/v2/users/@me/animelist?limit=1000&offset=${formattedMediaList.length}&fields=alternative_titles,start_date,mean,num_episodes,genres,my_list_status`, {
+        //     method: "GET",
+        //     headers: { Authorization: `Bearer ${session.accessToken}` },
+        // });
         const data = await fetch(`https://api.myanimelist.net/v2/users/@me/animelist?status=plan_to_watch&limit=1000&offset=${formattedMediaList.length}&fields=alternative_titles,start_date,mean,num_episodes,genres,my_list_status`, {
             method: "GET",
             headers: { Authorization: `Bearer ${session.accessToken}` },
@@ -78,6 +84,7 @@ query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType)
 
         for (const _item of mediaList) {
             const item: MALMediaItem = _item.node;
+            // if (item.my_list_status?.status === "completed" || item.my_list_status?.status === "watching") continue;
             formattedMediaList.push(malToMediaItem(item));
         }
 
