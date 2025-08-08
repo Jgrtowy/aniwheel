@@ -317,19 +317,19 @@ export function SpinWheelContent() {
                             <Card className="w-72 lg:w-80 overflow-hidden shadow-2xl p-0 gap-0">
                                 <div className="relative">
                                     <img src={getImageUrlWithPreference(selectedItem)} alt={getTitleWithPreference(selectedItem)} className="w-full h-72 lg:h-96 object-cover" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-card/95 via-card/60 to-transparent" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-card/95 via-card/50 to-transparent" />
                                     <div className="absolute bottom-0 left-0 right-0 text-primary flex flex-col gap-2 p-2 pb-4">
-                                        <h3 className="text-xl lg:text-2xl font-bold line-clamp-2 text-white">{getTitleWithPreference(selectedItem)}</h3>
-                                        <div className="flex gap-2 font-medium leading-tight whitespace-nowrap">
+                                        <h3 className="text-xl lg:text-2xl font-bold line-clamp-2 text-accent-foreground">{getTitleWithPreference(selectedItem)}</h3>
+                                        <div className="flex gap-2 font-medium leading-tight whitespace-nowrap text-sm">
                                             {selectedItem.averageScore && (
-                                                <div className={cn("flex items-center gap-1 h-7 px-2 text-md text-white w-fit border rounded-md bg-background/75")}>
+                                                <div className="flex items-center gap-1 h-7 px-2 text-md text-accent-foreground w-fit border rounded-md bg-component-primary">
                                                     <Star className="size-4" />
                                                     <p>{selectedItem.averageScore}</p>
                                                     <span className="sr-only">Average score</span>
                                                 </div>
                                             )}
                                             {selectedItem.episodes > 0 && (
-                                                <div className={cn("flex items-center gap-1 h-7 px-2 text-md text-white w-fit border rounded-md bg-background/75")}>
+                                                <div className="flex items-center gap-1 h-7 px-2 text-md text-accent-foreground w-fit border rounded-md bg-component-primary">
                                                     <Clapperboard className="size-4" />
                                                     <p>{selectedItem.episodes !== 1 ? `${selectedItem.episodes} eps` : "1 ep"}</p>
                                                     <span className="sr-only">Number of episodes</span>

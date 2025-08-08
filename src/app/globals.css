@@ -45,6 +45,13 @@
     --animate-collapsible-up: collapsible-up 200ms ease-out;
 }
 
+.bg-component-primary {
+    @apply bg-background/75;
+}
+.bg-component-secondary {
+    @apply bg-background/50 backdrop-blur-xl;
+}
+
 @keyframes collapsible-down {
     from {
         height: 0;

@@ -80,7 +80,7 @@ export default function AddToPlannedSheet() {
         if (!session?.activeProvider) return;
 
         try {
-            const response = await fetch("/api/planned");
+            const response = await fetch("/api/mediaList");
             if (response.ok) {
                 const data = await response.json();
                 clearFilters();
@@ -186,7 +186,7 @@ export default function AddToPlannedSheet() {
                             <div className="flex w-max h-38 gap-2 pb-3">
                                 {selectedTitles.map((anime) => (
                                     <div className="relative h-full aspect-square rounded-md overflow-hidden" key={anime.id}>
-                                        <button className="absolute inset-0 transition bg-background/75 flex justify-center items-center cursor-pointer opacity-0 hover:opacity-100 focus-visible:opacity-100 z-10" type="button" onClick={() => handleTitleRemove(anime)}>
+                                        <button className="absolute inset-0 transition bg-component-primary flex justify-center items-center cursor-pointer opacity-0 hover:opacity-100 focus-visible:opacity-100 z-10" type="button" onClick={() => handleTitleRemove(anime)}>
                                             <Trash2 className="size-8 stroke-destructive" />
                                             <span className="sr-only">Remove {getTitleWithPreference(anime)}</span>
                                         </button>

@@ -25,7 +25,7 @@ export default function SettingsMenu() {
                     <Settings className="w-4 h-4" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-background/50 backdrop-blur-sm">
+            <DropdownMenuContent align="end" className="bg-component-secondary">
                 <div className="flex flex-col p-2 gap-2">
                     <Label className="text-xs">Image Size</Label>
                     <ToggleGroup type="single" variant="outline" value={preferredImageSize} onValueChange={(val) => val && setPreferredImageSize(val as ImageSize)} className="mt-1" aria-label="Image Size">

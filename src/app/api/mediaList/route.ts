@@ -14,7 +14,7 @@ export async function GET() {
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.accessToken}` },
             body: JSON.stringify({
                 query: `
-query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType) {
+query MediaList($userName: String, $statusIn: [MediaListStatus], $type: MediaType) {
   MediaListCollection(userName: $userName, status_in: $statusIn, type: $type) {
     lists {
       entries {
@@ -41,9 +41,9 @@ query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType)
           genres
           mediaListEntry {
             createdAt
+            status
           }
         }
-        status
       }
     }
   }
@@ -55,7 +55,7 @@ query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType)
         if (!data.ok) return Response.json({ error: "Failed to fetch planned items from AniList" }, { status: 500 });
 
         const response = await data.json();
-        const mediaList = response.data.MediaListCollection.lists[0].entries as { media: AniListMediaItem }[];
+        const mediaList = response.data.MediaListCollection.lists.flatMap((list: { entries: { media: AniListMediaItem }[] }) => list.entries) as { media: AniListMediaItem }[];
 
         const formattedMediaList: MediaItem[] = mediaList.map((item: { media: AniListMediaItem }) => aniListToMediaItem(item.media));
 
@@ -67,12 +67,7 @@ query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType)
 
         const formattedMediaList: MediaItem[] = [];
 
-        // uncomment along with line 80 after status can be determined in both providers
-        // const data = await fetch(`https://api.myanimelist.net/v2/users/@me/animelist?limit=1000&offset=${formattedMediaList.length}&fields=alternative_titles,start_date,mean,num_episodes,genres,my_list_status`, {
-        //     method: "GET",
-        //     headers: { Authorization: `Bearer ${session.accessToken}` },
-        // });
-        const data = await fetch(`https://api.myanimelist.net/v2/users/@me/animelist?status=plan_to_watch&limit=1000&offset=${formattedMediaList.length}&fields=alternative_titles,start_date,mean,num_episodes,genres,my_list_status`, {
+        const data = await fetch(`https://api.myanimelist.net/v2/users/@me/animelist?limit=1000&offset=${formattedMediaList.length}&fields=alternative_titles,start_date,mean,num_episodes,genres,my_list_status`, {
             method: "GET",
             headers: { Authorization: `Bearer ${session.accessToken}` },
         });
@@ -84,7 +79,7 @@ query Planned($userName: String, $statusIn: [MediaListStatus], $type: MediaType)
 
         for (const _item of mediaList) {
             const item: MALMediaItem = _item.node;
-            // if (item.my_list_status?.status === "completed" || item.my_list_status?.status === "watching") continue;
+            if (!(item.my_list_status?.status === "plan_to_watch" || item.my_list_status?.status === "dropped" || item.my_list_status?.status === "on_hold")) continue;
             formattedMediaList.push(malToMediaItem(item));
         }
 

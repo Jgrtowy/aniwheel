@@ -52,7 +52,7 @@ export default function Recommendations() {
         if (!session?.activeProvider) return;
 
         try {
-            const response = await fetch("/api/planned");
+            const response = await fetch("/api/mediaList");
             if (response.ok) {
                 const data = await response.json();
                 clearFilters();
@@ -110,7 +110,7 @@ export default function Recommendations() {
     const isDisabled = !!session && session.activeProvider !== "anilist";
 
     return (
-        <Collapsible open={shouldShowRecommendations && filteredRecommendations.length > 0} onOpenChange={handleOpenChange} disabled={isDisabled} className={cn("flex w-full flex-col text-card-foreground rounded-xl border shadow-sm overflow-hidden bg-background/25")}>
+        <Collapsible open={shouldShowRecommendations && filteredRecommendations.length > 0} onOpenChange={handleOpenChange} disabled={isDisabled} className="flex w-full flex-col text-card-foreground rounded-xl border shadow-sm overflow-hidden bg-component-primary">
             <CollapsibleTrigger asChild>
                 <Button variant="ghost" className="peer flex items-center justify-center gap-6 py-8 rounded-xl rounded-b-none focus-visible:ring-0">
                     <h4 className="text-lg font-bold">Recommendations</h4>

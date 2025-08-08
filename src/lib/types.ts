@@ -16,8 +16,7 @@ export interface MediaItem {
     siteUrl: string;
     genres: string[];
     entryCreatedAt: number | null;
-    isCustom: boolean;
-    status: string;
+    status: "PLANNING" | "DROPPED" | "PAUSED" | null;
 }
 
 export interface MediaRecommendation {
@@ -50,8 +49,8 @@ export interface AniListMediaItem {
     genres: string[];
     mediaListEntry: {
         createdAt: number;
+        status: "PLANNING" | "DROPPED" | "PAUSED" | null;
     } | null;
-    status?: string;
 }
 
 export interface AniListMediaRecommendation {
@@ -78,7 +77,7 @@ export interface MALMediaItem {
     genres: { id: number; name: string }[];
     my_list_status: {
         updated_at: string;
-        status: string;
+        status: "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch";
         [key: string]: unknown;
     } | null;
 }

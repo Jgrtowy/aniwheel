@@ -4,14 +4,13 @@ import { Search, X } from "lucide-react";
 import Aurora from "~/components/Aurora";
 import FiltersDropdown from "~/components/FiltersDropdown";
 import Header from "~/components/Header";
-import PlannedList from "~/components/PlannedList";
+import MediaList from "~/components/MediaList";
 import SidePanel from "~/components/SidePanel";
 import SortingDropdown from "~/components/SortingDropdown";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import { useAnimeStore } from "~/lib/store";
-import { cn } from "~/lib/utils";
 
 export default function Home() {
     const { searchTerm, setSearchTerm } = useAnimeStore();
@@ -26,7 +25,7 @@ export default function Home() {
             <div className="p-2 sm:p-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex flex-col-reverse md:flex-row gap-4">
-                        <div className={cn("flex-1 flex-col rounded-xl border p-4 sm:p-6 space-y-6 bg-background/75")}>
+                        <div className="flex-1 flex-col rounded-xl border p-4 sm:p-6 space-y-6 bg-component-primary">
                             <div className="flex justify-between">
                                 <div className="relative shrink-0">
                                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
@@ -43,7 +42,7 @@ export default function Home() {
                                     <SortingDropdown />
                                 </div>
                             </div>
-                            <PlannedList />
+                            <MediaList />
                         </div>
 
                         <div className="lg:w-80 flex flex-col gap-4">

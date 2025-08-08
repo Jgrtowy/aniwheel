@@ -55,7 +55,7 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
                     {anime.siteUrl && showDetails && (
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button asChild variant="secondary" className={cn("flex size-7 justify-center items-center aspect-square border rounded-md bg-background/75")}>
+                                <Button asChild variant="secondary" className="flex size-7 justify-center items-center aspect-square border rounded-md bg-component-primary">
                                     <a href={anime.siteUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                         <ExternalLink className={variant === "compact" ? "size-3" : "size-3"} />
                                         <span className="sr-only">View on {session?.activeProvider}</span>
@@ -72,14 +72,14 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
                 </div>
                 <div className={cn("flex gap-1 font-medium leading-tight whitespace-nowrap flex-shrink-0", variant === "compact" ? "text-xs flex-col-reverse items-end gap-0.5" : "sm:text-sm text-xs")}>
                     {anime.averageScore && showDetails && (
-                        <div className={cn("flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md bg-background/75")}>
+                        <div className="flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md bg-component-primary">
                             <Star className="size-3" />
                             <p>{anime.averageScore}</p>
                             <span className="sr-only">Average score</span>
                         </div>
                     )}
                     {anime.episodes > 0 && showDetails && (
-                        <div className={cn("flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md bg-background/75")}>
+                        <div className="flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md bg-component-primary">
                             <Clapperboard className="size-3" />
                             <p>{anime.episodes !== 1 ? `${anime.episodes} eps` : "1 ep"}</p>
                             <span className="sr-only">Number of episodes</span>
@@ -87,7 +87,7 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
                     )}
                 </div>
             </div>
-            <div className={cn("p-1 w-fit border rounded-md text-left bg-background/75")}>
+            <div className="p-1 w-fit border rounded-md text-left bg-component-primary">
                 <p className={cn("font-medium leading-tight line-clamp-1 sm:line-clamp-2 overflow-hidden w-fit", variant === "compact" ? "text-xs" : "text-xs sm:text-sm")}>{getTitleWithPreference(anime)}</p>
             </div>
         </CardElement>

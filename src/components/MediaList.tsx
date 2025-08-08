@@ -13,7 +13,7 @@ export default function PlannedList() {
     useEffect(() => {
         (async () => {
             try {
-                const response = await fetch("/api/planned");
+                const response = await fetch("/api/mediaList");
                 if (!response.ok) throw new Error("Failed to fetch planned list");
                 const data = await response.json();
                 setFullMediaList(data);

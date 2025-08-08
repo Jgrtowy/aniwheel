@@ -41,7 +41,7 @@ export default function FiltersPopover() {
                     )}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80 flex flex-col gap-6 p-4">
+            <DropdownMenuContent className="w-80 flex flex-col gap-6 p-4 bg-component-secondary">
                 <h4 className="font-bold text-lg">Filter by:</h4>
                 <div className="grid gap-6">
                     <GenreCombobox availableGenres={availableGenres} />
@@ -120,15 +120,15 @@ function GenreCombobox({ availableGenres }: { availableGenres: string[] }) {
                     </div>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-48 p-0" align="start">
-                <Command>
+            <PopoverContent className="w-48 p-0 bg-component-secondary" align="start">
+                <Command className="bg-transparent">
                     <CommandInput placeholder="Search genres..." />
-                    <CommandList>
+                    <CommandList className="max-h-96">
                         <CommandEmpty>No genre found.</CommandEmpty>
                         <CommandGroup>
                             {availableGenres.map((genre) => (
-                                <CommandItem key={genre} value={genre} onSelect={() => handleGenreToggle(genre)}>
-                                    <CheckIcon className={cn("mr-2 h-4 w-4", activeGenres.includes(genre) ? "opacity-100" : "opacity-0")} />
+                                <CommandItem key={genre} value={genre} onSelect={() => handleGenreToggle(genre)} className="cursor-pointer data-[selected=true]:bg-background">
+                                    <CheckIcon className={cn("mr-2 h-4 w-4", activeGenres.includes(genre) ? "visible" : "invisible")} />
                                     {genre}
                                 </CommandItem>
                             ))}

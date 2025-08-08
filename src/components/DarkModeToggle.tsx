@@ -17,7 +17,7 @@ export function ModeToggle() {
                     <span className="sr-only">Toggle theme</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent className="bg-component-secondary">
                 <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
                     <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>

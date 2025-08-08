@@ -157,7 +157,6 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         if (state.showAiredOnly) {
             const currentDate = Date.now();
             filteredAnime = filteredAnime.filter((anime) => {
-                console.log(Boolean(anime.startDate));
                 if (!anime.startDate) return false;
                 return new Date(anime.startDate).getTime() <= currentDate;
             });

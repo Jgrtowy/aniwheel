@@ -8,7 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
-import { useAnimeStore, useSettingsStore } from "~/lib/store";
+import { useAnimeStore } from "~/lib/store";
 import { getTitleWithPreference } from "~/lib/utils";
 
 export default function SidePanel() {
@@ -17,7 +17,7 @@ export default function SidePanel() {
     const checkedAnimeList = mediaList.filter((anime) => checkedMedia.has(anime.id));
     return (
         <div className="flex flex-col gap-4 md:max-w-sm w-full">
-            <Card className="w-full bg-background/75">
+            <Card className="w-full bg-component-primary">
                 <CardContent className="flex flex-col items-center gap-2">
                     <div className="flex flex-col gap-2 w-full">
                         <div className="flex gap-2">
