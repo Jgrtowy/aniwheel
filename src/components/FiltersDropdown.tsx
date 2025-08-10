@@ -1,8 +1,7 @@
 "use client";
 
 import { CheckIcon, ChevronsUpDownIcon, ListFilter } from "lucide-react";
-import { useMemo } from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -16,7 +15,7 @@ import { useAnimeStore } from "~/lib/store";
 import { cn } from "~/lib/utils";
 
 export default function FiltersPopover() {
-    const { fullMediaList, score, showAiredOnly, setScore, setShowAiredOnly, clearFilters, hasActiveFilters, getActiveFilterCount } = useAnimeStore();
+    const { fullMediaList, score, showAiredOnly, showPlanning, showDropped, showPaused, setScore, setShowAiredOnly, setShowPlanning, setShowDropped, setShowPaused, clearFilters, hasActiveFilters, getActiveFilterCount } = useAnimeStore();
 
     const availableGenres = useMemo(() => {
         const genreSet = new Set<string>();
@@ -53,6 +52,20 @@ export default function FiltersPopover() {
                         <Checkbox id="aired-only" className="cursor-pointer" checked={showAiredOnly} onCheckedChange={setShowAiredOnly} />
                         <Label htmlFor="aired-only" className="text-xs md:text-sm cursor-pointer">
                             Show aired only
+                        </Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Checkbox id="planning" className="cursor-pointer" checked={showPlanning} onCheckedChange={setShowPlanning} />
+                        <Label htmlFor="planning" className="text-xs md:text-sm cursor-pointer">
+                            Planning
+                        </Label>
+                        <Checkbox id="dropped" className="cursor-pointer" checked={showDropped} onCheckedChange={setShowDropped} />
+                        <Label htmlFor="dropped" className="text-xs md:text-sm cursor-pointer">
+                            Dropped
+                        </Label>
+                        <Checkbox id="paused" className="cursor-pointer" checked={showPaused} onCheckedChange={setShowPaused} />
+                        <Label htmlFor="paused" className="text-xs md:text-sm cursor-pointer">
+                            Paused
                         </Label>
                     </div>
                 </div>

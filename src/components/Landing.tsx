@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import Aurora from "~/components/Aurora";
 import KanjiAnimation from "~/components/KanjiAnimation";
@@ -15,12 +16,14 @@ import { signIn } from "~/lib/auth";
 import { useSettingsStore } from "~/lib/store";
 import type { UserProfile } from "~/lib/types";
 import { cn } from "~/lib/utils";
+import { Dialog } from "./ui/dialog";
 
 export default function Landing() {
     const [kanjiPathAnimationComplete, setKanjiPathAnimationComplete] = useState(false);
     const [renderTitle, setRenderTitle] = useState(false);
     const [renderButtons, setRenderButtons] = useState(false);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [renderFooter, setRenderFooter] = useState(false);
 
     const prefersReducedMotion = useReducedMotion();
     const { skipLandingAnimation } = useSettingsStore();
@@ -52,6 +55,8 @@ export default function Landing() {
         setRenderTitle(true);
         await new Promise((resolve) => setTimeout(resolve, titleAnimationDuration * 1000 + 250));
         setRenderButtons(true);
+        await new Promise((resolve) => setTimeout(resolve, 150));
+        setRenderFooter(true);
     };
 
     const handleLogin = async (provider: UserProfile["provider"]) => {
@@ -159,6 +164,24 @@ export default function Landing() {
                     >
                         <div className="opacity-25 hover:opacity-100 transition-opacity duration-300">
                             <PlaceholderWheel className="size-48 sm:size-80" />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <AnimatePresence>
+                {(renderFooter || shouldSkipAnimations) && (
+                    <motion.div
+                        layout={!shouldSkipAnimations}
+                        initial={shouldSkipAnimations ? undefined : { opacity: 0, y: 300 }}
+                        animate={shouldSkipAnimations ? undefined : { opacity: 1, y: 0 }}
+                        exit={shouldSkipAnimations ? undefined : { opacity: 0, y: 300 }}
+                        transition={shouldSkipAnimations ? { duration: 0 } : { duration: titleAnimationDuration }}
+                        className="fixed bottom-0 left-0 right-0 z-20"
+                    >
+                        <div className="py-4 text-center">
+                            <Link href="/privacy" className="text-sm text-gray-500 underline">
+                                Privacy Policy
+                            </Link>
                         </div>
                     </motion.div>
                 )}

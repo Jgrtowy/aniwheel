@@ -45,7 +45,7 @@ export default function SortingPopover() {
                     Sort
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent className="bg-component-secondary">
                 <DropdownMenuLabel asChild className="font-bold text-lg">
                     <h4>Sort by:</h4>
                 </DropdownMenuLabel>

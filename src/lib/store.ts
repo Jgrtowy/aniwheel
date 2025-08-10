@@ -18,6 +18,9 @@ interface AnimeStore {
     activeGenres: string[];
     score: { from: number; to: number };
     showAiredOnly: boolean;
+    showDropped: boolean;
+    showPaused: boolean;
+    showPlanning: boolean;
 
     // Sorting
     sortField: SortField;
@@ -42,6 +45,10 @@ interface AnimeStore {
     setScore: (from: number | null, to: number | null) => void;
 
     setShowAiredOnly: (show: boolean) => void;
+
+    setShowPlanning: (show: boolean) => void;
+    setShowDropped: (show: boolean) => void;
+    setShowPaused: (show: boolean) => void;
 
     setSortField: (field: SortField) => void;
     setSortOrder: (order: SortOrder) => void;
@@ -77,6 +84,9 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     showAiredOnly: false,
     sortField: "date",
     sortOrder: "desc",
+    showPlanning: true,
+    showPaused: false,
+    showDropped: false,
 
     setFullMediaList: (list) => {
         set({ fullMediaList: list });
@@ -138,6 +148,19 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         set({ sortField: field, sortOrder: order });
         get().applyFilters();
     },
+    setShowPlanning: (show) => {
+        set({ showPlanning: show });
+        get().applyFilters();
+    },
+    setShowDropped: (show) => {
+        set({ showDropped: show });
+        get().applyFilters();
+    },
+    setShowPaused: (show) => {
+        set({ showPaused: show });
+        get().applyFilters();
+    },
+
     applyFilters: () => {
         const state = get();
         let filteredAnime = state.fullMediaList;
@@ -169,6 +192,17 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
                 if (score === null) return false;
                 return score >= state.score.from && score <= state.score.to;
             });
+        }
+
+        // Status filter
+        if (!state.showDropped) {
+            filteredAnime = filteredAnime.filter((anime) => anime.status !== "DROPPED");
+        }
+        if (!state.showPaused) {
+            filteredAnime = filteredAnime.filter((anime) => anime.status !== "PAUSED");
+        }
+        if (!state.showPlanning) {
+            filteredAnime = filteredAnime.filter((anime) => anime.status !== "PLANNING");
         }
 
         // Apply sorting
@@ -210,17 +244,17 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         }
     },
     clearFilters: () => {
-        set({ activeGenres: [], score: { from: 0, to: 10 }, showAiredOnly: false });
+        set({ activeGenres: [], score: { from: 0, to: 10 }, showAiredOnly: false, showPlanning: true, showDropped: false, showPaused: false });
         get().applyFilters();
     },
 
     hasActiveFilters: () => {
         const state = get();
-        return state.activeGenres.length > 0 || state.showAiredOnly || state.score.from > 0 || state.score.to < 10;
+        return state.activeGenres.length > 0 || state.showAiredOnly || state.score.from > 0 || state.score.to < 10 || !state.showPlanning || state.showDropped || state.showPaused;
     },
     getActiveFilterCount: () => {
         const state = get();
-        return (state.activeGenres.length > 0 ? 1 : 0) + (state.showAiredOnly ? 1 : 0) + (state.score.from > 0 || state.score.to < 10 ? 1 : 0);
+        return (state.activeGenres.length > 0 ? 1 : 0) + (state.showAiredOnly ? 1 : 0) + (state.score.from > 0 || state.score.to < 10 ? 1 : 0) + (state.showPlanning ? 0 : 1) + (state.showDropped ? 1 : 0) + (state.showPaused ? 1 : 0);
     },
 }));
 
