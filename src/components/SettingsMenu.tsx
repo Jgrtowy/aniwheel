@@ -1,17 +1,19 @@
-import { Settings } from "lucide-react";
+import { Laptop, Moon, Settings, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 import React, { useEffect } from "react";
 import { Button } from "~/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { Label } from "~/components/ui/label";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger } from "~/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { useSettingsStore } from "~/lib/store";
-import type { ImageSize, TitleLanguage } from "~/lib/types";
+import type { ImageSize } from "~/lib/types";
 import { useSession } from "~/providers/session-provider";
 
 export default function SettingsMenu() {
-    const { preferredImageSize, setPreferredImageSize, preferredTitleLanguage, setPreferredTitleLanguage, showBackdropEffects, setShowBackdropEffects, skipLandingAnimation, setSkipLandingAnimation, enableTickSounds, setEnableTickSounds } = useSettingsStore();
+    const { preferredImageSize, setPreferredImageSize, preferredTitleLanguage, setPreferredTitleLanguage, skipLandingAnimation, setSkipLandingAnimation, enableTickSounds, setEnableTickSounds } = useSettingsStore();
+    const { theme, setTheme } = useTheme();
     const session = useSession();
 
     useEffect(() => {
@@ -21,62 +23,71 @@ export default function SettingsMenu() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                    <Settings className="w-4 h-4" />
+                <Button variant="outline" className="size-9 sm:size-10">
+                    <Settings />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <div className="flex flex-col p-2 gap-2">
-                    <Label className="text-xs">Image Size</Label>
-                    <ToggleGroup type="single" variant="outline" value={preferredImageSize} onValueChange={(val) => val && setPreferredImageSize(val as ImageSize)} className="mt-1" aria-label="Image Size">
-                        <ToggleGroupItem value="medium">M</ToggleGroupItem>
-                        <ToggleGroupItem value="large">L</ToggleGroupItem>
-                        {session?.activeProvider !== "myanimelist" && <ToggleGroupItem value="extraLarge">XL</ToggleGroupItem>}
-                    </ToggleGroup>
-                </div>
-                <DropdownMenuSeparator className="my-1" />
-                <div className="flex flex-col justify-between p-2 gap-2">
-                    <Label className="text-xs">Title language</Label>
-                    <span className="text-xs text-muted-foreground">Changes the title language displayed across the app.</span>
-                    <div className="flex items-center gap-2">
-                        <Select value={preferredTitleLanguage} onValueChange={(value) => setPreferredTitleLanguage(value as TitleLanguage)}>
-                            <SelectTrigger className="w-28">
-                                <span className="text-sm">{preferredTitleLanguage === "en" ? "English" : preferredTitleLanguage === "romaji" ? "Romaji" : "Japanese"}</span>
+            <DropdownMenuContent className="w-80 py-4 bg-component-secondary">
+                <h4 className="font-bold text-lg px-4">User Settings</h4>
+                <DropdownMenuSeparator className="my-4" />
+                <div className="grid gap-4">
+                    <div className="flex flex-col gap-1 px-4">
+                        <Label>Image Size</Label>
+                        <span className="text-xs text-muted-foreground">May affect loading times.</span>
+                        <ToggleGroup type="single" variant="outline" value={preferredImageSize} onValueChange={(val) => val && setPreferredImageSize(val as ImageSize)}>
+                            <ToggleGroupItem value="medium">M</ToggleGroupItem>
+                            <ToggleGroupItem value="large">L</ToggleGroupItem>
+                            {session?.activeProvider !== "myanimelist" && <ToggleGroupItem value="extraLarge">XL</ToggleGroupItem>}
+                        </ToggleGroup>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <div className="flex flex-col gap-1 px-4">
+                        <Label>Theme</Label>
+                        <span className="text-xs text-muted-foreground">Changes the appearance of the app.</span>
+                        <Select value={theme} onValueChange={setTheme}>
+                            <SelectTrigger className="w-34">
+                                <SelectValue placeholder="Theme" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectGroup>
-                                    <SelectItem value="en">English</SelectItem>
-                                    <SelectItem value="romaji">Romaji</SelectItem>
-                                    <SelectItem value="jp">Japanese</SelectItem>
-                                </SelectGroup>
+                                <SelectItem value="light">
+                                    <Sun />
+                                    Light
+                                </SelectItem>
+                                <SelectItem value="dark">
+                                    <Moon />
+                                    Dark
+                                </SelectItem>
+                                <SelectItem value="system">
+                                    <Laptop />
+                                    System
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
-                </div>
-                <DropdownMenuSeparator className="my-1" />
-                <div className="flex flex-col p-2 gap-2">
-                    <Label className="text-xs">Backdrop effects</Label>
-                    <span className="text-xs text-muted-foreground">Enables additional effects on cards and backgrounds.</span>
-                    <div className="flex items-center gap-2">
-                        <Switch checked={showBackdropEffects} onCheckedChange={setShowBackdropEffects} />
-                        <span className="text-xs text-muted-foreground">(May cause lag!)</span>
+                    <DropdownMenuSeparator />
+                    <div className="flex flex-col gap-1 px-4">
+                        <Label>Title language</Label>
+                        <span className="text-xs text-muted-foreground">Changes the language of anime titles.</span>
+                        <Select value={preferredTitleLanguage} onValueChange={setPreferredTitleLanguage}>
+                            <SelectTrigger className="w-34">{preferredTitleLanguage === "en" ? "English" : preferredTitleLanguage === "romaji" ? "Romaji" : "Japanese"}</SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="en">English (Attack on Titan)</SelectItem>
+                                <SelectItem value="romaji">Romaji (Shingeki no Kyojin)</SelectItem>
+                                <SelectItem value="jp">Native (進撃の巨人)</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
-                </div>
-                <DropdownMenuSeparator className="my-1" />
-                <div className="flex flex-col p-2 gap-2">
-                    <Label className="text-xs">Enable Tick Sounds</Label>
-                    <span className="text-xs text-muted-foreground">Plays sound when the wheel passes through segments.</span>
-                    <div className="flex items-center gap-2">
-                        <Switch checked={enableTickSounds} onCheckedChange={setEnableTickSounds} />
+                    <DropdownMenuSeparator />
+                    <div className="flex flex-col gap-1 px-4">
+                        <Label>Enable Tick Sounds</Label>
+                        <span className="text-xs text-muted-foreground">Plays sounds when the wheel is spinning.</span>
+                        <Switch className="mt-1" checked={enableTickSounds} onCheckedChange={setEnableTickSounds} />
                     </div>
-                </div>
-                <DropdownMenuSeparator className="my-1" />
-                <div className="flex flex-col p-2 gap-2">
-                    <Label className="text-xs">Skip landing page animation</Label>
-                    <span className="text-xs text-muted-foreground">Completely skips the long landing page animation.</span>
-                    <div className="flex items-center gap-2">
-                        <Switch checked={skipLandingAnimation} onCheckedChange={setSkipLandingAnimation} />
-                        <span className="text-xs text-muted-foreground">(I'll be sad if you do 🥺)</span>
+                    <DropdownMenuSeparator />
+                    <div className="flex flex-col gap-1 px-4">
+                        <Label>Disable landing animation</Label>
+                        <span className="text-xs text-muted-foreground">Skip the long animation on the landing page.</span>
+                        <Switch className="mt-1" checked={skipLandingAnimation} onCheckedChange={setSkipLandingAnimation} />
                     </div>
                 </div>
             </DropdownMenuContent>

@@ -17,7 +17,10 @@ interface AnimeStore {
     searchTerm: string;
     activeGenres: string[];
     score: { from: number; to: number };
-    showAiredOnly: boolean;
+    showDropped: boolean;
+    showPaused: boolean;
+    showPlanning: boolean;
+    showUnaired: boolean;
 
     // Sorting
     sortField: SortField;
@@ -41,7 +44,11 @@ interface AnimeStore {
 
     setScore: (from: number | null, to: number | null) => void;
 
-    setShowAiredOnly: (show: boolean) => void;
+    setShowPlanning: (show: boolean) => void;
+    setShowDropped: (show: boolean) => void;
+    setShowPaused: (show: boolean) => void;
+
+    setShowUnaired: (show: boolean) => void;
 
     setSortField: (field: SortField) => void;
     setSortOrder: (order: SortOrder) => void;
@@ -57,14 +64,12 @@ interface SettingsStore {
     preferredTitleLanguage: TitleLanguage;
     preferredImageSize: ImageSize;
     showMediaRecommendations: boolean;
-    showBackdropEffects: boolean;
     skipLandingAnimation: boolean;
     enableTickSounds: boolean;
 
     setPreferredTitleLanguage: (lang: TitleLanguage) => void;
     setPreferredImageSize: (size: ImageSize) => void;
     setShowMediaRecommendations: (show: boolean) => void;
-    setShowBackdropEffects: (blur: boolean) => void;
     setSkipLandingAnimation: (skip: boolean) => void;
     setEnableTickSounds: (enable: boolean) => void;
 }
@@ -76,9 +81,12 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     searchTerm: "",
     activeGenres: [],
     score: { from: 0, to: 10 },
-    showAiredOnly: false,
+    showUnaired: false,
     sortField: "date",
     sortOrder: "desc",
+    showPlanning: true,
+    showPaused: false,
+    showDropped: false,
 
     setFullMediaList: (list) => {
         set({ fullMediaList: list });
@@ -124,8 +132,20 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         set({ score: { from: from ?? get().score.from, to: to ?? get().score.to } });
         get().applyFilters();
     },
-    setShowAiredOnly: (show) => {
-        set({ showAiredOnly: show });
+    setShowPlanning: (show) => {
+        set({ showPlanning: show });
+        get().applyFilters();
+    },
+    setShowDropped: (show) => {
+        set({ showDropped: show });
+        get().applyFilters();
+    },
+    setShowPaused: (show) => {
+        set({ showPaused: show });
+        get().applyFilters();
+    },
+    setShowUnaired: (show) => {
+        set({ showUnaired: show });
         get().applyFilters();
     },
     setSortField: (field) => {
@@ -140,6 +160,7 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         set({ sortField: field, sortOrder: order });
         get().applyFilters();
     },
+
     applyFilters: () => {
         const state = get();
         let filteredAnime = state.fullMediaList;
@@ -155,8 +176,8 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
             });
         }
 
-        // Aired only filter
-        if (state.showAiredOnly) {
+        // Show unaired filter
+        if (!state.showUnaired) {
             const currentDate = Date.now();
             filteredAnime = filteredAnime.filter((anime) => {
                 if (!anime.startDate) return false;
@@ -172,6 +193,11 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
                 return score >= state.score.from && score <= state.score.to;
             });
         }
+
+        // Status filter
+        if (!state.showDropped) filteredAnime = filteredAnime.filter((anime) => anime.status !== "DROPPED");
+        if (!state.showPaused) filteredAnime = filteredAnime.filter((anime) => anime.status !== "PAUSED");
+        if (!state.showPlanning) filteredAnime = filteredAnime.filter((anime) => anime.status !== "PLANNING");
 
         // Apply sorting
         filteredAnime = filteredAnime.slice().sort((a, b) => {
@@ -212,17 +238,17 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         }
     },
     clearFilters: () => {
-        set({ activeGenres: [], score: { from: 0, to: 10 }, showAiredOnly: false });
+        set({ activeGenres: [], score: { from: 0, to: 10 }, showUnaired: false, showPlanning: true, showDropped: false, showPaused: false });
         get().applyFilters();
     },
 
     hasActiveFilters: () => {
         const state = get();
-        return state.activeGenres.length > 0 || state.showAiredOnly || state.score.from > 0 || state.score.to < 10;
+        return state.activeGenres.length > 0 || state.showUnaired || state.score.from > 0 || state.score.to < 10 || !state.showPlanning || state.showDropped || state.showPaused;
     },
     getActiveFilterCount: () => {
         const state = get();
-        return (state.activeGenres.length > 0 ? 1 : 0) + (state.showAiredOnly ? 1 : 0) + (state.score.from > 0 || state.score.to < 10 ? 1 : 0);
+        return (state.activeGenres.length > 0 ? 1 : 0) + (state.showUnaired ? 1 : 0) + (state.score.from > 0 || state.score.to < 10 ? 1 : 0) + (state.showPlanning ? 0 : 1) + (state.showDropped ? 1 : 0) + (state.showPaused ? 1 : 0);
     },
 }));
 
@@ -232,14 +258,12 @@ export const useSettingsStore = create<SettingsStore>()(
             preferredTitleLanguage: "en",
             preferredImageSize: "large",
             showMediaRecommendations: true,
-            showBackdropEffects: false,
             skipLandingAnimation: false,
             enableTickSounds: true,
 
             setPreferredTitleLanguage: (lang) => set({ preferredTitleLanguage: lang }),
             setPreferredImageSize: (size) => set({ preferredImageSize: size }),
             setShowMediaRecommendations: (show) => set({ showMediaRecommendations: show }),
-            setShowBackdropEffects: (backdropEffects) => set({ showBackdropEffects: backdropEffects }),
             setSkipLandingAnimation: (skip) => set({ skipLandingAnimation: skip }),
             setEnableTickSounds: (enable) => set({ enableTickSounds: enable }),
         }),

@@ -10,5 +10,5 @@ export const metadata = { title: "Aniwheel" };
 export default async function Page() {
     const session = await getServerSession();
 
-    return <main>{session ? <Home /> : <Landing />}</main>;
+    return session ? <Home /> : <Landing />;
 }

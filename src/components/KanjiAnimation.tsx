@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { cn } from "~/lib/utils";
 
 interface KanjiAnimationProps {
     className?: string;
-    size?: number;
     duration?: number;
     delayBetween?: number;
     strokeWidth?: number;
+    skipAnimation?: boolean;
     onAnimationComplete?: () => void;
 }
 
@@ -26,15 +27,31 @@ const pathData = [
     "M16.25,83c3-0.5,9-1.75,13.5-0.75s29.32,7.71,33.75,9c12,3.5,21.25,4.5,30.25,2.75",
 ];
 
-export default function KanjiAnimation({ className = "", size = 100, duration = 0.5, delayBetween = 0.2, strokeWidth = 4, onAnimationComplete: onKanjiAnimationComplete }: KanjiAnimationProps) {
+export default function KanjiAnimation({ className = "", duration = 0.5, delayBetween = 0.2, strokeWidth = 4, skipAnimation = false, onAnimationComplete: onKanjiAnimationComplete }: KanjiAnimationProps) {
     const pathRefs = useRef<(SVGPathElement | null)[]>([]);
+    const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isMounted) return;
+
+        if (skipAnimation) {
+            for (const path of pathRefs.current) {
+                if (!path) continue;
+                path.style.strokeDasharray = "none";
+                path.style.strokeDashoffset = "0";
+            }
+            if (onKanjiAnimationComplete) onKanjiAnimationComplete();
+            return;
+        }
+
         for (const [i, path] of pathRefs.current.entries()) {
             if (!path) continue;
 
             const length = path.getTotalLength();
-            // Set initial state: hide the stroke completely
             path.style.strokeDasharray = length.toString();
             path.style.strokeDashoffset = length.toString();
 
@@ -47,11 +64,11 @@ export default function KanjiAnimation({ className = "", size = 100, duration = 
 
             if (i === pathRefs.current.length - 1 && onKanjiAnimationComplete) animation.addEventListener("finish", onKanjiAnimationComplete);
         }
-    }, [duration, delayBetween]);
+    }, [duration, delayBetween, isMounted, skipAnimation]);
 
     return (
         <div className="flex justify-center items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 109 109" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} role="img">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 109 109" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={cn("size-[100px]", className)} role="img">
                 {pathData.map((d, index) => (
                     <path
                         key={index}

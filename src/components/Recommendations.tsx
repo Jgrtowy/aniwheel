@@ -11,11 +11,11 @@ import type { MediaRecommendation } from "~/lib/types";
 import { cn } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
 
-const DESKTOP_DISPLAY_COUNT = 8;
+const DESKTOP_DISPLAY_COUNT = 12;
 const MOBILE_DISPLAY_COUNT = 4;
 
 export default function Recommendations() {
-    const { showBackdropEffects, showMediaRecommendations, setShowMediaRecommendations } = useSettingsStore();
+    const { showMediaRecommendations, setShowMediaRecommendations } = useSettingsStore();
     const { fullMediaList, clearFilters, setFullMediaList, addSelectedMedia } = useAnimeStore();
     const session = useSession();
 
@@ -52,7 +52,7 @@ export default function Recommendations() {
         if (!session?.activeProvider) return;
 
         try {
-            const response = await fetch("/api/planned");
+            const response = await fetch("/api/mediaList");
             if (response.ok) {
                 const data = await response.json();
                 clearFilters();
@@ -107,16 +107,14 @@ export default function Recommendations() {
         setDisplayCount((prev) => Math.min(prev + increment, filteredRecommendations.length));
     };
 
-    const bgClass = showBackdropEffects ? "backdrop-blur-2xl backdrop-brightness-75 bg-black/20" : "bg-background/75";
-
     const isDisabled = !!session && session.activeProvider !== "anilist";
 
     return (
-        <Collapsible open={shouldShowRecommendations && filteredRecommendations.length > 0} onOpenChange={handleOpenChange} disabled={isDisabled} className={cn("flex w-full flex-col text-card-foreground rounded-xl border shadow-sm overflow-hidden", bgClass)}>
+        <Collapsible open={shouldShowRecommendations && filteredRecommendations.length > 0} onOpenChange={handleOpenChange} disabled={isDisabled} className="flex w-full flex-col text-card-foreground rounded-xl border shadow-sm overflow-hidden bg-component-primary">
             <CollapsibleTrigger asChild>
                 <Button variant="ghost" className="peer flex items-center justify-center gap-6 py-8 rounded-xl rounded-b-none focus-visible:ring-0">
                     <h4 className="text-lg font-bold">Recommendations</h4>
-                    <ChevronsDown className={cn("transition-transform size-5", { "rotate-180": shouldShowRecommendations && filteredRecommendations.length > 0 })} />
+                    <ChevronsDown className={cn("transition-transform duration-200 size-5", { "rotate-180": shouldShowRecommendations && filteredRecommendations.length > 0 })} />
                 </Button>
             </CollapsibleTrigger>
             {isDisabled && <div className="px-4 pb-3 text-sm text-muted-foreground text-center">This feature is currently only available with the AniList provider</div>}
@@ -135,7 +133,7 @@ export default function Recommendations() {
                                     </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <span className="text-sm">Add to planning</span>
+                                    <p>Add to planning</p>
                                 </TooltipContent>
                             </Tooltip>
                         </div>

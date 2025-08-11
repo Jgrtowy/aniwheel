@@ -7,8 +7,11 @@ import { cn } from "~/lib/utils";
 export default function PlaceholderWheel({ className }: { className?: string }) {
     const [rotation, setRotation] = useState(0);
     const [isSpinning, setIsSpinning] = useState(false);
+    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
     const spinWheel = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+
         setIsSpinning(true);
 
         const baseRotations = 3 + Math.random() * 3;
@@ -17,9 +20,12 @@ export default function PlaceholderWheel({ className }: { className?: string }) 
 
         setRotation(totalRotation);
 
-        setTimeout(() => {
+        const newTimeoutId = setTimeout(() => {
             setIsSpinning(false);
+            setTimeoutId(null);
         }, 3000);
+
+        setTimeoutId(newTimeoutId);
     };
 
     useEffect(() => {
@@ -30,8 +36,15 @@ export default function PlaceholderWheel({ className }: { className?: string }) 
         awaitSpin();
     }, []);
 
+    useEffect(() => {
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+    }, [timeoutId]);
+
     return (
         <div className={cn("relative", className)} onClick={spinWheel}>
+            <img src="/Click_to_spin.svg" alt="Click to spin!" className={cn("absolute inset-0 object-cover z-10 rounded-full opacity-100 pointer-events-none transition-opacity", isSpinning && "opacity-0")} />
             <svg viewBox="0 0 302 302" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" className="absolute inset-0 cursor-pointer origin-center" style={{ transform: `rotate(${rotation}deg)`, transition: isSpinning ? "transform 3s cubic-bezier(0.23, 1, 0.32, 1)" : "none" }}>
                 <title>Placeholder wheel</title>
                 <path d="M151 151H301C301 177.33 294.069 203.197 280.904 226L151 151Z" fill="#4A90E2" stroke="white" strokeWidth="2" />

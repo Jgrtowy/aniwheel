@@ -13,7 +13,7 @@ export function aniListToMediaItem(item: AniListMediaItem): MediaItem {
         id: item.id,
         title: {
             en: item.title.english || null,
-            romaji: item.title.romaji || "Unknown Title",
+            romaji: item.title.romaji,
             jp: item.title.native || null,
         },
         image: {
@@ -21,13 +21,13 @@ export function aniListToMediaItem(item: AniListMediaItem): MediaItem {
             large: item.coverImage.large || null,
             medium: item.coverImage.medium || "/placeholder.webp",
         },
-        startDate: item.startDate ? new Date(`${item.startDate.year ?? 1970}-${`0${item.startDate.month ?? 1}`.slice(-2)}-${`0${item.startDate.day ?? 1}`.slice(-2)}T00:00:00Z`) : null,
+        startDate: item.startDate && (item.startDate.year || item.startDate.month || item.startDate.day) ? new Date(`${item.startDate.year}-${`0${item.startDate.month}`.slice(-2)}-${`0${item.startDate.day}`.slice(-2)}T00:00:00Z`) : null,
         averageScore: Number.isFinite(item.averageScore) ? (item.averageScore as number) / 10 : null,
         episodes: item.episodes || 0,
         siteUrl: item.siteUrl || `https://anilist.co/anime/${item.id}`,
         genres: item.genres || [],
         entryCreatedAt: item.mediaListEntry?.createdAt || null,
-        isCustom: false,
+        status: item.mediaListEntry?.status || null,
     };
 }
 
@@ -36,7 +36,7 @@ export function malToMediaItem(item: MALMediaItem): MediaItem {
         id: item.id,
         title: {
             en: item.alternative_titles?.en || null,
-            romaji: item.title || "Unknown Title",
+            romaji: item.title,
             jp: item.alternative_titles?.ja || null,
         },
         image: {
@@ -50,7 +50,7 @@ export function malToMediaItem(item: MALMediaItem): MediaItem {
         siteUrl: `https://myanimelist.net/anime/${item.id}`,
         genres: item.genres?.map((genre: { name: string }) => genre.name) || [],
         entryCreatedAt: item.my_list_status?.updated_at ? new Date(item.my_list_status.updated_at).getTime() : null,
-        isCustom: false,
+        status: item.my_list_status?.status === "plan_to_watch" ? "PLANNING" : item.my_list_status?.status === "dropped" ? "DROPPED" : item.my_list_status?.status === "on_hold" ? "PAUSED" : null,
     };
 }
 

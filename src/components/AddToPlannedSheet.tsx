@@ -80,7 +80,7 @@ export default function AddToPlannedSheet() {
         if (!session?.activeProvider) return;
 
         try {
-            const response = await fetch("/api/planned");
+            const response = await fetch("/api/mediaList");
             if (response.ok) {
                 const data = await response.json();
                 clearFilters();
@@ -137,7 +137,7 @@ export default function AddToPlannedSheet() {
                     Add new title
                 </Button>
             </SheetTrigger>
-            <SheetContent className="gap-0 flex flex-col h-full">
+            <SheetContent className="gap-0 flex flex-col h-full bg-component-secondary">
                 <SheetHeader className="shrink-0">
                     <SheetTitle>Add a title to your planning list</SheetTitle>
                 </SheetHeader>
@@ -147,8 +147,7 @@ export default function AddToPlannedSheet() {
                         <Input placeholder="Enter anime title..." value={searchQuery} onChange={handleInputChange} />
                         {isSearching && <LoaderCircle className="absolute right-0 p-2 h-full w-auto top-1/2 -translate-y-1/2 text-muted-foreground animate-spin" />}
                     </div>
-                    <ScrollArea className="flex-1 overflow-hidden relative" type="auto">
-                        <div className="absolute bottom-0 w-full h-3 bg-gradient-to-t from-background to-transparent" />
+                    <ScrollArea className="flex-1 overflow-hidden" type="auto">
                         <div className="flex flex-col gap-2">
                             {searchResults.map((anime) => (
                                 <Button variant="outline" className="h-18 p-2 gap-2 flex justify-start disabled:cursor-not-allowed" onClick={() => handleTitleSelect(anime)} disabled={isAdded(anime)} key={anime.id}>
@@ -178,15 +177,14 @@ export default function AddToPlannedSheet() {
 
                 <SheetFooter className="shrink-0 pt-2">
                     {selectedTitles.length > 0 && (
-                        <ScrollArea type="auto" className="relative">
+                        <ScrollArea type="auto">
                             <h4 className="mb-2 font-medium">
                                 Selected titles: <span className="text-primary/50 text-xs">(click to remove)</span>
                             </h4>
-                            <div className="absolute right-0 w-3 h-full bg-gradient-to-l from-background to-transparent z-10" />
                             <div className="flex w-max h-38 gap-2 pb-3">
                                 {selectedTitles.map((anime) => (
                                     <div className="relative h-full aspect-square rounded-md overflow-hidden" key={anime.id}>
-                                        <button className="absolute inset-0 transition bg-background/75 flex justify-center items-center cursor-pointer opacity-0 hover:opacity-100 focus-visible:opacity-100 z-10" type="button" onClick={() => handleTitleRemove(anime)}>
+                                        <button className="absolute inset-0 transition bg-component-primary flex justify-center items-center cursor-pointer opacity-0 hover:opacity-100 focus-visible:opacity-100 z-10" type="button" onClick={() => handleTitleRemove(anime)}>
                                             <Trash2 className="size-8 stroke-destructive" />
                                             <span className="sr-only">Remove {getTitleWithPreference(anime)}</span>
                                         </button>
