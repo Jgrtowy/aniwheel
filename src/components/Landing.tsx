@@ -1,7 +1,7 @@
 "use client";
 
 import { CircleArrowRight, LoaderCircle } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -59,94 +59,92 @@ export default function Landing() {
     };
 
     return (
-        <main className="flex items-center justify-center flex-col h-dvh p-4">
-            <RepoLink className="fixed top-4 right-4" />
-            <header>
-                <motion.div layout={!reduceMotion} className="flex items-center justify-center gap-2 sm:gap-4">
-                    <motion.div layout={!reduceMotion} transition={{ type: "spring", stiffness: 300, damping: 30 }}>
-                        <Tooltip open={kanjiPathAnimationComplete ? undefined : false}>
-                            <TooltipTrigger>
-                                <KanjiAnimation
-                                    className={cn("shrink-0 transition size-[75px] sm:size-[100px]", kanjiPathAnimationComplete || reduceMotion ? "scale-100" : "scale-[300%]")}
-                                    duration={0.175}
-                                    delayBetween={0.01}
-                                    strokeWidth={5}
-                                    skipAnimation={reduceMotion}
-                                    onAnimationComplete={handleKanjiPathAnimationComplete}
-                                />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>(うん) - luck/fate</p>
-                            </TooltipContent>
-                        </Tooltip>
+        <MotionConfig reducedMotion="user">
+            <main className="flex items-center justify-center flex-col h-dvh p-4">
+                <RepoLink className="fixed top-4 right-4" />
+                <header>
+                    <motion.div layout={!reduceMotion} className="flex items-center justify-center gap-2 sm:gap-4">
+                        <motion.div layout={!reduceMotion} transition={{ type: "spring", stiffness: 300, damping: 30 }}>
+                            <Tooltip open={kanjiPathAnimationComplete ? undefined : false}>
+                                <TooltipTrigger>
+                                    <KanjiAnimation
+                                        className={cn("shrink-0 transition size-[75px] sm:size-[100px]", kanjiPathAnimationComplete || reduceMotion ? "scale-100" : "scale-[300%]")}
+                                        duration={0.175}
+                                        delayBetween={0.01}
+                                        strokeWidth={5}
+                                        skipAnimation={reduceMotion}
+                                        onAnimationComplete={handleKanjiPathAnimationComplete}
+                                    />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>(うん) - luck/fate</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </motion.div>
+                        <AnimatePresence>
+                            {renderTitle && (
+                                <motion.h1 className="text-5xl sm:text-6xl font-bold" layout initial={reduceMotion ? { opacity: 1, x: 0 } : { opacity: 1, x: 60 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION }}>
+                                    Aniwheel
+                                </motion.h1>
+                            )}
+                        </AnimatePresence>
                     </motion.div>
-
-                    <AnimatePresence>
-                        {renderTitle && (
-                            <motion.h1 className="text-5xl sm:text-6xl font-bold" layout initial={reduceMotion ? { opacity: 1, x: 0 } : { opacity: 1, x: 60 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION }}>
-                                Aniwheel
-                            </motion.h1>
-                        )}
-                    </AnimatePresence>
-                </motion.div>
-            </header>
-
-            <AnimatePresence>
-                {renderButtons && (
-                    <motion.section layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }} className="flex flex-col items-center gap-6">
-                        <div className="flex flex-col items-center gap-1 mt-4 text-center">
-                            <h2 className="text-xl sm:text-4xl font-semibold">Your Anime Wheel of Fortune</h2>
-                            <p className="text-base sm:text-xl">
-                                Connect your list and let <span className="peer italic">fate</span> pick your next binge!
-                                <Image src="/Rider_of_black.webp" alt="Rider of Black from Fate/Apocrypha anime" width={150} height={150} className="fixed rotate-45 transition-[750ms] -bottom-72 -left-46 peer-hover:-bottom-23 peer-hover:-left-12 size-auto" />
-                            </p>
-                        </div>
-                        <nav className="flex flex-col sm:flex-row gap-6" aria-label="Sign in options">
-                            <Button variant="outline" size="lg" className="text-xl w-60 py-7 font-bold gap-3" onClick={async () => handleLogin("anilist")} disabled={!!isLoggingIn} aria-label="Sign in with AniList">
-                                {isLoggingIn === "anilist" ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <CircleArrowRight aria-hidden="true" />}
-                                AniList
-                            </Button>
-                            <Separator orientation={isDesktop ? "vertical" : "horizontal"} />
-                            <Button variant="outline" size="lg" className="text-xl w-60 py-7 font-bold gap-3" onClick={async () => handleLogin("myanimelist")} disabled={!!isLoggingIn} aria-label="Sign in with MyAnimeList">
-                                {isLoggingIn === "myanimelist" ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <CircleArrowRight aria-hidden="true" />}
-                                MyAnimeList
-                            </Button>
-                        </nav>
-                    </motion.section>
-                )}
-            </AnimatePresence>
-
-            {renderTitle && (
-                <motion.div layout className="fixed inset-0 h-1/2 sm:h-full -z-10 pointer-events-none" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.4, y: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION * 4 }}>
-                    <Aurora colorStops={isDesktop ? ["#1100c8", "#b33796", "#a410ff"] : ["#1100c8", "#b33796"]} blend={0.1} amplitude={0.75} speed={0.5} />
-                </motion.div>
-            )}
-
-            <AnimatePresence>
-                {renderButtons && (
-                    <motion.div
-                        layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }}
-                        className="fixed -rotate-45 bottom-0 right-0 translate-x-1/3 translate-y-1/3 z-10 hover:translate-x-1/4 hover:translate-y-1/4 transition-all duration-300"
-                    >
-                        <div className="opacity-25 hover:opacity-100 transition-opacity duration-300">
-                            <PlaceholderWheel className="size-48 sm:size-80" />
-                        </div>
+                </header>
+                <AnimatePresence>
+                    {renderButtons && (
+                        <motion.section layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }} className="flex flex-col items-center gap-6">
+                            <div className="flex flex-col items-center gap-1 mt-4 text-center">
+                                <h2 className="text-xl sm:text-4xl font-semibold">Your Anime Wheel of Fortune</h2>
+                                <p className="text-base sm:text-xl">
+                                    Connect your list and let <span className="peer italic">fate</span> pick your next binge!
+                                    <Image src="/Rider_of_black.webp" alt="Rider of Black from Fate/Apocrypha anime" width={150} height={150} className="fixed rotate-45 transition-[750ms] -bottom-72 -left-46 peer-hover:-bottom-23 peer-hover:-left-12 size-auto" />
+                                </p>
+                            </div>
+                            <nav className="flex flex-col sm:flex-row gap-6" aria-label="Sign in options">
+                                <Button variant="outline" size="lg" className="text-xl w-60 py-7 font-bold gap-3" onClick={async () => handleLogin("anilist")} disabled={!!isLoggingIn} aria-label="Sign in with AniList">
+                                    {isLoggingIn === "anilist" ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <CircleArrowRight aria-hidden="true" />}
+                                    AniList
+                                </Button>
+                                <Separator orientation={isDesktop ? "vertical" : "horizontal"} />
+                                <Button variant="outline" size="lg" className="text-xl w-60 py-7 font-bold gap-3" onClick={async () => handleLogin("myanimelist")} disabled={!!isLoggingIn} aria-label="Sign in with MyAnimeList">
+                                    {isLoggingIn === "myanimelist" ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <CircleArrowRight aria-hidden="true" />}
+                                    MyAnimeList
+                                </Button>
+                            </nav>
+                        </motion.section>
+                    )}
+                </AnimatePresence>
+                {renderTitle && (
+                    <motion.div layout className="fixed inset-0 h-1/2 sm:h-full -z-10 pointer-events-none" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.4, y: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION * 4 }}>
+                        <Aurora colorStops={isDesktop ? ["#1100c8", "#b33796", "#a410ff"] : ["#1100c8", "#b33796"]} blend={0.1} amplitude={0.75} speed={0.5} />
                     </motion.div>
                 )}
-            </AnimatePresence>
-            <AnimatePresence>
-                {renderButtons && (
-                    <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }} className="fixed bottom-4 text-xs text-muted-foreground">
-                        By signing in, you agree to our{" "}
-                        <Link href="/privacy" className="underline">
-                            Privacy Policy
-                        </Link>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </main>
+                <AnimatePresence>
+                    {renderButtons && (
+                        <motion.div
+                            layout
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }}
+                            className="fixed -rotate-45 bottom-0 right-0 translate-x-1/3 translate-y-1/3 z-10 hover:translate-x-1/4 hover:translate-y-1/4 transition-all duration-300"
+                        >
+                            <div className="opacity-25 hover:opacity-100 transition-opacity duration-300">
+                                <PlaceholderWheel className="size-48 sm:size-80" />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+                <AnimatePresence>
+                    {renderButtons && (
+                        <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }} className="fixed bottom-4 text-xs text-muted-foreground">
+                            By signing in, you agree to our{" "}
+                            <Link href="/privacy" className="underline">
+                                Privacy Policy
+                            </Link>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </main>
+        </MotionConfig>
     );
 }

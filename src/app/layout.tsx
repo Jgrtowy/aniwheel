@@ -1,5 +1,4 @@
 import "./globals.css";
-import { MotionConfig } from "motion/react";
 import type { Metadata } from "next";
 import { Comfortaa } from "next/font/google";
 import { Toaster } from "~/components/ui/sonner";
@@ -78,12 +77,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     return (
         <html lang="en" suppressHydrationWarning>
             <body className={`${comfortaa.className} antialiased`}>
-                <MotionConfig reducedMotion="user">
-                    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                        <ClientSessionProvider>{children}</ClientSessionProvider>
-                    </ThemeProvider>
-                    <Toaster richColors />
-                </MotionConfig>
+                <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                    <ClientSessionProvider>{children}</ClientSessionProvider>
+                </ThemeProvider>
+                <Toaster richColors />
             </body>
         </html>
     );

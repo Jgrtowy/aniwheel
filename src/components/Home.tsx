@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, X } from "lucide-react";
-import { motion } from "motion/react";
+import { MotionConfig, motion } from "motion/react";
 import Aurora from "~/components/Aurora";
 import BackToTop from "~/components/BackToTop";
 import FiltersDropdown from "~/components/FiltersDropdown";
@@ -20,7 +20,7 @@ export default function Home() {
     const isDesktop = useMediaQuery("(width >= 40rem)");
 
     return (
-        <>
+        <MotionConfig reducedMotion="user">
             <motion.div className="fixed inset-0 h-1/2 sm:h-full -z-10 pointer-events-none" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.8, y: 0, transition: { duration: 2.5 } }}>
                 <Aurora colorStops={isDesktop ? ["#1100c8", "#b33796", "#a410ff"] : ["#1100c8", "#b33796"]} blend={0.75} amplitude={0.75} speed={0.5} />
             </motion.div>
@@ -54,6 +54,6 @@ export default function Home() {
             <div className="fixed bottom-6 right-6">
                 <BackToTop />
             </div>
-        </>
+        </MotionConfig>
     );
 }
