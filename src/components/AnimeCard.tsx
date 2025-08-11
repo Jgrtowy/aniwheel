@@ -37,7 +37,7 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
         if (variant === "compact") return cn("relative flex flex-col justify-between p-0.5 rounded-lg transition-all overflow-hidden aspect-square", !isStatic && "cursor-pointer", checked ? "brightness-100 opacity-100" : "brightness-75 opacity-75", className);
         return cn(
             "relative flex flex-col justify-between p-1 sm:p-2 rounded-lg transition-all overflow-hidden brightness-75 opacity-75 mx-4 sm:mx-0 sm:scale-90 aspect-[4] sm:aspect-square",
-            !isStatic && "cursor-pointer outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+            !isStatic && "cursor-pointer outline-none focus-visible:border-ring focus-visible:ring-ring/75 focus-visible:ring-[3px]",
             checked && "brightness-100 opacity-100 mx-0 sm:scale-100 aspect-[3.5]",
             className,
         );
@@ -49,7 +49,7 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
     return (
         <CardElement className={getCardClasses()} {...cardProps}>
             {!isStatic && <span className="sr-only">Select {getTitleWithPreference(anime)}</span>}
-            <Image className={cn("absolute inset-0 object-cover -z-10 transition scale-125", checked && "scale-100")} src={getImageUrlWithPreference(anime)} alt={getTitleWithPreference(anime)} fill sizes="100%" priority />
+            <Image className={cn("absolute inset-0 object-cover -z-10 transition scale-130", checked && "scale-100")} src={getImageUrlWithPreference(anime)} alt={getTitleWithPreference(anime)} fill sizes="100%" priority />
             <div className="flex justify-between w-full">
                 <div className="flex-shrink-0">
                     {anime.siteUrl && showDetails && (

@@ -17,10 +17,10 @@ interface AnimeStore {
     searchTerm: string;
     activeGenres: string[];
     score: { from: number; to: number };
-    showAiredOnly: boolean;
     showDropped: boolean;
     showPaused: boolean;
     showPlanning: boolean;
+    showUnaired: boolean;
 
     // Sorting
     sortField: SortField;
@@ -44,11 +44,11 @@ interface AnimeStore {
 
     setScore: (from: number | null, to: number | null) => void;
 
-    setShowAiredOnly: (show: boolean) => void;
-
     setShowPlanning: (show: boolean) => void;
     setShowDropped: (show: boolean) => void;
     setShowPaused: (show: boolean) => void;
+
+    setShowUnaired: (show: boolean) => void;
 
     setSortField: (field: SortField) => void;
     setSortOrder: (order: SortOrder) => void;
@@ -81,7 +81,7 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     searchTerm: "",
     activeGenres: [],
     score: { from: 0, to: 10 },
-    showAiredOnly: false,
+    showUnaired: false,
     sortField: "date",
     sortOrder: "desc",
     showPlanning: true,
@@ -132,8 +132,20 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         set({ score: { from: from ?? get().score.from, to: to ?? get().score.to } });
         get().applyFilters();
     },
-    setShowAiredOnly: (show) => {
-        set({ showAiredOnly: show });
+    setShowPlanning: (show) => {
+        set({ showPlanning: show });
+        get().applyFilters();
+    },
+    setShowDropped: (show) => {
+        set({ showDropped: show });
+        get().applyFilters();
+    },
+    setShowPaused: (show) => {
+        set({ showPaused: show });
+        get().applyFilters();
+    },
+    setShowUnaired: (show) => {
+        set({ showUnaired: show });
         get().applyFilters();
     },
     setSortField: (field) => {
@@ -146,18 +158,6 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     },
     setSorting: (field, order) => {
         set({ sortField: field, sortOrder: order });
-        get().applyFilters();
-    },
-    setShowPlanning: (show) => {
-        set({ showPlanning: show });
-        get().applyFilters();
-    },
-    setShowDropped: (show) => {
-        set({ showDropped: show });
-        get().applyFilters();
-    },
-    setShowPaused: (show) => {
-        set({ showPaused: show });
         get().applyFilters();
     },
 
@@ -176,8 +176,8 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
             });
         }
 
-        // Aired only filter
-        if (state.showAiredOnly) {
+        // Show unaired filter
+        if (!state.showUnaired) {
             const currentDate = Date.now();
             filteredAnime = filteredAnime.filter((anime) => {
                 if (!anime.startDate) return false;
@@ -195,15 +195,9 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         }
 
         // Status filter
-        if (!state.showDropped) {
-            filteredAnime = filteredAnime.filter((anime) => anime.status !== "DROPPED");
-        }
-        if (!state.showPaused) {
-            filteredAnime = filteredAnime.filter((anime) => anime.status !== "PAUSED");
-        }
-        if (!state.showPlanning) {
-            filteredAnime = filteredAnime.filter((anime) => anime.status !== "PLANNING");
-        }
+        if (!state.showDropped) filteredAnime = filteredAnime.filter((anime) => anime.status !== "DROPPED");
+        if (!state.showPaused) filteredAnime = filteredAnime.filter((anime) => anime.status !== "PAUSED");
+        if (!state.showPlanning) filteredAnime = filteredAnime.filter((anime) => anime.status !== "PLANNING");
 
         // Apply sorting
         filteredAnime = filteredAnime.slice().sort((a, b) => {
@@ -244,17 +238,17 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         }
     },
     clearFilters: () => {
-        set({ activeGenres: [], score: { from: 0, to: 10 }, showAiredOnly: false, showPlanning: true, showDropped: false, showPaused: false });
+        set({ activeGenres: [], score: { from: 0, to: 10 }, showUnaired: false, showPlanning: true, showDropped: false, showPaused: false });
         get().applyFilters();
     },
 
     hasActiveFilters: () => {
         const state = get();
-        return state.activeGenres.length > 0 || state.showAiredOnly || state.score.from > 0 || state.score.to < 10 || !state.showPlanning || state.showDropped || state.showPaused;
+        return state.activeGenres.length > 0 || state.showUnaired || state.score.from > 0 || state.score.to < 10 || !state.showPlanning || state.showDropped || state.showPaused;
     },
     getActiveFilterCount: () => {
         const state = get();
-        return (state.activeGenres.length > 0 ? 1 : 0) + (state.showAiredOnly ? 1 : 0) + (state.score.from > 0 || state.score.to < 10 ? 1 : 0) + (state.showPlanning ? 0 : 1) + (state.showDropped ? 1 : 0) + (state.showPaused ? 1 : 0);
+        return (state.activeGenres.length > 0 ? 1 : 0) + (state.showUnaired ? 1 : 0) + (state.score.from > 0 || state.score.to < 10 ? 1 : 0) + (state.showPlanning ? 0 : 1) + (state.showDropped ? 1 : 0) + (state.showPaused ? 1 : 0);
     },
 }));
 

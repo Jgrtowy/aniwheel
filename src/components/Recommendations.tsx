@@ -11,7 +11,7 @@ import type { MediaRecommendation } from "~/lib/types";
 import { cn } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
 
-const DESKTOP_DISPLAY_COUNT = 8;
+const DESKTOP_DISPLAY_COUNT = 12;
 const MOBILE_DISPLAY_COUNT = 4;
 
 export default function Recommendations() {
@@ -133,7 +133,7 @@ export default function Recommendations() {
                                     </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <span className="text-sm">Add to planning</span>
+                                    <p>Add to planning</p>
                                 </TooltipContent>
                             </Tooltip>
                         </div>

@@ -4,9 +4,9 @@ import { Button } from "~/components/ui/button";
 
 export default function RepoLink({ className = "" }: { className?: string }) {
     return (
-        <Button asChild variant="outline" size="icon" className={className}>
+        <Button variant="outline" size="icon" className={className}>
             <a href="https://github.com/Jgrtowy/aniwheel" target="_blank" rel="noopener noreferrer">
-                <span className="sr-only">GitHub repository link</span>
+                <span className="sr-only">Go to GitHub repository</span>
                 <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path
                         fill="currentColor"

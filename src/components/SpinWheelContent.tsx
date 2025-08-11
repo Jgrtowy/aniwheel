@@ -281,7 +281,7 @@ export function SpinWheelContent() {
                         animate={{ scale: selectedItem ? 1 : isMobile || isTablet ? 1.6 : 1.3 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.2 }}
                     >
-                        <img src="/Click_to_spin.svg" alt="Click to spin!" className={cn("absolute inset-0 w-full h-full object-cover z-10 rounded-full opacity-100 pointer-events-none transition-opacity", isSpinning && "opacity-0")} />
+                        <img src="/Click_to_spin.svg" alt="Click to spin!" className={cn("absolute inset-0 object-cover z-10 rounded-full opacity-100 pointer-events-none transition-opacity", isSpinning && "opacity-0")} />
                         <svg ref={wheelRef} width="100%" height="100%" viewBox={`0 0 ${wheelSize} ${wheelSize}`} className="absolute inset-0 overflow-hidden rounded-full" style={{ transform: `rotate(${rotation}deg)` }}>
                             <title>{isSpinning ? "Spinning..." : "Click to spin the wheel!"}</title>
                             <defs>

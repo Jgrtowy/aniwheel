@@ -15,7 +15,7 @@ import { useAnimeStore } from "~/lib/store";
 import { cn } from "~/lib/utils";
 
 export default function FiltersPopover() {
-    const { fullMediaList, score, showAiredOnly, showPlanning, showDropped, showPaused, setScore, setShowAiredOnly, setShowPlanning, setShowDropped, setShowPaused, clearFilters, hasActiveFilters, getActiveFilterCount } = useAnimeStore();
+    const { fullMediaList, score, showUnaired, showPlanning, showDropped, showPaused, setScore, setShowUnaired, setShowPlanning, setShowDropped, setShowPaused, clearFilters, hasActiveFilters, getActiveFilterCount } = useAnimeStore();
 
     const availableGenres = useMemo(() => {
         const genreSet = new Set<string>();
@@ -30,14 +30,9 @@ export default function FiltersPopover() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                    <ListFilter />
+                <Button variant="outline" className="px-3 has-[>svg]:px-3">
+                    {hasActiveFilters() ? <div className="text-xs leading-tight font-bold rounded-full size-4 bg-primary pt-0.25">{getActiveFilterCount()}</div> : <ListFilter />}
                     Filter
-                    {hasActiveFilters() && (
-                        <Badge className="text-xs font-bold rounded-full size-5" variant="secondary">
-                            <span className="translate-y-0.25">{getActiveFilterCount()}</span>
-                        </Badge>
-                    )}
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-80 flex flex-col gap-6 p-4 bg-component-secondary">
@@ -48,25 +43,34 @@ export default function FiltersPopover() {
                         <span>Score range:</span>
                         <DualRangeSlider value={[score.from, score.to]} onValueChange={([from, to]) => setScore(from, to)} min={0} max={10} step={0.1} labelPosition="bottom" label={(value) => value} />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Checkbox id="aired-only" className="cursor-pointer" checked={showAiredOnly} onCheckedChange={setShowAiredOnly} />
-                        <Label htmlFor="aired-only" className="text-xs md:text-sm cursor-pointer">
-                            Show aired only
-                        </Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Checkbox id="planning" className="cursor-pointer" checked={showPlanning} onCheckedChange={setShowPlanning} />
-                        <Label htmlFor="planning" className="text-xs md:text-sm cursor-pointer">
-                            Planning
-                        </Label>
-                        <Checkbox id="dropped" className="cursor-pointer" checked={showDropped} onCheckedChange={setShowDropped} />
-                        <Label htmlFor="dropped" className="text-xs md:text-sm cursor-pointer">
-                            Dropped
-                        </Label>
-                        <Checkbox id="paused" className="cursor-pointer" checked={showPaused} onCheckedChange={setShowPaused} />
-                        <Label htmlFor="paused" className="text-xs md:text-sm cursor-pointer">
-                            Paused
-                        </Label>
+                    <div className="flex flex-col gap-1 text-sm">
+                        <span>Show lists:</span>
+                        <div className="grid grid-cols-3 gap-y-3">
+                            <div className="flex items-center gap-1">
+                                <Checkbox id="planning" className="cursor-pointer" checked={showPlanning} onCheckedChange={setShowPlanning} />
+                                <Label htmlFor="planning" className="text-sm cursor-pointer">
+                                    Planning
+                                </Label>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Checkbox id="dropped" className="cursor-pointer" checked={showDropped} onCheckedChange={setShowDropped} />
+                                <Label htmlFor="dropped" className="text-sm cursor-pointer">
+                                    Dropped
+                                </Label>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Checkbox id="paused" className="cursor-pointer" checked={showPaused} onCheckedChange={setShowPaused} />
+                                <Label htmlFor="paused" className="text-sm cursor-pointer">
+                                    Paused
+                                </Label>
+                            </div>
+                            <div className="flex items-center gap-2 col-span-3">
+                                <Checkbox id="aired-only" className="cursor-pointer" checked={showUnaired} onCheckedChange={setShowUnaired} />
+                                <Label htmlFor="aired-only" className="text-sm cursor-pointer">
+                                    Include unaired
+                                </Label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <Button variant="outline" onClick={clearFilters} size="sm" disabled={!hasActiveFilters()}>
@@ -136,7 +140,7 @@ function GenreCombobox({ availableGenres }: { availableGenres: string[] }) {
             <PopoverContent className="w-48 p-0 bg-component-secondary" align="start">
                 <Command className="bg-transparent">
                     <CommandInput placeholder="Search genres..." />
-                    <CommandList className="max-h-96">
+                    <CommandList className="max-h-[23.4rem]">
                         <CommandEmpty>No genre found.</CommandEmpty>
                         <CommandGroup>
                             {availableGenres.map((genre) => (

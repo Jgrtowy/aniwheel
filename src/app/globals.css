@@ -46,10 +46,10 @@
 }
 
 .bg-component-primary {
-    @apply bg-background/75;
+    @apply bg-background/65;
 }
 .bg-component-secondary {
-    @apply bg-background/50 backdrop-blur-xl;
+    @apply bg-background/50 backdrop-blur-2xl;
 }
 
 @keyframes collapsible-down {
