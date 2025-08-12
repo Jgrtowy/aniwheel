@@ -2,9 +2,10 @@ import { Laptop, Moon, Settings, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import React, { useEffect } from "react";
 import { Button } from "~/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { Label } from "~/components/ui/label";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { useSettingsStore } from "~/lib/store";
@@ -21,15 +22,15 @@ export default function SettingsMenu() {
     }, [session?.activeProvider, preferredImageSize]);
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        <Popover>
+            <PopoverTrigger asChild>
                 <Button variant="outline" className="size-9 sm:size-10">
                     <Settings />
                 </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80 py-4 bg-component-secondary">
+            </PopoverTrigger>
+            <PopoverContent className="w-80 py-4 px-0 space-y-4 bg-component-secondary">
                 <h4 className="font-bold text-lg px-4">User Settings</h4>
-                <DropdownMenuSeparator className="my-4" />
+                <Separator />
                 <div className="grid gap-4">
                     <div className="flex flex-col gap-1 px-4">
                         <Label>Image Size</Label>
@@ -40,7 +41,7 @@ export default function SettingsMenu() {
                             {session?.activeProvider !== "myanimelist" && <ToggleGroupItem value="extraLarge">XL</ToggleGroupItem>}
                         </ToggleGroup>
                     </div>
-                    <DropdownMenuSeparator />
+                    <Separator />
                     <div className="flex flex-col gap-1 px-4">
                         <Label>Theme</Label>
                         <span className="text-xs text-muted-foreground">Changes the appearance of the app.</span>
@@ -64,7 +65,7 @@ export default function SettingsMenu() {
                             </SelectContent>
                         </Select>
                     </div>
-                    <DropdownMenuSeparator />
+                    <Separator />
                     <div className="flex flex-col gap-1 px-4">
                         <Label>Title language</Label>
                         <span className="text-xs text-muted-foreground">Changes the language of anime titles.</span>
@@ -77,20 +78,20 @@ export default function SettingsMenu() {
                             </SelectContent>
                         </Select>
                     </div>
-                    <DropdownMenuSeparator />
+                    <Separator />
                     <div className="flex flex-col gap-1 px-4">
                         <Label>Enable Tick Sounds</Label>
                         <span className="text-xs text-muted-foreground">Plays sounds when the wheel is spinning.</span>
                         <Switch className="mt-1" checked={enableTickSounds} onCheckedChange={setEnableTickSounds} />
                     </div>
-                    <DropdownMenuSeparator />
+                    <Separator />
                     <div className="flex flex-col gap-1 px-4">
                         <Label>Disable landing animation</Label>
                         <span className="text-xs text-muted-foreground">Skip the long animation on the landing page.</span>
                         <Switch className="mt-1" checked={skipLandingAnimation} onCheckedChange={setSkipLandingAnimation} />
                     </div>
                 </div>
-            </DropdownMenuContent>
-        </DropdownMenu>
+            </PopoverContent>
+        </Popover>
     );
 }

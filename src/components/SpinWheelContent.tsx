@@ -301,7 +301,7 @@ export function SpinWheelContent() {
                                 </g>
                             ))}
                         </svg>
-                        <ChevronDown strokeWidth={2} className="w-12 h-12 lg:w-16 lg:h-16 absolute -top-10 lg:-top-13 left-1/2 -translate-x-1/2" />
+                        <ChevronDown strokeWidth={2} className="size-12 lg:w-16 lg:h-16 absolute -top-10 lg:-top-13 left-1/2 text-primary-foreground -translate-x-1/2" />
                         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 lg:w-8 lg:h-8 bg-white border-2 lg:border-4 border-gray-300 rounded-full" />
                     </motion.button>
                     {selectedItem && (
@@ -317,9 +317,9 @@ export function SpinWheelContent() {
                             <Card className="w-72 lg:w-80 overflow-hidden shadow-2xl p-0 gap-0">
                                 <div className="relative">
                                     <img src={getImageUrlWithPreference(selectedItem)} alt={getTitleWithPreference(selectedItem)} className="w-full h-72 lg:h-96 object-cover" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-card/95 via-card/50 to-transparent" />
+                                    <div className="absolute bottom-0 w-full h-3/6 bg-gradient-to-t from-black/95 to-transparent" />
                                     <div className="absolute bottom-0 left-0 right-0 text-primary flex flex-col gap-2 p-2 pb-4">
-                                        <h3 className="text-xl lg:text-2xl font-bold line-clamp-2 text-accent-foreground">{getTitleWithPreference(selectedItem)}</h3>
+                                        <h3 className="text-xl lg:text-2xl font-bold text-primary-foreground line-clamp-2">{getTitleWithPreference(selectedItem)}</h3>
                                         <div className="flex gap-2 font-medium leading-tight whitespace-nowrap text-sm">
                                             {selectedItem.averageScore && (
                                                 <div className="flex items-center gap-1 h-7 px-2 text-md text-accent-foreground w-fit border rounded-md bg-component-primary">
@@ -340,8 +340,8 @@ export function SpinWheelContent() {
                                 </div>
                                 <CardContent className="p-3 lg:p-4">
                                     <Button asChild className="w-full" size="lg">
-                                        <a href={selectedItem.siteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
-                                            {session?.activeProvider && <span className="translate-y-0.25 text-sm lg:text-base">View on {getPrettyProviderName(session?.activeProvider)}</span>}
+                                        <a href={selectedItem.siteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 icon-text-container">
+                                            {session?.activeProvider && <span className="text-sm lg:text-base">View on {getPrettyProviderName(session?.activeProvider)}</span>}
                                             <ExternalLink className="w-4 h-4" />
                                         </a>
                                     </Button>

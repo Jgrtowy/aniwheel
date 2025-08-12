@@ -6,7 +6,6 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "~/components/ui/command";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { DualRangeSlider } from "~/components/ui/dual-range-slider";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
 import { Label } from "~/components/ui/label";
@@ -28,15 +27,15 @@ export default function FiltersPopover() {
     }, [fullMediaList]);
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        <Popover>
+            <PopoverTrigger asChild>
                 <Button variant="outline" className="px-3 has-[>svg]:px-3">
                     {hasActiveFilters() ? <div className="text-xs leading-tight font-bold rounded-full size-4 bg-primary pt-0.25">{getActiveFilterCount()}</div> : <ListFilter />}
                     Filter
                 </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80 flex flex-col gap-6 p-4 bg-component-secondary">
-                <h4 className="font-bold text-lg">Filter by:</h4>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 flex flex-col gap-6 p-4 bg-component-secondary">
+                <h4 className="font-bold text-lg">Filter</h4>
                 <div className="grid gap-6">
                     <GenreCombobox availableGenres={availableGenres} />
                     <div className="flex flex-col gap-1 text-sm">
@@ -76,8 +75,8 @@ export default function FiltersPopover() {
                 <Button variant="outline" onClick={clearFilters} size="sm" disabled={!hasActiveFilters()}>
                     Clear filters
                 </Button>
-            </DropdownMenuContent>
-        </DropdownMenu>
+            </PopoverContent>
+        </Popover>
     );
 }
 

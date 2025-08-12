@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleArrowRight, LoaderCircle } from "lucide-react";
+import { CircleArrowRight, LoaderCircle, LogIn } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -60,7 +60,7 @@ export default function Landing() {
 
     return (
         <MotionConfig reducedMotion="user">
-            <main className="flex items-center justify-center flex-col h-dvh p-4">
+            <main className="flex items-center justify-center flex-col h-dvh p-4 overflow-hidden">
                 <RepoLink className="fixed top-4 right-4" />
                 <header>
                     <motion.div layout={!reduceMotion} className="flex items-center justify-center gap-2 sm:gap-4">
@@ -92,25 +92,35 @@ export default function Landing() {
                 </header>
                 <AnimatePresence>
                     {renderButtons && (
-                        <motion.section layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }} className="flex flex-col items-center gap-6">
+                        <motion.section className="flex flex-col items-center gap-6" layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }}>
                             <div className="flex flex-col items-center gap-1 mt-4 text-center">
                                 <h2 className="text-xl sm:text-4xl font-semibold">Your Anime Wheel of Fortune</h2>
-                                <p className="text-base sm:text-xl">
+                                <p className="text-md sm:text-xl">
                                     Connect your list and let <span className="peer italic">fate</span> pick your next binge!
                                     <Image src="/Rider_of_black.webp" alt="Rider of Black from Fate/Apocrypha anime" width={150} height={150} className="fixed rotate-45 transition-[750ms] -bottom-72 -left-46 peer-hover:-bottom-23 peer-hover:-left-12 size-auto" />
                                 </p>
                             </div>
-                            <nav className="flex flex-col sm:flex-row gap-6" aria-label="Sign in options">
-                                <Button variant="outline" size="lg" className="text-xl w-60 py-7 font-bold gap-3" onClick={async () => handleLogin("anilist")} disabled={!!isLoggingIn} aria-label="Sign in with AniList">
-                                    {isLoggingIn === "anilist" ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <CircleArrowRight aria-hidden="true" />}
+                            <nav className="flex flex-col items-center sm:flex-row gap-4 sm:gap-6" aria-label="Sign in options">
+                                <Button variant="outline" size="lg" className="text-xl w-60 py-6.5 sm:py-7 font-bold gap-3" onClick={async () => handleLogin("anilist")} disabled={!!isLoggingIn} aria-label="Sign in with AniList">
+                                    {isLoggingIn === "anilist" ? <LoaderCircle className="animate-spin" /> : <LogIn />}
                                     AniList
                                 </Button>
-                                <Separator orientation={isDesktop ? "vertical" : "horizontal"} />
-                                <Button variant="outline" size="lg" className="text-xl w-60 py-7 font-bold gap-3" onClick={async () => handleLogin("myanimelist")} disabled={!!isLoggingIn} aria-label="Sign in with MyAnimeList">
-                                    {isLoggingIn === "myanimelist" ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <CircleArrowRight aria-hidden="true" />}
+                                <Separator className="data-[orientation=horizontal]:w-5/6 data-[orientation=vertical]:h-2/3" orientation={isDesktop ? "vertical" : "horizontal"} />
+                                <Button variant="outline" size="lg" className="text-xl w-60 py-6.5 sm:py-7 font-bold gap-3" onClick={async () => handleLogin("myanimelist")} disabled={!!isLoggingIn} aria-label="Sign in with MyAnimeList">
+                                    {isLoggingIn === "myanimelist" ? <LoaderCircle className="animate-spin" /> : <LogIn />}
                                     MyAnimeList
                                 </Button>
                             </nav>
+                            <AnimatePresence>
+                                {renderButtons && (
+                                    <motion.div className="text-xs text-muted-foreground z-10" layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }}>
+                                        By signing in, you agree to our{" "}
+                                        <Link href="/privacy" className="underline">
+                                            Privacy Policy
+                                        </Link>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.section>
                     )}
                 </AnimatePresence>
@@ -131,16 +141,6 @@ export default function Landing() {
                             <div className="opacity-25 hover:opacity-100 transition-opacity duration-300">
                                 <PlaceholderWheel className="size-48 sm:size-80" />
                             </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-                <AnimatePresence>
-                    {renderButtons && (
-                        <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }} className="fixed bottom-4 text-xs text-muted-foreground">
-                            By signing in, you agree to our{" "}
-                            <Link href="/privacy" className="underline">
-                                Privacy Policy
-                            </Link>
                         </motion.div>
                     )}
                 </AnimatePresence>

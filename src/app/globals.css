@@ -41,15 +41,23 @@
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
 
+    --comfortaa-baseline-offset: 0.1em;
+
     --animate-collapsible-down: collapsible-down 200ms ease-out;
     --animate-collapsible-up: collapsible-up 200ms ease-out;
 }
 
 .bg-component-primary {
-    @apply bg-background/65;
+    @apply bg-background/60;
 }
 .bg-component-secondary {
-    @apply bg-background/50 backdrop-blur-2xl;
+    @apply bg-background/50 backdrop-blur-xl;
+}
+
+.icon-text-container > span,
+.icon-text-container > p,
+.icon-text-container > div:not([class*="lucide"]) {
+    transform: translateY(var(--comfortaa-baseline-offset));
 }
 
 @keyframes collapsible-down {

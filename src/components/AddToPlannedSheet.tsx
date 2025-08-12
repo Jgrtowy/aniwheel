@@ -156,15 +156,15 @@ export default function AddToPlannedSheet() {
                                         <h3 className="font-bold w-fit leading-tight line-clamp-1">{getTitleWithPreference(anime)}</h3>
                                         <div className="flex items-center gap-2 text-sm leading-tight text-muted-foreground">
                                             {anime.episodes > 0 && (
-                                                <p className="flex items-center gap-1">
+                                                <p className="flex items-center gap-1 icon-text-container">
                                                     <Clapperboard className="size-3" />
-                                                    <span className="translate-y-0.25">{anime.episodes !== 1 ? `${anime.episodes} eps` : "1 ep"}</span>
+                                                    <span>{anime.episodes !== 1 ? `${anime.episodes} eps` : "1 ep"}</span>
                                                 </p>
                                             )}
                                             {anime.averageScore && (
-                                                <p className="flex items-center gap-1">
+                                                <p className="flex items-center gap-1 icon-text-container">
                                                     <Star className="size-3" />
-                                                    <span className="translate-y-0.25">{anime.averageScore}</span>
+                                                    <span>{anime.averageScore}</span>
                                                 </p>
                                             )}
                                         </div>

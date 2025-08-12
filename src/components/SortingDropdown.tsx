@@ -1,11 +1,18 @@
-import { ArrowDown10, ArrowDownUp, ArrowDownZA, ArrowUp01, ArrowUpAZ, CalendarArrowDown, CalendarArrowUp, CalendarPlus, Star, WholeWord } from "lucide-react";
+import { ArrowDown10, ArrowDownUp, ArrowDownZA, ArrowUp01, ArrowUpAZ, CalendarArrowDown, CalendarArrowUp, CalendarPlus, Info, Star, WholeWord } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { useAnimeStore } from "~/lib/store";
 import type { SortField, SortOrder } from "~/lib/types";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 export default function SortingPopover() {
     const { sortField, sortOrder, setSortField, setSortOrder } = useAnimeStore();
+
+    const sortFieldOptions: { value: SortField; label: string; description: string; icon: React.ReactNode }[] = [
+        { value: "date", label: "Date", description: "Date you added the title to your list", icon: <CalendarPlus /> },
+        { value: "title", label: "Title", description: "Title of the anime in your language", icon: <WholeWord /> },
+        { value: "score", label: "Score", description: "Weighted average user score", icon: <Star /> },
+    ];
 
     const sortOrderOptions: {
         [key in SortField]: {
@@ -32,50 +39,55 @@ export default function SortingPopover() {
 
     const getDefaultSortOrder = (field: SortField): SortOrder => sortOrderOptions[field][0].value;
 
-    const handleSortFieldChange = (field: SortField) => {
+    const handleSortFieldChange = (field: SortField | "") => {
+        if (field === "") return;
         setSortField(field);
         setSortOrder(getDefaultSortOrder(field));
     };
 
+    const handleSortOrderChange = (order: SortOrder | "") => {
+        if (order === "") return;
+        setSortOrder(order);
+    };
+
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        <Popover>
+            <PopoverTrigger asChild>
                 <Button variant="outline">
                     {getSortIcon()}
                     Sort
                 </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-component-secondary">
-                <DropdownMenuLabel asChild className="font-bold text-lg">
-                    <h4>Sort by:</h4>
-                </DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={sortField} onValueChange={(value) => handleSortFieldChange(value as SortField)}>
-                    <DropdownMenuRadioItem value="date">
-                        <CalendarPlus />
-                        Date
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="title">
-                        <WholeWord />
-                        Title
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="score">
-                        <Star />
-                        Average score
-                    </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-                <DropdownMenuSeparator className="my-2" />
-                <DropdownMenuLabel asChild className="font-bold text-lg">
-                    <h4>Order:</h4>
-                </DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={sortOrder} onValueChange={(value) => setSortOrder(value as SortOrder)}>
-                    {sortOrderOptions[sortField].map((option) => (
-                        <DropdownMenuRadioItem key={option.value} value={option.value}>
-                            {option.icon}
-                            {option.label}
-                        </DropdownMenuRadioItem>
-                    ))}
-                </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-        </DropdownMenu>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 flex flex-col gap-6 p-4 bg-component-secondary">
+                <div className="flex flex-col gap-1">
+                    <h4 className="font-bold text-lg">Sort</h4>
+                    <ToggleGroup type="single" variant="outline" className="w-full" value={sortField} onValueChange={handleSortFieldChange}>
+                        {sortFieldOptions.map((option) => (
+                            <ToggleGroupItem key={option.value} value={option.value} className="gap-1 icon-text-container data-[state=on]:bg-primary cursor-pointer">
+                                {option.icon}
+                                <span>{option.label}</span>
+                                <span className="sr-only">Sort by {option.label}</span>
+                            </ToggleGroupItem>
+                        ))}
+                    </ToggleGroup>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 icon-text-container">
+                        <Info className="size-3" />
+                        <span>{sortFieldOptions.find((opt) => opt.value === sortField)?.description}</span>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                    <h4 className="font-bold text-lg">Order</h4>
+                    <ToggleGroup type="single" variant="outline" className="w-full" value={sortOrder} onValueChange={handleSortOrderChange}>
+                        {sortOrderOptions[sortField].map((option) => (
+                            <ToggleGroupItem key={option.value} value={option.value} className="gap-1 icon-text-container data-[state=on]:bg-primary cursor-pointer">
+                                {option.icon}
+                                <span>{option.label}</span>
+                                <span className="sr-only">Sort by {option.label}</span>
+                            </ToggleGroupItem>
+                        ))}
+                    </ToggleGroup>
+                </div>
+            </PopoverContent>
+        </Popover>
     );
 }

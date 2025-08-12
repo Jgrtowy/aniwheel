@@ -14,11 +14,11 @@ export default function Header() {
     return (
         <header className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
-                <Avatar className="size-9 sm:size-10">
+                <Avatar className="size-8 sm:size-10">
                     <AvatarImage src={session?.user.image ?? ""} alt="Profile Picture" />
                     <AvatarFallback>{session?.user.name?.charAt(0) || "U"}</AvatarFallback>
                 </Avatar>
-                <h1 className="text-xl sm:text-2xl text-primary-foreground leading-tight">{!session ? "hello!" : `hello, ${session.user.name}!`}</h1>
+                <h1 className="text-lg sm:text-2xl text-primary-foreground leading-tight">{!session ? "hello!" : `hello, ${session.user.name}!`}</h1>
             </div>
             <div className="flex items-center gap-2">
                 <SettingsMenu />
