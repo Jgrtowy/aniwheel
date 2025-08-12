@@ -48,7 +48,7 @@
 }
 
 .bg-component-primary {
-    @apply bg-background/60;
+    @apply bg-background/80;
 }
 .bg-component-secondary {
     @apply bg-background/50 backdrop-blur-xl;
