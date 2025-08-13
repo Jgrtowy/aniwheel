@@ -63,7 +63,7 @@ export default function SortingPopover() {
                     <h4 className="font-bold text-lg">Sort</h4>
                     <ToggleGroup type="single" variant="outline" className="w-full" value={sortField} onValueChange={handleSortFieldChange}>
                         {sortFieldOptions.map((option) => (
-                            <ToggleGroupItem key={option.value} value={option.value} className="gap-1 icon-text-container data-[state=on]:bg-primary cursor-pointer">
+                            <ToggleGroupItem key={option.value} value={option.value} className="gap-1 icon-text-container data-[state=on]:bg-primary data-[state=on]:text-primary-foreground cursor-pointer">
                                 {option.icon}
                                 <span>{option.label}</span>
                                 <span className="sr-only">Sort by {option.label}</span>
@@ -79,7 +79,7 @@ export default function SortingPopover() {
                     <h4 className="font-bold text-lg">Order</h4>
                     <ToggleGroup type="single" variant="outline" className="w-full" value={sortOrder} onValueChange={handleSortOrderChange}>
                         {sortOrderOptions[sortField].map((option) => (
-                            <ToggleGroupItem key={option.value} value={option.value} className="gap-1 icon-text-container data-[state=on]:bg-primary cursor-pointer">
+                            <ToggleGroupItem key={option.value} value={option.value} className="gap-1 icon-text-container data-[state=on]:bg-primary data-[state=on]:text-primary-foreground cursor-pointer">
                                 {option.icon}
                                 <span>{option.label}</span>
                                 <span className="sr-only">Sort by {option.label}</span>

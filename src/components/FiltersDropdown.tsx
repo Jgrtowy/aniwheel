@@ -37,7 +37,10 @@ export default function FiltersPopover() {
             <PopoverContent className="w-80 flex flex-col gap-6 p-4 bg-component-secondary">
                 <h4 className="font-bold text-lg">Filter</h4>
                 <div className="grid gap-6">
-                    <GenreCombobox availableGenres={availableGenres} />
+                    <div className="flex flex-col gap-1 text-sm">
+                        <span>Genres:</span>
+                        <GenreCombobox availableGenres={availableGenres} />
+                    </div>
                     <div className="flex flex-col gap-1 text-sm">
                         <span>Score range:</span>
                         <DualRangeSlider value={[score.from, score.to]} onValueChange={([from, to]) => setScore(from, to)} min={0} max={10} step={0.1} labelPosition="bottom" label={(value) => value} />
@@ -46,25 +49,25 @@ export default function FiltersPopover() {
                         <span>Show lists:</span>
                         <div className="grid grid-cols-3 gap-y-3">
                             <div className="flex items-center gap-1">
-                                <Checkbox id="planning" className="cursor-pointer" checked={showPlanning} onCheckedChange={setShowPlanning} />
+                                <Checkbox id="planning" className="cursor-pointer bg-background/50" checked={showPlanning} onCheckedChange={setShowPlanning} />
                                 <Label htmlFor="planning" className="text-sm cursor-pointer">
                                     Planning
                                 </Label>
                             </div>
                             <div className="flex items-center gap-1">
-                                <Checkbox id="dropped" className="cursor-pointer" checked={showDropped} onCheckedChange={setShowDropped} />
+                                <Checkbox id="dropped" className="cursor-pointer bg-background/50" checked={showDropped} onCheckedChange={setShowDropped} />
                                 <Label htmlFor="dropped" className="text-sm cursor-pointer">
                                     Dropped
                                 </Label>
                             </div>
                             <div className="flex items-center gap-1">
-                                <Checkbox id="paused" className="cursor-pointer" checked={showPaused} onCheckedChange={setShowPaused} />
+                                <Checkbox id="paused" className="cursor-pointer bg-background/50" checked={showPaused} onCheckedChange={setShowPaused} />
                                 <Label htmlFor="paused" className="text-sm cursor-pointer">
                                     Paused
                                 </Label>
                             </div>
                             <div className="flex items-center gap-2 col-span-3">
-                                <Checkbox id="aired-only" className="cursor-pointer" checked={showUnaired} onCheckedChange={setShowUnaired} />
+                                <Checkbox id="aired-only" className="cursor-pointer bg-background/50" checked={showUnaired} onCheckedChange={setShowUnaired} />
                                 <Label htmlFor="aired-only" className="text-sm cursor-pointer">
                                     Include unaired
                                 </Label>
@@ -99,10 +102,10 @@ function GenreCombobox({ availableGenres }: { availableGenres: string[] }) {
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 {/* biome-ignore lint/a11y/useSemanticElements: <explanation> */}
-                <Button className="h-fit hover:!bg-background hover:!text-current dark:hover:!bg-input/30 dark:hover:!text-current w-full md:w-auto md:min-w-48 p-2" variant="outline" role="combobox" aria-expanded={open}>
+                <Button className="p-2 bg-background/50" variant="outline" role="combobox" aria-expanded={open}>
                     <div className="flex flex-wrap items-center gap-1 flex-1">
                         {activeGenres.length === 0 ? (
-                            <span className="text-muted-foreground">Genres...</span>
+                            <span className="text-muted-foreground">No genres selected</span>
                         ) : (
                             <>
                                 {visibleGenres.map((genre) => (
@@ -117,7 +120,7 @@ function GenreCombobox({ availableGenres }: { availableGenres: string[] }) {
                                                 +{hiddenGenres.length} more
                                             </Badge>
                                         </HoverCardTrigger>
-                                        <HoverCardContent className="w-auto p-4">
+                                        <HoverCardContent className="w-auto p-2">
                                             <div className="flex flex-wrap gap-1">
                                                 {hiddenGenres.map((genre) => (
                                                     <Badge key={genre} variant="secondary" className="text-xs cursor-pointer rounded-full bg-input hover:text-destructive" onClick={(e) => handleRemoveGenre(genre, e)}>

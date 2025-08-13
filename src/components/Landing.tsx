@@ -4,7 +4,7 @@ import { CircleArrowRight, LoaderCircle, LogIn } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Aurora from "~/components/Aurora";
 import KanjiAnimation from "~/components/KanjiAnimation";
@@ -31,6 +31,11 @@ export default function Landing() {
     const [renderTitle, setRenderTitle] = useState(false);
     const [renderButtons, setRenderButtons] = useState(false);
     const [isLoggingIn, setIsLoggingIn] = useState<string | null>(null);
+    const [colorStops, setColorStops] = useState<string[]>(["#2e1cff", "#ff3161", "#b032ff"]);
+
+    useEffect(() => {
+        setColorStops((prev) => [...prev].sort(() => Math.random() - 0.5));
+    }, []);
 
     const handleKanjiPathAnimationComplete = async () => {
         if (reduceMotion) {
@@ -125,8 +130,8 @@ export default function Landing() {
                     )}
                 </AnimatePresence>
                 {renderTitle && (
-                    <motion.div layout className="fixed inset-0 h-1/2 sm:h-full -z-10 pointer-events-none" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.4, y: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION * 4 }}>
-                        <Aurora colorStops={isDesktop ? ["#1100c8", "#b33796", "#a410ff"] : ["#1100c8", "#b33796"]} blend={0.1} amplitude={0.75} speed={0.5} />
+                    <motion.div layout className="fixed w-full h-1/3 sm:h-full -z-10 pointer-events-none brightness-[140%]" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.8, y: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION * 4 }}>
+                        <Aurora colorStops={colorStops} blend={1} amplitude={0.75} speed={0.5} />
                     </motion.div>
                 )}
                 <AnimatePresence>

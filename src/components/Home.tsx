@@ -2,6 +2,8 @@
 
 import { Search, X } from "lucide-react";
 import { MotionConfig, motion } from "motion/react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 import Aurora from "~/components/Aurora";
 import BackToTop from "~/components/BackToTop";
 import FiltersDropdown from "~/components/FiltersDropdown";
@@ -11,18 +13,20 @@ import SidePanel from "~/components/SidePanel";
 import SortingDropdown from "~/components/SortingDropdown";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import useMediaQuery from "~/hooks/useMediaQuery";
 import { useAnimeStore } from "~/lib/store";
 
 export default function Home() {
     const { searchTerm, setSearchTerm } = useAnimeStore();
+    const [colorStops, setColorStops] = useState<string[]>(["#2e1cff", "#ff3161", "#b032ff"]);
 
-    const isDesktop = useMediaQuery("(width >= 40rem)");
+    useEffect(() => {
+        setColorStops((prev) => [...prev].sort(() => Math.random() - 0.5));
+    }, []);
 
     return (
         <MotionConfig reducedMotion="user">
-            <motion.div className="fixed inset-0 h-1/2 sm:h-full -z-10 pointer-events-none" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.8, y: 0, transition: { duration: 2.5 } }}>
-                <Aurora colorStops={isDesktop ? ["#1100c8", "#b33796", "#a410ff"] : ["#1100c8", "#b33796"]} blend={0.75} amplitude={0.75} speed={0.5} />
+            <motion.div className="fixed w-full h-1/3 sm:h-full -z-10 pointer-events-none brightness-[140%]" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.8, y: 0, transition: { duration: 2 } }}>
+                <Aurora colorStops={colorStops} blend={1} amplitude={0.75} speed={0.5} />
             </motion.div>
             <div className="max-w-[82rem] mx-auto p-4 space-y-4">
                 <Header />
