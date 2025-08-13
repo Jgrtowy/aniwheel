@@ -36,9 +36,9 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
     const getCardClasses = () => {
         if (variant === "compact") return cn("relative flex flex-col justify-between p-0.5 rounded-lg transition-all overflow-hidden aspect-square", !isStatic && "cursor-pointer", checked ? "brightness-100 opacity-100" : "brightness-75 opacity-75", className);
         return cn(
-            "relative flex flex-col justify-between p-1 sm:p-2 rounded-lg transition-all overflow-hidden brightness-75 opacity-75 mx-4 sm:mx-0 sm:scale-90 aspect-[4] sm:aspect-square",
+            "relative flex flex-col justify-between p-1 sm:p-2 rounded-lg transition-all overflow-hidden brightness-75 opacity-75 w-[calc(100%-2rem)] sm:w-full sm:scale-90 aspect-[4] sm:aspect-square",
             !isStatic && "cursor-pointer outline-none focus-visible:border-ring focus-visible:ring-ring/75 focus-visible:ring-[3px]",
-            checked && "brightness-100 opacity-100 mx-0 sm:scale-100 aspect-[3.5]",
+            checked && "brightness-100 opacity-100 w-full sm:scale-100 aspect-[3.5]",
             className,
         );
     };
