@@ -17,9 +17,9 @@ interface AnimeStore {
     searchTerm: string;
     activeGenres: string[];
     score: { from: number; to: number };
-    showDropped: boolean;
-    showPaused: boolean;
     showPlanning: boolean;
+    showPaused: boolean;
+    showDropped: boolean;
     showUnaired: boolean;
 
     // Sorting
@@ -45,8 +45,8 @@ interface AnimeStore {
     setScore: (from: number | null, to: number | null) => void;
 
     setShowPlanning: (show: boolean) => void;
-    setShowDropped: (show: boolean) => void;
     setShowPaused: (show: boolean) => void;
+    setShowDropped: (show: boolean) => void;
 
     setShowUnaired: (show: boolean) => void;
 
@@ -136,12 +136,12 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         set({ showPlanning: show });
         get().applyFilters();
     },
-    setShowDropped: (show) => {
-        set({ showDropped: show });
-        get().applyFilters();
-    },
     setShowPaused: (show) => {
         set({ showPaused: show });
+        get().applyFilters();
+    },
+    setShowDropped: (show) => {
+        set({ showDropped: show });
         get().applyFilters();
     },
     setShowUnaired: (show) => {

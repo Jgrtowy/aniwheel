@@ -25,7 +25,7 @@ export default function Home() {
 
     return (
         <MotionConfig reducedMotion="user">
-            <motion.div className="fixed w-full h-1/3 sm:h-full -z-10 pointer-events-none brightness-[140%]" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.8, y: 0, transition: { duration: 2 } }}>
+            <motion.div className="fixed w-full h-3/4 sm:h-full -z-10 pointer-events-none brightness-[140%]" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.8, y: 0, transition: { duration: 2 } }}>
                 <Aurora colorStops={colorStops} blend={1} amplitude={0.75} speed={0.5} />
             </motion.div>
             <div className="max-w-[82rem] mx-auto p-4 space-y-4">
@@ -35,7 +35,7 @@ export default function Home() {
                         <div className="flex justify-between gap-2">
                             <div className="relative w-full max-w-64">
                                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                                <Input placeholder="Search..." className="pl-8 text-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                <Input placeholder="Search..." className="pl-8 text-sm bg-background" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                                 {searchTerm && (
                                     <Button variant="ghost" size="sm" onClick={() => setSearchTerm("")} className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted">
                                         <X className="h-3 w-3" />
@@ -50,7 +50,7 @@ export default function Home() {
                         </div>
                         <MediaList />
                     </section>
-                    <aside className="lg:w-[22rem] flex flex-col gap-4 md:sticky top-4 md:self-start">
+                    <aside className="w-full md:w-[19rem] lg:w-[22rem] flex flex-col gap-4 md:sticky md:top-4 md:self-start">
                         <SidePanel />
                     </aside>
                 </main>

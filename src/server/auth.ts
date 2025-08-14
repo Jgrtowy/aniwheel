@@ -8,6 +8,7 @@ declare module "next-auth" {
         id: string;
         name: string;
         image: string;
+        url: string;
     }
 
     interface Session {
@@ -22,6 +23,7 @@ declare module "next-auth/jwt" {
         id: string;
         name: string;
         image: string;
+        url: string;
         accessToken: string;
         activeProvider: "anilist" | "myanimelist";
     }
@@ -45,6 +47,7 @@ export const authOptions: NextAuthOptions = {
                 token.id = user.id;
                 token.name = user.name;
                 token.image = user.image;
+                token.url = user.url;
                 token.accessToken = account.access_token as string;
                 token.activeProvider = account.provider as "anilist" | "myanimelist";
             }
@@ -56,6 +59,7 @@ export const authOptions: NextAuthOptions = {
                 session.user.id = token.id;
                 session.user.name = token.name;
                 session.user.image = token.image;
+                session.user.url = token.url;
                 session.accessToken = token.accessToken;
                 session.activeProvider = token.activeProvider;
             }
@@ -80,12 +84,8 @@ export async function getServerSession(): Promise<Session | null> {
         if (malSession) {
             const sessionData = JSON.parse(atob(malSession));
 
-            // Check if token is expired
-            if (sessionData.accessTokenExpires && Date.now() > sessionData.accessTokenExpires) {
-                // Token expired, would need refresh logic here
-                // For server-side, we'll just return null and let client handle refresh
-                return null;
-            }
+            // Check if token is expired, if so let client handle refresh
+            if (sessionData.accessTokenExpires && Date.now() > sessionData.accessTokenExpires) return null;
 
             return {
                 user: sessionData.user,

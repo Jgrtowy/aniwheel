@@ -91,7 +91,8 @@ export type SortOrder = "asc" | "desc";
 export interface UserProfile {
     id: string;
     name: string;
-    image?: string;
+    image: string | null;
+    url: string;
     accessToken: string;
     provider: "anilist" | "myanimelist";
 }

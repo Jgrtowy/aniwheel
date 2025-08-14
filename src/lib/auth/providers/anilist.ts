@@ -8,6 +8,7 @@ interface AniListProfile {
         large: string;
         medium: string;
     };
+    siteUrl: string;
 }
 
 export function AniListProvider<P extends AniListProfile>(options: OAuthUserConfig<P>): OAuthConfig<P> {
@@ -42,6 +43,7 @@ export function AniListProvider<P extends AniListProfile>(options: OAuthUserConf
                     large
                     medium
                   }
+                  siteUrl
                 }
               }
             `,
@@ -49,23 +51,11 @@ export function AniListProvider<P extends AniListProfile>(options: OAuthUserConf
                 });
 
                 const data = await response.json();
-                return data.data.Viewer;
+                return data.data.Viewer as AniListProfile;
             },
         },
-        profile(profile: AniListProfile) {
-            return {
-                id: profile.id.toString(),
-                name: profile.name,
-                image: profile.avatar.large || profile.avatar.medium,
-            };
-        },
-        style: {
-            logo: "https://anilist.co/img/icons/android-chrome-512x512.png",
-            logoDark: "https://anilist.co/img/icons/android-chrome-512x512.png",
-            bg: "#02A9FF",
-            text: "#fff",
-            bgDark: "#02A9FF",
-            textDark: "#fff",
+        profile({ id, name, avatar, siteUrl }: AniListProfile) {
+            return { id: id.toString(), name, image: avatar.large || avatar.medium, url: siteUrl };
         },
         options,
     };
