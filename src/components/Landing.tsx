@@ -23,7 +23,10 @@ const TITLE_ANIMATION_DURATION = 0.5;
 
 export default function Landing() {
     const { skipLandingAnimation } = useSettingsStore();
-    const reduceMotion = useReducedMotion() || skipLandingAnimation;
+    const systemReducedMotion = useReducedMotion();
+
+    const [isClient, setIsClient] = useState(false);
+    const [reduceMotion, setReduceMotion] = useState(true); // Default to true to prevent hydration mismatch
 
     const isDesktop = useMediaQuery("(width >= 40rem)");
 
@@ -37,8 +40,14 @@ export default function Landing() {
         setColorStops((prev) => [...prev].sort(() => Math.random() - 0.5));
     }, []);
 
+    // Set client state and motion preference after hydration
+    useEffect(() => {
+        setIsClient(true);
+        setReduceMotion(systemReducedMotion || skipLandingAnimation);
+    }, [systemReducedMotion, skipLandingAnimation]);
+
     const handleKanjiPathAnimationComplete = async () => {
-        if (reduceMotion) {
+        if (reduceMotion || !isClient) {
             setKanjiPathAnimationComplete(true);
             setRenderTitle(true);
             setRenderButtons(true);
@@ -65,21 +74,17 @@ export default function Landing() {
 
     return (
         <MotionConfig reducedMotion="user">
-            <main className="flex items-center justify-center flex-col h-dvh p-4 overflow-hidden">
-                <RepoLink className="fixed top-4 right-4" />
+            <main className="flex items-center justify-center flex-col h-dvh p-4 gap-4 overflow-hidden">
+                <Button variant="outline" size="icon" className="fixed top-4 right-4" asChild>
+                    <RepoLink />
+                </Button>
+
                 <header>
-                    <motion.div layout={!reduceMotion} className="flex items-center justify-center gap-2 sm:gap-4">
-                        <motion.div layout={!reduceMotion} transition={{ type: "spring", stiffness: 300, damping: 30 }}>
+                    <motion.div layout className="flex items-center justify-center gap-2 sm:gap-4">
+                        <motion.div className="size-[75px] sm:size-[100px]" layout transition={{ type: "spring", stiffness: 300, damping: 30 }}>
                             <Tooltip open={kanjiPathAnimationComplete ? undefined : false}>
                                 <TooltipTrigger>
-                                    <KanjiAnimation
-                                        className={cn("shrink-0 transition size-[75px] sm:size-[100px]", kanjiPathAnimationComplete || reduceMotion ? "scale-100" : "scale-[300%]")}
-                                        duration={0.175}
-                                        delayBetween={0.01}
-                                        strokeWidth={5}
-                                        skipAnimation={reduceMotion}
-                                        onAnimationComplete={handleKanjiPathAnimationComplete}
-                                    />
+                                    <KanjiAnimation className={cn("shrink-0 transition size-full", kanjiPathAnimationComplete || reduceMotion ? "scale-100" : "scale-[300%]")} duration={0.175} delayBetween={0.01} strokeWidth={5} skipAnimation={reduceMotion} onAnimationComplete={handleKanjiPathAnimationComplete} />
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <p>(うん) - luck/fate</p>
@@ -97,8 +102,8 @@ export default function Landing() {
                 </header>
                 <AnimatePresence>
                     {renderButtons && (
-                        <motion.section className="flex flex-col items-center gap-6" layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }}>
-                            <div className="flex flex-col items-center gap-1 mt-4 text-center">
+                        <motion.section className="flex flex-col items-center gap-6" layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }}>
+                            <div className="flex flex-col items-center gap-1 text-center">
                                 <h2 className="text-xl sm:text-4xl font-semibold">Your Anime Wheel of Fortune</h2>
                                 <p className="text-md sm:text-xl">
                                     Connect your list and let <span className="peer italic">fate</span> pick your next binge!
@@ -130,23 +135,22 @@ export default function Landing() {
                     )}
                 </AnimatePresence>
                 {renderTitle && (
-                    <motion.div layout className="fixed w-full h-1/3 sm:h-full -z-10 pointer-events-none brightness-[140%]" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.8, y: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION * 4 }}>
+                    <motion.div layout className="fixed w-full h-1/3 top-0 sm:h-full -z-10 pointer-events-none brightness-[140%]" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.8, y: 0 }} transition={{ duration: TITLE_ANIMATION_DURATION * 4 }}>
                         <Aurora colorStops={colorStops} blend={1} amplitude={0.75} speed={0.5} />
                     </motion.div>
                 )}
                 <AnimatePresence>
                     {renderButtons && (
-                        <motion.div
+                        <motion.button
                             layout
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }}
-                            className="fixed -rotate-45 bottom-0 right-0 translate-x-1/3 translate-y-1/3 z-10 hover:translate-x-1/4 hover:translate-y-1/4 transition-all duration-300"
+                            className="group fixed -rotate-45 bottom-0 right-0 translate-x-1/3 translate-y-1/3 z-10 hover:translate-x-1/4 hover:translate-y-1/4 focus:translate-x-1/4 focus:translate-y-1/4 transition-transform duration-300"
+                            type="button"
                         >
-                            <div className="opacity-25 hover:opacity-100 transition-opacity duration-300">
-                                <PlaceholderWheel className="size-48 sm:size-80" />
-                            </div>
-                        </motion.div>
+                            <PlaceholderWheel className="size-48 sm:size-80 opacity-25 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300" />
+                        </motion.button>
                     )}
                 </AnimatePresence>
             </main>

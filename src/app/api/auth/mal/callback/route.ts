@@ -74,6 +74,7 @@ export async function GET(request: NextRequest) {
                 id: user.id.toString(),
                 name: user.name,
                 image: user.picture || null,
+                url: `https://myanimelist.net/profile/${user.name}`,
             },
             accessToken: tokens.access_token,
             refreshToken: tokens.refresh_token,

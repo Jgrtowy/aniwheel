@@ -55,15 +55,15 @@ export default function FiltersPopover() {
                                 </Label>
                             </div>
                             <div className="flex items-center gap-1">
-                                <Checkbox id="dropped" className="cursor-pointer bg-background/50" checked={showDropped} onCheckedChange={setShowDropped} />
-                                <Label htmlFor="dropped" className="text-sm cursor-pointer">
-                                    Dropped
-                                </Label>
-                            </div>
-                            <div className="flex items-center gap-1">
                                 <Checkbox id="paused" className="cursor-pointer bg-background/50" checked={showPaused} onCheckedChange={setShowPaused} />
                                 <Label htmlFor="paused" className="text-sm cursor-pointer">
                                     Paused
+                                </Label>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Checkbox id="dropped" className="cursor-pointer bg-background/50" checked={showDropped} onCheckedChange={setShowDropped} />
+                                <Label htmlFor="dropped" className="text-sm cursor-pointer">
+                                    Dropped
                                 </Label>
                             </div>
                             <div className="flex items-center gap-2 col-span-3">
