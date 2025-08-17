@@ -1,21 +1,23 @@
 <div align="center">
-<a href="https://aniwheel.moe"><img width="500" height="167" alt="Aniwheel banner" src="https://github.com/user-attachments/assets/15e736c0-422b-4b17-90ce-b97460381cbb" /></a>
+  <a href="https://aniwheel.moe">
+    <img width="500" height="167" alt="Aniwheel banner" src="https://github.com/user-attachments/assets/15e736c0-422b-4b17-90ce-b97460381cbb" />
+  </a>
 </div>
+<br />
+<h1 align="center">Your Anime Wheel of Fortune</h1>
 
-### A simple app created for those who can't decide which anime from their planned list watch as next. 🤔
-
-### Simply select your nominees, spin the wheel and let the fortune decide! 🍀
+### Aniwheel is an app created for those who can't decide which anime from their planning list to watch next. 🤔
+#### Simply select your nominees, spin the wheel and let fortune decide! 🍀
+<br />
 
 ## Features ⭐
 
-- MAL and AniList support
-- Multiple filters and sorting options
-- Toggleable tick sounds while spinning
+- MyAnimeList and AniList support
+- Multiple filter & sorting options
 - Option to include "Dropped" and "On-hold" titles
-- Preferable title languages
-- Recommendations dropdown
-- Special sidebar to add new titles to your "Plan to watch" with sync to your anime tracker
-- Both dark and light mode
+- User settings (image size, theme, language preferences...)
+- Ability to add new titles to your "Planning" list on your selected anime tracker
+- User recommendations
 *...and more to come!*
 
 <details>
@@ -32,37 +34,35 @@
 
 Built on top of [Next.js](https://nextjs.org), using [Bun](https://bun.sh) runtime.
 
-1. Clone the repo.
-
+1. Clone this repo.
 ```sh
 $ git clone https://github.com/Jgrtowy/aniwheel.git
 ```
 
-2. Create new OAuth clients both on [AniList](https://anilist.co/settings/developer) and [MyAnimeList](https://myanimelist.net/apiconfig#_=_) websites.
+2. Go to [AniList developer settings](https://anilist.co/settings/developer) and create a new client.
+* Set the Redirect URL to `http://localhost:3000/api/auth/callback/anilist`.
+* *Optional:* For production environments, set the Redirect URL to `https://[YOUR_DOMAIN]/api/auth/callback/anilist`.
 
-> [!IMPORTANT]  
-> For MAL set app type to "Other" to ***only*** get client ID. It is necessery to run the app ***without*** the secret which is assigned when selecting other app types.
+3. Go to [MyAnimeList developer settings](https://myanimelist.net/apiconfig#_=_) and create an ID
+* Set the App Type to `web`.
+* Add `http://localhost:3000/api/auth/mal/callback` to the App Redirect URL.
+* *Optional:* For production environments, also add `https://[YOUR_DOMAIN]/api/auth/mal/callback`.
 
-3. Set their redirect URLs to `http://localhost:3000`.
+4. Copy the `Client ID` and `Client Secret` values from both providers.
 
-4. Copy `.env.example` file, rename it to `.env` and fill out all fields.
-
-5. Generate NextAuth secret
-
+5. Generate NextAuth secret with
 ```sh
 $ openssl rand -base64 32
 ```
 
-and paste it to `.env` file.
+6. Copy the `.env.example` file, rename it to `.env` and fill out all fields.
 
-6. Install dependencies
-
+7. Install dependencies
 ```sh
-$ bun i
+$ bun install
 ```
 
-7. Run development server
-
+8. Run development server
 ```sh
 $ bun dev
 ```
@@ -71,10 +71,13 @@ And you're ready to go!
 
 ## Contributing 🌟
 
-Contributions are always appreciated in any form!
+**Contributions are always appreciated in any form!**
 
-Found an issue? Have an idea for a new feature? Create an issue!
+*Found an bug? Have an idea for a new feature?*<br />
+Create an issue!
 
-Want to fix or implement something new? Fork repo, make commits, create a pull request and (hopefully) we'll merge it!
+*Want to fix or implement something new yourself?*<br />
+Fork > make changes > create a PR<br />
+We'll review it and if it looks good, merge it!
 
-Need to contact us privately? Reach us at <a href="mailto:team@aniwheel.moe">team@aniwheel.moe</a>
+Need to contact us privately? Write to <a href="mailto:team@aniwheel.moe">team@aniwheel.moe</a>
