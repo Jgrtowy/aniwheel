@@ -1,0 +1,35 @@
+# .github/ISSUE_TEMPLATE/feature_request.yml
+name: ✨ Feature request
+description: Suggest an enhancement or new feature
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the feature idea! Please describe it below.
+  - type: input
+    id: title
+    attributes:
+      label: Short feature request title
+      placeholder: e.g. “Add dark mode for the wheel interface”
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why is this feature useful?
+      placeholder: What problem does it solve or what value does it bring?
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed implementation
+      placeholder: How would you envision this feature working?
+  - type: input
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: Other ways to solve this (if any)
+  - type: input
+    id: additional
+    attributes:
+      label: Additional context
+      placeholder: Any screenshots, links or context that would help

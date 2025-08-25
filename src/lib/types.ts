@@ -17,6 +17,7 @@ export interface MediaItem {
     genres: string[];
     entryCreatedAt: number | null;
     status: "PLANNING" | "DROPPED" | "PAUSED" | null;
+    format: Format;
 }
 
 export interface MediaRecommendation {
@@ -51,6 +52,7 @@ export interface AniListMediaItem {
         createdAt: number;
         status: "PLANNING" | "DROPPED" | "PAUSED" | null;
     } | null;
+    format: "TV" | "TV_SHORT" | "MOVIE" | "SPECIAL" | "OVA" | "ONA" | "MUSIC";
 }
 
 export interface AniListMediaRecommendation {
@@ -80,6 +82,7 @@ export interface MALMediaItem {
         status: "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch";
         [key: string]: unknown;
     } | null;
+    media_type: "unknown" | "tv" | "ova" | "movie" | "special" | "ona" | "music";
 }
 
 export type TitleLanguage = keyof MediaItem["title"];
@@ -87,6 +90,7 @@ export type ImageSize = keyof MediaItem["image"];
 
 export type SortField = "date" | "title" | "score";
 export type SortOrder = "asc" | "desc";
+export type Format = "TV" | "OVA" | "MOVIE" | "SPECIAL" | "ONA" | "MUSIC" | "TV_SHORT" | "UNKNOWN";
 
 export interface UserProfile {
     id: string;

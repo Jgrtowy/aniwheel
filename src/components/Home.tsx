@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { Grid2X2, List, Rows4, Search, X } from "lucide-react";
 import { MotionConfig, motion } from "motion/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -13,11 +13,13 @@ import SidePanel from "~/components/SidePanel";
 import SortingDropdown from "~/components/SortingDropdown";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { useAnimeStore } from "~/lib/store";
+import { useAnimeStore, useSettingsStore } from "~/lib/store";
+import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
 export default function Home() {
     const { searchTerm, setSearchTerm } = useAnimeStore();
     const [colorStops, setColorStops] = useState<string[]>(["#2e1cff", "#ff3161", "#b032ff"]);
+    const { viewMode, setViewMode } = useSettingsStore();
 
     useEffect(() => {
         setColorStops((prev) => [...prev].sort(() => Math.random() - 0.5));
@@ -44,6 +46,17 @@ export default function Home() {
                                 )}
                             </div>
                             <div className="flex gap-2">
+                                <ToggleGroup type="single" variant="outline" value={viewMode} onValueChange={(val) => val && setViewMode(val as "grid" | "list" | "compact")} className="w-32">
+                                    <ToggleGroupItem value="grid">
+                                        <Grid2X2 />
+                                    </ToggleGroupItem>
+                                    <ToggleGroupItem value="list">
+                                        <List />
+                                    </ToggleGroupItem>
+                                    <ToggleGroupItem value="compact">
+                                        <Rows4 />
+                                    </ToggleGroupItem>
+                                </ToggleGroup>
                                 <FiltersDropdown />
                                 <SortingDropdown />
                             </div>

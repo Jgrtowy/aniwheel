@@ -77,6 +77,12 @@ export default function Header() {
                                 </div>
                             </div>
                         </div>
+                        {session && session.activeProvider === "anilist" && session.user.moderatorRoles && (
+                            <div>
+                                <Separator />
+                                <p className="text-white text-sm m-4">Thank you for being an AniList moderator. 🫡</p>
+                            </div>
+                        )}
                         <Separator />
                         <div className="grid p-2">
                             <Button variant="ghost" className="justify-start" asChild>

@@ -1,0 +1,39 @@
+# .github/ISSUE_TEMPLATE/bug_report.yml
+name: 🐛 Bug report
+description: Report a problem or unexpected behavior
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please fill in the relevant details.
+  - type: input
+    id: title
+    attributes:
+      label: Short bug description
+      placeholder: e.g. “Login fails when using MyAnimeList account”
+  - type: textarea
+    id: description
+    attributes:
+      label: What is the current behavior?
+      placeholder: Describe what happens.
+  - type: textarea
+    id: expected
+    attributes:
+      label: What is the expected behavior?
+      placeholder: Describe what you expected to happen.
+  - type: input
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Please list steps to reproduce the bug, if applicable.
+  - type: input
+    id: environment
+    attributes:
+      label: Environment (OS, browser, Node version, etc.)
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error logs or console output
+      description: Please include any relevant log output or stack traces.

@@ -28,6 +28,7 @@ export function aniListToMediaItem(item: AniListMediaItem): MediaItem {
         genres: item.genres || [],
         entryCreatedAt: item.mediaListEntry?.createdAt || null,
         status: item.mediaListEntry?.status || null,
+        format: item.format || "UNKNOWN",
     };
 }
 
@@ -51,6 +52,7 @@ export function malToMediaItem(item: MALMediaItem): MediaItem {
         genres: item.genres?.map((genre: { name: string }) => genre.name) || [],
         entryCreatedAt: item.my_list_status?.updated_at ? new Date(item.my_list_status.updated_at).getTime() : null,
         status: item.my_list_status?.status === "plan_to_watch" ? "PLANNING" : item.my_list_status?.status === "dropped" ? "DROPPED" : item.my_list_status?.status === "on_hold" ? "PAUSED" : null,
+        format: item.media_type === "tv" ? "TV" : item.media_type === "ova" ? "OVA" : item.media_type === "movie" ? "MOVIE" : item.media_type === "special" ? "SPECIAL" : item.media_type === "ona" ? "ONA" : item.media_type === "music" ? "MUSIC" : item.media_type === "unknown" ? "UNKNOWN" : "UNKNOWN",
     };
 }
 

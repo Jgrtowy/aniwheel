@@ -9,6 +9,7 @@ declare module "next-auth" {
         name: string;
         image: string;
         url: string;
+        moderatorRoles: string[] | null;
     }
 
     interface Session {
@@ -26,6 +27,7 @@ declare module "next-auth/jwt" {
         url: string;
         accessToken: string;
         activeProvider: "anilist" | "myanimelist";
+        moderatorRoles: string[] | null;
     }
 }
 
@@ -50,6 +52,7 @@ export const authOptions: NextAuthOptions = {
                 token.url = user.url;
                 token.accessToken = account.access_token as string;
                 token.activeProvider = account.provider as "anilist" | "myanimelist";
+                token.moderatorRoles = user.moderatorRoles;
             }
             return token;
         },
@@ -62,6 +65,7 @@ export const authOptions: NextAuthOptions = {
                 session.user.url = token.url;
                 session.accessToken = token.accessToken;
                 session.activeProvider = token.activeProvider;
+                session.user.moderatorRoles = token.moderatorRoles;
             }
             return session;
         },
