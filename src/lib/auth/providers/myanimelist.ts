@@ -6,6 +6,7 @@ interface MyAnimeListProfile {
     name: string;
     picture?: string;
     url: string;
+    moderatorRoles: null;
 }
 
 export function MyAnimeListProvider<P extends MyAnimeListProfile>(options: OAuthUserConfig<P>): OAuthConfig<P> {
@@ -16,8 +17,8 @@ export function MyAnimeListProvider<P extends MyAnimeListProfile>(options: OAuth
         authorization: { url: "/api/auth/mal/signin", params: {} },
         token: { url: "/api/auth/mal/session" },
         userinfo: { url: "/api/auth/mal/session" },
-        profile({ id, name, picture, url }: MyAnimeListProfile) {
-            return { id: id.toString(), name, image: picture ?? "", url };
+        profile({ id, name, picture, url, moderatorRoles }: MyAnimeListProfile) {
+            return { id: id.toString(), name, image: picture ?? "", url, moderatorRoles };
         },
         options,
     };

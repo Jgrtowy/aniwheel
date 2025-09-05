@@ -34,8 +34,8 @@ export default function Home() {
                 <Header />
                 <main className="flex flex-col-reverse md:flex-row gap-4">
                     <section className="flex-1 flex-col rounded-xl border p-4 sm:p-6 space-y-6 bg-component-primary">
-                        <div className="flex justify-between gap-2">
-                            <div className="relative w-full max-w-64">
+                        <div className="flex sm:justify-between justify-center sm:flex-row flex-col items-center gap-2">
+                            <div className="relative w-full sm:max-w-64 max-w-full">
                                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
                                 <Input placeholder="Search..." className="pl-8 text-sm bg-background" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                                 {searchTerm && (
