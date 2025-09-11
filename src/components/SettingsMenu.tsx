@@ -1,5 +1,6 @@
 import { Laptop, Moon, Settings, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import posthog from "posthog-js";
 import React, { useEffect } from "react";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
@@ -13,13 +14,21 @@ import type { ImageSize } from "~/lib/types";
 import { useSession } from "~/providers/session-provider";
 
 export default function SettingsMenu() {
-    const { preferredImageSize, setPreferredImageSize, preferredTitleLanguage, setPreferredTitleLanguage, skipLandingAnimation, setSkipLandingAnimation, enableTickSounds, setEnableTickSounds } = useSettingsStore();
+    const { preferredImageSize, setPreferredImageSize, preferredTitleLanguage, setPreferredTitleLanguage, skipLandingAnimation, setSkipLandingAnimation, enableTickSounds, setEnableTickSounds, analyticsEnabled, setAnalyticsEnabled } = useSettingsStore();
     const { theme, setTheme } = useTheme();
     const session = useSession();
 
     useEffect(() => {
         if (session?.activeProvider === "myanimelist" && preferredImageSize === "extraLarge") setPreferredImageSize("large");
     }, [session?.activeProvider, preferredImageSize]);
+
+    useEffect(() => {
+        if (analyticsEnabled) {
+            posthog.opt_in_capturing();
+            return;
+        }
+        posthog.opt_out_capturing();
+    }, [analyticsEnabled]);
 
     return (
         <Popover>
@@ -42,6 +51,11 @@ export default function SettingsMenu() {
                         </ToggleGroup>
                     </div>
                     <Separator />
+                    <div className="flex flex-col gap-1 px-4">
+                        <Label>Analytics</Label>
+                        <span className="text-xs text-muted-foreground">Enable or disable analytics tracking.</span>
+                        <Switch checked={analyticsEnabled} onCheckedChange={setAnalyticsEnabled} />
+                    </div>
                     <div className="flex flex-col gap-1 px-4">
                         <Label>Theme</Label>
                         <span className="text-xs text-muted-foreground">Changes the appearance of the app.</span>

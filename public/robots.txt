@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 Allow: /privacy
 Disallow: /api/
+Disallow: /skibidi/

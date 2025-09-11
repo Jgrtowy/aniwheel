@@ -18,6 +18,7 @@ type AnimeCardProps =
           variant?: "default" | "compact";
           showDetails?: boolean;
           className?: string;
+          isRecommendation?: boolean;
       }
     | {
           anime: MediaItem;
@@ -25,10 +26,11 @@ type AnimeCardProps =
           variant?: "default" | "compact";
           showDetails?: boolean;
           className?: string;
+          isRecommendation?: boolean;
       };
 
 const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
-    const { anime, isStatic, variant = "default", showDetails = true, className } = props;
+    const { anime, isStatic, variant = "default", showDetails = true, className, isRecommendation = false } = props;
     const checked = isStatic ? true : props.checked;
 
     const { toggleSelectedMedia } = useAnimeStore();
@@ -37,8 +39,8 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
 
     const getCardClasses = () => {
         if (variant === "compact") return cn("relative flex flex-col justify-between p-0.5 rounded-lg transition-all overflow-hidden aspect-square", !isStatic && "cursor-pointer", checked ? "brightness-100 opacity-100" : "brightness-75 opacity-75", className);
-        if (viewMode === "list") return cn("relative flex sm:flex-row gap-2 items-center rounded-2xl");
-        if (viewMode === "compact") return cn("relative flex flex-row gap-2 items-center");
+        if (viewMode === "list" && !isRecommendation) return cn("relative flex sm:flex-row gap-2 items-center rounded-2xl");
+        if (viewMode === "compact" && !isRecommendation) return cn("relative flex flex-row gap-2 items-center");
         return cn(
             "relative flex flex-col justify-between p-1 sm:p-2 rounded-lg brightness-75 opacity-75 w-[calc(100%-2rem)] sm:w-full sm:scale-90 aspect-[4] sm:aspect-square",
             !isStatic && "cursor-pointer transition-all duration-125 outline-none focus-visible:border-ring focus-visible:ring-ring/75 focus-visible:ring-[3px]",
@@ -52,7 +54,7 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
 
     return (
         <>
-            {viewMode === "grid" && (
+            {(viewMode === "grid" || isRecommendation) && (
                 <CardElement className={getCardClasses()} {...cardProps}>
                     {!isStatic && <span className="sr-only">Select {getTitleWithPreference(anime)}</span>}
                     <div className={cn("absolute inset-0 -z-20 rounded-lg transition-all ease-in-out duration-700 scale-75 brightness-50", checked && "scale-100 brightness-50")}>
@@ -102,7 +104,7 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
                     </div>
                 </CardElement>
             )}
-            {viewMode !== "grid" && (
+            {viewMode !== "grid" && !isRecommendation && (
                 <div className={cn(getCardClasses())}>
                     <div className="flex items-center gap-2">
                         <Checkbox id={`anime-checkbox-${anime.id}`} checked={checked} onCheckedChange={() => toggleSelectedMedia(anime.id)} className="transition-all duration-200 scale-100 ease-in-out hover:scale-125 cursor-pointer sm:size-4 size-6" />

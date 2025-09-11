@@ -121,7 +121,7 @@ export default function Recommendations() {
             <CollapsibleContent className="flex flex-col gap-4 px-4 pb-4 open overflow-hidden transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down peer-hover:bg-accent peer-hover:text-accent-foreground dark:peer-hover:bg-accent/50">
                 {displayedRecommendations.map((rec) => (
                     <div key={rec.id} className="grid grid-cols-5">
-                        <AnimeCard isStatic={true} anime={rec.media} variant="compact" showDetails={false} className="col-span-2 rounded-md" />
+                        <AnimeCard isStatic={true} anime={rec.media} variant="compact" showDetails={false} className="col-span-2 rounded-md" isRecommendation={true} />
                         <div className="flex justify-center items-center px-2 col-span-1">
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -137,7 +137,7 @@ export default function Recommendations() {
                                 </TooltipContent>
                             </Tooltip>
                         </div>
-                        <AnimeCard isStatic={true} anime={rec.mediaRecommendation} variant="compact" className="col-span-2 rounded-md" />
+                        <AnimeCard isStatic={true} anime={rec.mediaRecommendation} variant="compact" className="col-span-2 rounded-md" isRecommendation={true} />
                     </div>
                 ))}
                 {hasMoreRecommendations && (
