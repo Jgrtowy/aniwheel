@@ -69,6 +69,7 @@ export default function Landing() {
 
     const handleLogin = async (provider: UserProfile["provider"]) => {
         setIsLoggingIn(provider);
+
         try {
             signIn(provider);
         } catch (error) {
@@ -78,20 +79,22 @@ export default function Landing() {
         }
     };
 
-    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-        e.preventDefault();
-        let pasted = e.clipboardData.getData("text/plain");
-        if (pasted.startsWith("https://myanimelist.net/profile/")) {
-            setService("myanimelist");
-        }
-        if (pasted.startsWith("https://anilist.co/user/")) {
-            setService("anilist");
-        }
-        pasted = pasted.replace("https://myanimelist.net/profile/", "");
-        pasted = pasted.replace("https://anilist.co/user/", "");
-        pasted = pasted.split("/")[0];
-        setUsername(pasted);
-    };
+    // Function to handle pasting username (commented due to disabled feature)
+
+    // const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    //     e.preventDefault();
+    //     let pasted = e.clipboardData.getData("text/plain");
+    //     if (pasted.startsWith("https://myanimelist.net/profile/")) {
+    //         setService("myanimelist");
+    //     }
+    //     if (pasted.startsWith("https://anilist.co/user/")) {
+    //         setService("anilist");
+    //     }
+    //     pasted = pasted.replace("https://myanimelist.net/profile/", "");
+    //     pasted = pasted.replace("https://anilist.co/user/", "");
+    //     pasted = pasted.split("/")[0];
+    //     setUsername(pasted);
+    // };
 
     return (
         <MotionConfig reducedMotion="user">
@@ -128,7 +131,7 @@ export default function Landing() {
                                 <h2 className="text-xl sm:text-4xl font-semibold">Your Anime Wheel of Fortune</h2>
                                 <p className="text-md sm:text-xl">
                                     Connect your list and let <span className="peer italic">fate</span> pick your next binge!
-                                    {/* <Image src="/Rider_of_black.webp" alt="Rider of Black from Fate/Apocrypha anime" width={150} height={150} className="fixed rotate-45 transition-[750ms] -bottom-72 -left-46 peer-hover:-bottom-23 peer-hover:-left-12 size-auto" /> */}
+                                    <Image src="/Rider_of_black.webp" alt="Rider of Black from Fate/Apocrypha anime" width={150} height={150} className="fixed rotate-45 transition-[750ms] -bottom-72 -left-46 peer-hover:-bottom-23 peer-hover:-left-12 size-auto" />
                                 </p>
                             </div>
                             <nav className="flex flex-col items-center sm:flex-row gap-4 sm:gap-6" aria-label="Sign in options">
@@ -142,10 +145,21 @@ export default function Landing() {
                                     MyAnimeList
                                 </Button>
                             </nav>
-                            <Dialog>
+                            <nav className="flex flex-row gap-4">
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="outline" size="lg" className="flex items-center text-muted-foreground cursor-not-allowed hover:text-muted-foreground" aria-label="Sign in with username (coming soon)">
+                                            Sign in with username <CircleArrowRight className="ml-2 w-45 py-6.5 sm:py-7 font-bold gap-3" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Comming soon!</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                                {/* <Dialog>
                                 <DialogTrigger asChild>
                                     <div className="flex flex-row w-full items-center justify-center gap-2 text-sm text-muted-foreground">
-                                        <Button variant="outline" size="lg" className="flex items-center">
+                                        <Button variant="outline" size="lg" className="flex items-center text-muted-foreground">
                                             Sign in with username <CircleArrowRight className="ml-2" />
                                         </Button>
                                     </div>
@@ -174,9 +188,19 @@ export default function Landing() {
                                     <Separator />
                                     <Button variant="secondary">Live demo</Button>
                                 </DialogContent>
-                            </Dialog>
-                            <Separator />
-                            <Button variant="outline">Demo mode</Button>
+                            </Dialog> */}
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="outline" className="flex items-center text-muted-foreground cursor-not-allowed hover:text-muted-foreground" aria-label="Demo mode (coming soon)">
+                                            Demo mode
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Coming soon(er)!</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </nav>
+
                             <AnimatePresence>
                                 {renderButtons && (
                                     <motion.div className="text-xs text-muted-foreground z-10" layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: TITLE_ANIMATION_DURATION, delay: TITLE_ANIMATION_DURATION / 2 }}>

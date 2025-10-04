@@ -2,7 +2,6 @@
 
 import { Grid2X2, List, Rows4, Search, X } from "lucide-react";
 import { MotionConfig, motion } from "motion/react";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import Aurora from "~/components/Aurora";
 import BackToTop from "~/components/BackToTop";

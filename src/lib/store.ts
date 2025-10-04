@@ -76,7 +76,6 @@ interface SettingsStore {
     skipLandingAnimation: boolean;
     enableTickSounds: boolean;
     viewMode: "grid" | "list" | "compact";
-    analyticsEnabled: boolean;
 
     setPreferredTitleLanguage: (lang: TitleLanguage) => void;
     setPreferredImageSize: (size: ImageSize) => void;
@@ -84,7 +83,6 @@ interface SettingsStore {
     setSkipLandingAnimation: (skip: boolean) => void;
     setEnableTickSounds: (enable: boolean) => void;
     setViewMode: (mode: "grid" | "list" | "compact") => void;
-    setAnalyticsEnabled: (enabled: boolean) => void;
 }
 
 export const useAnimeStore = create<AnimeStore>((set, get) => ({
@@ -315,7 +313,6 @@ export const useSettingsStore = create<SettingsStore>()(
             skipLandingAnimation: false,
             enableTickSounds: true,
             viewMode: "grid",
-            analyticsEnabled: true,
 
             setPreferredTitleLanguage: (lang) => set({ preferredTitleLanguage: lang }),
             setPreferredImageSize: (size) => set({ preferredImageSize: size }),
@@ -323,7 +320,6 @@ export const useSettingsStore = create<SettingsStore>()(
             setSkipLandingAnimation: (skip) => set({ skipLandingAnimation: skip }),
             setEnableTickSounds: (enable) => set({ enableTickSounds: enable }),
             setViewMode: (mode) => set({ viewMode: mode }),
-            setAnalyticsEnabled: (enabled) => set({ analyticsEnabled: enabled }),
         }),
         { name: "aniwheel-settings" },
     ),
