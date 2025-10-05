@@ -109,16 +109,40 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     setMediaList: (list) => set({ mediaList: list }),
     setSelectedMedia: (checked) => set({ checkedMedia: checked }),
     toggleSelectedMedia: (id) => {
-        const checked = new Set(get().checkedMedia);
-        if (checked.has(id)) checked.delete(id);
-        else checked.add(id);
-        set({ checkedMedia: checked });
+        const currentChecked = get().checkedMedia;
+        const newChecked = new Set(currentChecked);
+        if (newChecked.has(id)) {
+            newChecked.delete(id);
+        } else {
+            newChecked.add(id);
+        }
+        // Only update if there's actually a change
+        if (newChecked.size !== currentChecked.size || !currentChecked.has(id) === newChecked.has(id)) {
+            set({ checkedMedia: newChecked });
+        }
     },
     addSelectedMedia: (id) => {
-        const checked = new Set(get().checkedMedia);
-        if (Array.isArray(id)) for (const itemId of id) checked.add(itemId);
-        else checked.add(id);
-        set({ checkedMedia: checked });
+        const currentChecked = get().checkedMedia;
+        const newChecked = new Set(currentChecked);
+        let hasChanges = false;
+
+        if (Array.isArray(id)) {
+            for (const itemId of id) {
+                if (!newChecked.has(itemId)) {
+                    newChecked.add(itemId);
+                    hasChanges = true;
+                }
+            }
+        } else {
+            if (!newChecked.has(id)) {
+                newChecked.add(id);
+                hasChanges = true;
+            }
+        }
+
+        if (hasChanges) {
+            set({ checkedMedia: newChecked });
+        }
     },
     selectAllMedia: () => set({ checkedMedia: new Set(get().mediaList.map((a) => a.id)) }),
     deselectAllMedia: () => set({ checkedMedia: new Set() }),
@@ -208,8 +232,14 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         const state = get();
         let filteredAnime = state.fullMediaList;
 
+        // Cache settings for performance
+        const settings = useSettingsStore.getState();
+        const searchTermLower = state.searchTerm.toLowerCase();
+
         // Search term filter
-        if (state.searchTerm) filteredAnime = filteredAnime.filter((anime) => anime.title.en?.toLowerCase().includes(state.searchTerm.toLowerCase()) || anime.title.romaji?.toLowerCase().includes(state.searchTerm.toLowerCase()) || anime.title.jp?.toLowerCase().includes(state.searchTerm.toLowerCase()));
+        if (state.searchTerm) {
+            filteredAnime = filteredAnime.filter((anime) => anime.title.en?.toLowerCase().includes(searchTermLower) || anime.title.romaji?.toLowerCase().includes(searchTermLower) || anime.title.jp?.toLowerCase().includes(searchTermLower));
+        }
 
         // Genre filter
         if (state.activeGenres.length > 0) {
@@ -260,7 +290,7 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
                     break;
                 }
                 case "title": {
-                    comparison = getTitleWithPreference(a).localeCompare(getTitleWithPreference(b));
+                    comparison = getTitleWithPreference(a, settings.preferredTitleLanguage).localeCompare(getTitleWithPreference(b, settings.preferredTitleLanguage));
                     break;
                 }
                 case "score": {

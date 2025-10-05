@@ -3,7 +3,7 @@
 import { ExternalLink, LogOut, ShieldHalf } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RepoLink from "~/components/RepoLink";
 import SettingsMenu from "~/components/SettingsMenu";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -32,6 +32,10 @@ export default function Header() {
         },
         {} as Record<NonNullable<MediaItem["status"]>, number>,
     );
+
+    useEffect(() => {
+        console.log(session?.user);
+    }, [session]);
 
     return (
         <header className="flex items-center justify-between bg-component-primary p-4 rounded-xl border">
@@ -71,6 +75,7 @@ export default function Header() {
                                             <p>
                                                 {statusesCount.PLANNING} planning &bull; {statusesCount.PAUSED} paused &bull; {statusesCount.DROPPED} dropped
                                             </p>
+                                            <p>Member since {new Date(session.user.createdAt * 1000).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</p>
                                             <p>Signed in with {getPrettyProviderName(session?.activeProvider)}</p>
                                         </div>
                                     )}

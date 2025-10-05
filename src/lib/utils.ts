@@ -1,12 +1,20 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useSettingsStore } from "~/lib/store";
-import type { AniListMediaItem, ImageSize, MALMediaItem, MediaItem, UserProfile } from "~/lib/types";
+import type { AniListMediaItem, ImageSize, MALMediaItem, MediaItem, TitleLanguage, UserProfile } from "~/lib/types";
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
-export const getTitleWithPreference = (media: MediaItem) => media.title[useSettingsStore.getState().preferredTitleLanguage] || media.title.romaji || media.title.jp || "[Unknown Title]";
-export const getImageUrlWithPreference = (media: MediaItem, size?: ImageSize) => media.image[size || useSettingsStore.getState().preferredImageSize] || media.image.large || media.image.medium || "/placeholder.webp";
+// Cached versions to avoid repeated store calls
+export const getTitleWithPreference = (media: MediaItem, preferredLanguage?: TitleLanguage) => {
+    const lang = preferredLanguage || useSettingsStore.getState().preferredTitleLanguage;
+    return media.title[lang] || media.title.romaji || media.title.jp || "[Unknown Title]";
+};
+
+export const getImageUrlWithPreference = (media: MediaItem, size?: ImageSize, preferredSize?: ImageSize) => {
+    const sizeToUse = size || preferredSize || useSettingsStore.getState().preferredImageSize;
+    return media.image[sizeToUse] || media.image.large || media.image.medium || "/placeholder.webp";
+};
 
 export function aniListToMediaItem(item: AniListMediaItem): MediaItem {
     return {
@@ -29,6 +37,7 @@ export function aniListToMediaItem(item: AniListMediaItem): MediaItem {
         entryCreatedAt: item.mediaListEntry?.createdAt || null,
         status: item.mediaListEntry?.status || null,
         format: item.format || "UNKNOWN",
+        duration: item.duration || 0,
     };
 }
 
@@ -53,6 +62,7 @@ export function malToMediaItem(item: MALMediaItem): MediaItem {
         entryCreatedAt: item.my_list_status?.updated_at ? new Date(item.my_list_status.updated_at).getTime() : null,
         status: item.my_list_status?.status === "plan_to_watch" ? "PLANNING" : item.my_list_status?.status === "dropped" ? "DROPPED" : item.my_list_status?.status === "on_hold" ? "PAUSED" : null,
         format: item.media_type === "tv" ? "TV" : item.media_type === "ova" ? "OVA" : item.media_type === "movie" ? "MOVIE" : item.media_type === "special" ? "SPECIAL" : item.media_type === "ona" ? "ONA" : item.media_type === "music" ? "MUSIC" : item.media_type === "unknown" ? "UNKNOWN" : "UNKNOWN",
+        duration: Number(((item.average_episode_duration || 0) / 60).toFixed()),
     };
 }
 

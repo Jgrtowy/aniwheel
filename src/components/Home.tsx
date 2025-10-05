@@ -14,6 +14,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import Stats from "./Stats";
 
 export default function Home() {
     const { searchTerm, setSearchTerm } = useAnimeStore();
@@ -59,6 +60,9 @@ export default function Home() {
                                 <FiltersDropdown />
                                 <SortingDropdown />
                             </div>
+                        </div>
+                        <div>
+                            <Stats />
                         </div>
                         <MediaList />
                     </section>

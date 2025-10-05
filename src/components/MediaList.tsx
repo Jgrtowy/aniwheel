@@ -1,16 +1,18 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AnimeCard from "~/components/AnimeCard";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useAnimeStore, useSettingsStore } from "~/lib/store";
+import { useCheckedMedia, useViewMode } from "~/hooks/useShallowStore";
+import { useAnimeStore } from "~/lib/store";
 import { Separator } from "./ui/separator";
 
 export default function PlannedList() {
-    const { mediaList, checkedMedia, fullMediaList, setFullMediaList, setActiveGenres, clearFilters, setSearchTerm } = useAnimeStore();
-    const { viewMode } = useSettingsStore();
+    const { mediaList, fullMediaList, setFullMediaList, setActiveGenres, clearFilters, setSearchTerm } = useAnimeStore();
+    const checkedMedia = useCheckedMedia();
+    const viewMode = useViewMode();
     const [isFetching, setIsFetching] = useState(true);
 
     useEffect(() => {
@@ -28,18 +30,18 @@ export default function PlannedList() {
         })();
     }, [setFullMediaList, setActiveGenres]);
 
-    const handleResetFilters = () => {
+    const handleResetFilters = useCallback(() => {
         clearFilters();
         setSearchTerm("");
-    };
+    }, [clearFilters, setSearchTerm]);
 
-    const getLayoutClasses = () => {
+    const layoutClasses = useMemo(() => {
         if (viewMode === "grid") return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-full gap-4 max-h-fit";
         return "flex flex-col w-full gap-2";
-    };
+    }, [viewMode]);
 
     return (
-        <motion.div className={getLayoutClasses()} key={viewMode} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+        <motion.div className={layoutClasses} key={viewMode} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
             {isFetching &&
                 viewMode === "grid" &&
                 Array.from({ length: 24 }).map((_, index) => (
@@ -59,7 +61,7 @@ export default function PlannedList() {
                 ))}
             {!isFetching &&
                 mediaList.map((anime, index) => (
-                    <motion.div className="space-y-2" key={`${viewMode}-${anime.id}`} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, delay: index * 0.02, ease: "easeOut" }}>
+                    <motion.div className="space-y-2" key={`${viewMode}-${anime.id}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15, delay: Math.min(index * 0.01, 0.5) }} layout={false}>
                         <AnimeCard anime={anime} checked={checkedMedia.has(anime.id)} className="mx-auto" />
                         {viewMode !== "grid" && index < mediaList.length - 1 && (
                             <div className="ml-6">

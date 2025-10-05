@@ -18,6 +18,7 @@ export interface MediaItem {
     entryCreatedAt: number | null;
     status: "PLANNING" | "DROPPED" | "PAUSED" | null;
     format: Format;
+    duration: number;
 }
 
 export interface MediaRecommendation {
@@ -53,6 +54,7 @@ export interface AniListMediaItem {
         status: "PLANNING" | "DROPPED" | "PAUSED" | null;
     } | null;
     format: "TV" | "TV_SHORT" | "MOVIE" | "SPECIAL" | "OVA" | "ONA" | "MUSIC";
+    duration: number | null;
 }
 
 export interface AniListMediaRecommendation {
@@ -83,6 +85,7 @@ export interface MALMediaItem {
         [key: string]: unknown;
     } | null;
     media_type: "unknown" | "tv" | "ova" | "movie" | "special" | "ona" | "music";
+    average_episode_duration: number | null;
 }
 
 export type TitleLanguage = keyof MediaItem["title"];
