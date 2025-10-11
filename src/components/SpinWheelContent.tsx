@@ -11,7 +11,6 @@ import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import type { MediaItem } from "~/lib/types";
 import { cn, getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
-import ShinyText from "./ui/ShinyText";
 
 const calculateImageDimensions = (segmentAngle: number, radius: number) => {
     const angleRad = (segmentAngle * Math.PI) / 180;
@@ -320,7 +319,7 @@ export function SpinWheelContent() {
                                     <img src={getImageUrlWithPreference(selectedItem)} alt={getTitleWithPreference(selectedItem)} className="w-full h-72 lg:h-96 object-cover" />
                                     <div className="absolute bottom-0 w-full h-3/6 bg-gradient-to-t from-black/95 to-transparent" />
                                     <div className="absolute bottom-0 left-0 right-0 text-primary flex flex-col gap-2 p-2 pb-4">
-                                        <ShinyText text={getTitleWithPreference(selectedItem)} className="text-xl lg:text-2xl font-bold line-clamp-2" speed={2} />
+                                        <h3 className="text-xl lg:text-2xl font-bold text-primary-foreground line-clamp-2">{getTitleWithPreference(selectedItem)}</h3>
                                         <div className="flex gap-2 font-medium leading-tight whitespace-nowrap text-sm">
                                             {selectedItem.averageScore && (
                                                 <div className="flex items-center gap-1 h-7 px-2 text-md text-accent-foreground w-fit border rounded-md bg-component-primary">

@@ -92,6 +92,12 @@
     }
 }
 
+@property --mask-opacity-65 {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
+}
+
 :root {
     --radius: 0.65rem;
     --background: oklch(1 0 0);

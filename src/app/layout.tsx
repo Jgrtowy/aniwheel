@@ -1,9 +1,9 @@
+import "./globals.css";
 import type { Metadata } from "next";
 import { Comfortaa } from "next/font/google";
 import { Toaster } from "~/components/ui/sonner";
 import { ClientSessionProvider } from "~/providers/session-provider";
 import { ThemeProvider } from "~/providers/theme-provider";
-import "./globals.css";
 
 const comfortaa = Comfortaa({
     variable: "--font-comfortaa",

@@ -11,7 +11,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/h
 import { Label } from "~/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { useAnimeStore } from "~/lib/store";
-import type { Format } from "~/lib/types";
+import type { MediaItem } from "~/lib/types";
 import { cn } from "~/lib/utils";
 
 export default function FiltersPopover() {
@@ -92,7 +92,7 @@ export default function FiltersPopover() {
     );
 }
 
-function FormatCheckbox({ format }: { format: Format }) {
+function FormatCheckbox({ format }: { format: MediaItem["format"] }) {
     const { activeFormats, addActiveFormat, removeActiveFormat } = useAnimeStore();
 
     const isChecked = activeFormats.has(format);

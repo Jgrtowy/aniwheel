@@ -1,6 +1,6 @@
 "use client";
 
-import { Grid2X2, List, Rows4, Search, X } from "lucide-react";
+import { Grid2X2, List, Rows3, Search, X } from "lucide-react";
 import { MotionConfig, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import Aurora from "~/components/Aurora";
@@ -13,8 +13,9 @@ import SortingDropdown from "~/components/SortingDropdown";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useAnimeStore, useSettingsStore } from "~/lib/store";
-import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import Stats from "./Stats";
+import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function Home() {
     const { searchTerm, setSearchTerm } = useAnimeStore();
@@ -46,24 +47,23 @@ export default function Home() {
                                 )}
                             </div>
                             <div className="flex gap-2">
-                                <ToggleGroup type="single" variant="outline" value={viewMode} onValueChange={(val) => val && setViewMode(val as "grid" | "list" | "compact")} className="w-32">
-                                    <ToggleGroupItem value="grid">
+                                <ToggleGroup type="single" variant="outline" className="w-24" value={viewMode} onValueChange={(val) => val && setViewMode(val as "grid" | "list")}>
+                                    <ToggleGroupItem value="grid" className="border dark:border-input cursor-pointer shadow-xs transition-none bg-background hover:bg-accent dark:bg-input/30 dark:hover:bg-input/50 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground!">
                                         <Grid2X2 />
+                                        <span className="sr-only">Grid view</span>
                                     </ToggleGroupItem>
-                                    <ToggleGroupItem value="list">
-                                        <List />
-                                    </ToggleGroupItem>
-                                    <ToggleGroupItem value="compact">
-                                        <Rows4 />
+                                    <ToggleGroupItem value="list" className="border dark:border-input cursor-pointer shadow-xs transition-none bg-background hover:bg-accent dark:bg-input/30 dark:hover:bg-input/50 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground!">
+                                        <Rows3 />
+                                        <span className="sr-only">List view</span>
                                     </ToggleGroupItem>
                                 </ToggleGroup>
                                 <FiltersDropdown />
                                 <SortingDropdown />
                             </div>
                         </div>
-                        <div>
+                        {/* <div>
                             <Stats />
-                        </div>
+                        </div> */}
                         <MediaList />
                     </section>
                     <aside className="w-full md:w-[19rem] lg:w-[22rem] flex flex-col gap-4 md:sticky md:top-4 md:self-start">

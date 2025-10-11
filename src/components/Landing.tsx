@@ -38,6 +38,7 @@ export default function Landing() {
     const [renderButtons, setRenderButtons] = useState(false);
     const [isLoggingIn, setIsLoggingIn] = useState<string | null>(null);
     const [colorStops, setColorStops] = useState<string[]>(["#2e1cff", "#ff3161", "#b032ff"]);
+    const [isKanjiTooltipOpen, setIsKanjiTooltipOpen] = useState(false);
 
     const [service, setService] = useState<"anilist" | "myanimelist">("anilist");
     const [username, setUsername] = useState("");
@@ -65,6 +66,7 @@ export default function Landing() {
         setRenderTitle(true);
         await new Promise((resolve) => setTimeout(resolve, TITLE_ANIMATION_DURATION * 1000 + 250));
         setRenderButtons(true);
+        setIsKanjiTooltipOpen(false);
     };
 
     const handleLogin = async (provider: UserProfile["provider"]) => {
@@ -106,7 +108,7 @@ export default function Landing() {
                 <header>
                     <motion.div layout className="flex items-center justify-center gap-2 sm:gap-4">
                         <motion.div className="size-[75px] sm:size-[100px]" layout transition={{ type: "spring", stiffness: 300, damping: 30 }}>
-                            <Tooltip open={kanjiPathAnimationComplete ? undefined : false}>
+                            <Tooltip open={kanjiPathAnimationComplete ? isKanjiTooltipOpen : false} onOpenChange={setIsKanjiTooltipOpen}>
                                 <TooltipTrigger>
                                     <KanjiAnimation className={cn("shrink-0 transition size-full", kanjiPathAnimationComplete || reduceMotion ? "scale-100" : "scale-[300%]")} duration={0.175} delayBetween={0.01} strokeWidth={5} skipAnimation={reduceMotion} onAnimationComplete={handleKanjiPathAnimationComplete} />
                                 </TooltipTrigger>

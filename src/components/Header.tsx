@@ -3,19 +3,19 @@
 import { ExternalLink, LogOut, ShieldHalf } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import KanjiAnimation from "~/components/KanjiAnimation";
 import RepoLink from "~/components/RepoLink";
 import SettingsMenu from "~/components/SettingsMenu";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import { Separator } from "~/components/ui/separator";
 import { signOut } from "~/lib/auth";
 import { useAnimeStore } from "~/lib/store";
 import type { MediaItem } from "~/lib/types";
 import { getPrettyProviderName } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
-import KanjiAnimation from "./KanjiAnimation";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Separator } from "./ui/separator";
 
 export default function Header() {
     const session = useSession();
@@ -32,10 +32,6 @@ export default function Header() {
         },
         {} as Record<NonNullable<MediaItem["status"]>, number>,
     );
-
-    useEffect(() => {
-        console.log(session?.user);
-    }, [session]);
 
     return (
         <header className="flex items-center justify-between bg-component-primary p-4 rounded-xl border">
@@ -82,12 +78,6 @@ export default function Header() {
                                 </div>
                             </div>
                         </div>
-                        {session && session.activeProvider === "anilist" && session.user.moderatorRoles && (
-                            <div>
-                                <Separator />
-                                <p className="text-white text-sm m-4">Thank you for being an AniList moderator. 🫡</p>
-                            </div>
-                        )}
                         <Separator />
                         <div className="grid p-2">
                             <Button variant="ghost" className="justify-start" asChild>
@@ -104,6 +94,15 @@ export default function Header() {
                                 Sign Out
                             </Button>
                         </div>
+                        {session && session.activeProvider === "anilist" && session.user.moderatorRoles && (
+                            <>
+                                <Separator />
+                                <div className="p-4">
+                                    <p className="text-sm italic font-bold">Hey there moderator!</p>
+                                    <p className="text-xs">Thank you for making AniList better for all of us. 💗</p>
+                                </div>
+                            </>
+                        )}
                     </PopoverContent>
                 </Popover>
             </div>

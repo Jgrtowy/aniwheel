@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Format, ImageSize, MediaItem, SortField, SortOrder, TitleLanguage } from "~/lib/types";
-import { getTitleWithPreference } from "~/lib/utils";
+import type { ImageSize, MediaItem, SortField, SortOrder, TitleLanguage } from "~/lib/types";
+import { getTitleWithPreference, mediaDateToTimestamp } from "~/lib/utils";
 
 interface AnimeStore {
     // Full, unfiltered list of titles
@@ -21,8 +21,8 @@ interface AnimeStore {
     showPaused: boolean;
     showDropped: boolean;
     showUnaired: boolean;
-    activeFormats: Set<Format>;
-    availableFormats: Set<Format>;
+    activeFormats: Set<MediaItem["format"]>;
+    availableFormats: Set<MediaItem["format"]>;
 
     // Sorting
     sortField: SortField;
@@ -52,11 +52,11 @@ interface AnimeStore {
 
     setShowUnaired: (show: boolean) => void;
 
-    setActiveFormats: (formats: Format[]) => void;
-    addActiveFormat: (format: Format) => void;
-    removeActiveFormat: (format: Format) => void;
+    setActiveFormats: (formats: MediaItem["format"][]) => void;
+    addActiveFormat: (format: MediaItem["format"]) => void;
+    removeActiveFormat: (format: MediaItem["format"]) => void;
 
-    setAvailableFormats: (formats: Format[]) => void;
+    setAvailableFormats: (formats: MediaItem["format"][]) => void;
 
     setSortField: (field: SortField) => void;
     setSortOrder: (order: SortOrder) => void;
@@ -75,14 +75,14 @@ interface SettingsStore {
     showMediaRecommendations: boolean;
     skipLandingAnimation: boolean;
     enableTickSounds: boolean;
-    viewMode: "grid" | "list" | "compact";
+    viewMode: "grid" | "list";
 
     setPreferredTitleLanguage: (lang: TitleLanguage) => void;
     setPreferredImageSize: (size: ImageSize) => void;
     setShowMediaRecommendations: (show: boolean) => void;
     setSkipLandingAnimation: (skip: boolean) => void;
     setEnableTickSounds: (enable: boolean) => void;
-    setViewMode: (mode: "grid" | "list" | "compact") => void;
+    setViewMode: (mode: "grid" | "list") => void;
 }
 
 export const useAnimeStore = create<AnimeStore>((set, get) => ({
@@ -222,7 +222,7 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     initialize: () => {
         const state = get();
         const FORMAT_ORDER = ["TV", "TV_SHORT", "ONA", "OVA", "MOVIE", "SPECIAL", "UNKNOWN"];
-        const availableFormatsArr = Array.from(new Set(state.fullMediaList.map((anime) => anime.format).filter((format): format is Format => format !== null))).sort((a, b) => FORMAT_ORDER.indexOf(a) - FORMAT_ORDER.indexOf(b));
+        const availableFormatsArr = Array.from(new Set(state.fullMediaList.map((anime) => anime.format).filter((format): format is MediaItem["format"] => format !== null))).sort((a, b) => FORMAT_ORDER.indexOf(a) - FORMAT_ORDER.indexOf(b));
         set({
             availableFormats: new Set(availableFormatsArr),
             activeFormats: new Set(availableFormatsArr),
@@ -254,7 +254,9 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
             const currentDate = Date.now();
             filteredAnime = filteredAnime.filter((anime) => {
                 if (!anime.startDate) return false;
-                return new Date(anime.startDate).getTime() <= currentDate;
+                const releaseTimestamp = mediaDateToTimestamp(anime.startDate);
+                if (releaseTimestamp === null) return false;
+                return releaseTimestamp <= currentDate;
             });
         }
 
@@ -351,6 +353,21 @@ export const useSettingsStore = create<SettingsStore>()(
             setEnableTickSounds: (enable) => set({ enableTickSounds: enable }),
             setViewMode: (mode) => set({ viewMode: mode }),
         }),
-        { name: "aniwheel-settings" },
+        {
+            name: "aniwheel-settings",
+            version: 2,
+            migrate: (persistedState, version) => {
+                if (!persistedState || typeof persistedState !== "object") return persistedState as Partial<SettingsStore>;
+                const state = persistedState as Record<string, unknown>;
+                const viewMode = state.viewMode;
+                if (version < 2 && viewMode === "compact") {
+                    return { ...state, viewMode: "grid" } as Partial<SettingsStore>;
+                }
+                if (viewMode !== "grid" && viewMode !== "list") {
+                    return { ...state, viewMode: "grid" } as Partial<SettingsStore>;
+                }
+                return persistedState as Partial<SettingsStore>;
+            },
+        },
     ),
 );

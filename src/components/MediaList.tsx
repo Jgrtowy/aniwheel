@@ -3,11 +3,11 @@
 import { motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AnimeCard from "~/components/AnimeCard";
+import AnimeListItem from "~/components/AnimeListItem";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useCheckedMedia, useViewMode } from "~/hooks/useShallowStore";
 import { useAnimeStore } from "~/lib/store";
-import { Separator } from "./ui/separator";
 
 export default function PlannedList() {
     const { mediaList, fullMediaList, setFullMediaList, setActiveGenres, clearFilters, setSearchTerm } = useAnimeStore();
@@ -62,12 +62,7 @@ export default function PlannedList() {
             {!isFetching &&
                 mediaList.map((anime, index) => (
                     <motion.div className="space-y-2" key={`${viewMode}-${anime.id}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15, delay: Math.min(index * 0.01, 0.5) }} layout={false}>
-                        <AnimeCard anime={anime} checked={checkedMedia.has(anime.id)} className="mx-auto" />
-                        {viewMode !== "grid" && index < mediaList.length - 1 && (
-                            <div className="ml-6">
-                                <Separator />
-                            </div>
-                        )}
+                        {viewMode === "grid" ? <AnimeCard anime={anime} checked={checkedMedia.has(anime.id)} className="mx-auto" /> : <AnimeListItem anime={anime} checked={checkedMedia.has(anime.id)} />}
                     </motion.div>
                 ))}
             {fullMediaList.length === 0 && !isFetching && (

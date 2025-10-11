@@ -35,6 +35,11 @@ query MediaList($userName: String, $statusIn: [MediaListStatus], $type: MediaTyp
             month
             year
           }
+          endDate {
+            day
+            month
+            year
+          }
           averageScore
           episodes
           siteUrl
@@ -45,6 +50,15 @@ query MediaList($userName: String, $statusIn: [MediaListStatus], $type: MediaTyp
           }
           format
           duration
+          status(version: 2)
+          studios {
+            edges {
+              isMain
+              node {
+                name
+              }
+            }
+          }
         }
       }
     }
@@ -69,7 +83,7 @@ query MediaList($userName: String, $statusIn: [MediaListStatus], $type: MediaTyp
 
         const formattedMediaList: MediaItem[] = [];
 
-        const data = await fetch(`https://api.myanimelist.net/v2/users/@me/animelist?limit=1000&offset=${formattedMediaList.length}&fields=alternative_titles,start_date,mean,num_episodes,genres,my_list_status,media_type,average_episode_duration`, {
+        const data = await fetch(`https://api.myanimelist.net/v2/users/@me/animelist?limit=1000&offset=${formattedMediaList.length}&fields=alternative_titles,start_date,end_date,mean,num_episodes,genres,my_list_status,media_type,average_episode_duration,status,studios`, {
             method: "GET",
             headers: { Authorization: `Bearer ${session.accessToken}` },
         });

@@ -12,7 +12,7 @@ export function SpinWheelDialog() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button disabled={checkedMedia.size < 2} variant="default" size="lg" className="w-full">
+                <Button disabled={checkedMedia.size < 2} size="lg" className="w-full">
                     <Shuffle className="size-5 mr-2" />
                     Spin the wheel!
                 </Button>
