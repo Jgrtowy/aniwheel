@@ -13,6 +13,7 @@ interface MALUserResponse {
     id: number;
     name: string;
     picture?: string;
+    joined_at: number;
 }
 
 export async function GET(request: NextRequest) {
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
 
         const tokens: MALTokenResponse = await tokenResponse.json();
 
-        const userResponse = await fetch("https://api.myanimelist.net/v2/users/@me", {
+        const userResponse = await fetch("https://api.myanimelist.net/v2/users/@me?fields=name,picture,joined_at", {
             headers: { Authorization: `Bearer ${tokens.access_token}` },
         });
 
@@ -75,6 +76,8 @@ export async function GET(request: NextRequest) {
                 name: user.name,
                 image: user.picture || null,
                 url: `https://myanimelist.net/profile/${user.name}`,
+                moderatorRoles: null,
+                createdAt: Number(new Date(user.joined_at).getTime().toString().slice(0, -3)), // Convert to seconds
             },
             accessToken: tokens.access_token,
             refreshToken: tokens.refresh_token,

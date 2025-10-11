@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ImageSize, MediaItem, SortField, SortOrder, TitleLanguage } from "~/lib/types";
-import { getTitleWithPreference } from "~/lib/utils";
+import { getTitleWithPreference, mediaDateToTimestamp } from "~/lib/utils";
 
 interface AnimeStore {
     // Full, unfiltered list of titles
@@ -21,6 +21,8 @@ interface AnimeStore {
     showPaused: boolean;
     showDropped: boolean;
     showUnaired: boolean;
+    activeFormats: Set<MediaItem["format"]>;
+    availableFormats: Set<MediaItem["format"]>;
 
     // Sorting
     sortField: SortField;
@@ -50,10 +52,17 @@ interface AnimeStore {
 
     setShowUnaired: (show: boolean) => void;
 
+    setActiveFormats: (formats: MediaItem["format"][]) => void;
+    addActiveFormat: (format: MediaItem["format"]) => void;
+    removeActiveFormat: (format: MediaItem["format"]) => void;
+
+    setAvailableFormats: (formats: MediaItem["format"][]) => void;
+
     setSortField: (field: SortField) => void;
     setSortOrder: (order: SortOrder) => void;
     setSorting: (field: SortField, order: SortOrder) => void;
 
+    initialize: () => void;
     applyFilters: () => void;
     clearFilters: () => void;
     hasActiveFilters: () => boolean;
@@ -66,12 +75,14 @@ interface SettingsStore {
     showMediaRecommendations: boolean;
     skipLandingAnimation: boolean;
     enableTickSounds: boolean;
+    viewMode: "grid" | "list";
 
     setPreferredTitleLanguage: (lang: TitleLanguage) => void;
     setPreferredImageSize: (size: ImageSize) => void;
     setShowMediaRecommendations: (show: boolean) => void;
     setSkipLandingAnimation: (skip: boolean) => void;
     setEnableTickSounds: (enable: boolean) => void;
+    setViewMode: (mode: "grid" | "list") => void;
 }
 
 export const useAnimeStore = create<AnimeStore>((set, get) => ({
@@ -87,24 +98,51 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     showPlanning: true,
     showPaused: false,
     showDropped: false,
+    activeFormats: new Set(),
+    availableFormats: new Set(),
 
     setFullMediaList: (list) => {
         set({ fullMediaList: list });
         get().applyFilters();
+        get().initialize();
     },
     setMediaList: (list) => set({ mediaList: list }),
     setSelectedMedia: (checked) => set({ checkedMedia: checked }),
     toggleSelectedMedia: (id) => {
-        const checked = new Set(get().checkedMedia);
-        if (checked.has(id)) checked.delete(id);
-        else checked.add(id);
-        set({ checkedMedia: checked });
+        const currentChecked = get().checkedMedia;
+        const newChecked = new Set(currentChecked);
+        if (newChecked.has(id)) {
+            newChecked.delete(id);
+        } else {
+            newChecked.add(id);
+        }
+        // Only update if there's actually a change
+        if (newChecked.size !== currentChecked.size || !currentChecked.has(id) === newChecked.has(id)) {
+            set({ checkedMedia: newChecked });
+        }
     },
     addSelectedMedia: (id) => {
-        const checked = new Set(get().checkedMedia);
-        if (Array.isArray(id)) for (const itemId of id) checked.add(itemId);
-        else checked.add(id);
-        set({ checkedMedia: checked });
+        const currentChecked = get().checkedMedia;
+        const newChecked = new Set(currentChecked);
+        let hasChanges = false;
+
+        if (Array.isArray(id)) {
+            for (const itemId of id) {
+                if (!newChecked.has(itemId)) {
+                    newChecked.add(itemId);
+                    hasChanges = true;
+                }
+            }
+        } else {
+            if (!newChecked.has(id)) {
+                newChecked.add(id);
+                hasChanges = true;
+            }
+        }
+
+        if (hasChanges) {
+            set({ checkedMedia: newChecked });
+        }
     },
     selectAllMedia: () => set({ checkedMedia: new Set(get().mediaList.map((a) => a.id)) }),
     deselectAllMedia: () => set({ checkedMedia: new Set() }),
@@ -126,6 +164,26 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     removeActiveGenre: (genre) => {
         const current = get().activeGenres;
         set({ activeGenres: current.filter((g) => g !== genre) });
+        get().applyFilters();
+    },
+    setActiveFormats: (formats) => {
+        set({ activeFormats: new Set(formats) });
+        get().applyFilters();
+    },
+    addActiveFormat: (format) => {
+        const current = get().activeFormats;
+        if (!current.has(format)) {
+            set({ activeFormats: new Set([...current, format]) });
+            get().applyFilters();
+        }
+    },
+    removeActiveFormat: (format) => {
+        const current = get().activeFormats;
+        set({ activeFormats: new Set([...current].filter((f) => f !== format)) });
+        get().applyFilters();
+    },
+    setAvailableFormats: (formats) => {
+        set({ availableFormats: new Set(formats) });
         get().applyFilters();
     },
     setScore: (from, to) => {
@@ -161,12 +219,27 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         get().applyFilters();
     },
 
+    initialize: () => {
+        const state = get();
+        const FORMAT_ORDER = ["TV", "TV_SHORT", "ONA", "OVA", "MOVIE", "SPECIAL", "UNKNOWN"];
+        const availableFormatsArr = Array.from(new Set(state.fullMediaList.map((anime) => anime.format).filter((format): format is MediaItem["format"] => format !== null))).sort((a, b) => FORMAT_ORDER.indexOf(a) - FORMAT_ORDER.indexOf(b));
+        set({
+            availableFormats: new Set(availableFormatsArr),
+            activeFormats: new Set(availableFormatsArr),
+        });
+    },
     applyFilters: () => {
         const state = get();
         let filteredAnime = state.fullMediaList;
 
+        // Cache settings for performance
+        const settings = useSettingsStore.getState();
+        const searchTermLower = state.searchTerm.toLowerCase();
+
         // Search term filter
-        if (state.searchTerm) filteredAnime = filteredAnime.filter((anime) => anime.title.en?.toLowerCase().includes(state.searchTerm.toLowerCase()) || anime.title.romaji?.toLowerCase().includes(state.searchTerm.toLowerCase()) || anime.title.jp?.toLowerCase().includes(state.searchTerm.toLowerCase()));
+        if (state.searchTerm) {
+            filteredAnime = filteredAnime.filter((anime) => anime.title.en?.toLowerCase().includes(searchTermLower) || anime.title.romaji?.toLowerCase().includes(searchTermLower) || anime.title.jp?.toLowerCase().includes(searchTermLower));
+        }
 
         // Genre filter
         if (state.activeGenres.length > 0) {
@@ -181,7 +254,9 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
             const currentDate = Date.now();
             filteredAnime = filteredAnime.filter((anime) => {
                 if (!anime.startDate) return false;
-                return new Date(anime.startDate).getTime() <= currentDate;
+                const releaseTimestamp = mediaDateToTimestamp(anime.startDate);
+                if (releaseTimestamp === null) return false;
+                return releaseTimestamp <= currentDate;
             });
         }
 
@@ -199,6 +274,14 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         if (!state.showPaused) filteredAnime = filteredAnime.filter((anime) => anime.status !== "PAUSED");
         if (!state.showPlanning) filteredAnime = filteredAnime.filter((anime) => anime.status !== "PLANNING");
 
+        // Format filter
+        if (state.activeFormats.size > 0) {
+            filteredAnime = filteredAnime.filter((anime) => {
+                if (!anime.format) return false;
+                return state.activeFormats.has(anime.format);
+            });
+        }
+
         // Apply sorting
         filteredAnime = filteredAnime.slice().sort((a, b) => {
             let comparison: number;
@@ -209,7 +292,7 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
                     break;
                 }
                 case "title": {
-                    comparison = getTitleWithPreference(a).localeCompare(getTitleWithPreference(b));
+                    comparison = getTitleWithPreference(a, settings.preferredTitleLanguage).localeCompare(getTitleWithPreference(b, settings.preferredTitleLanguage));
                     break;
                 }
                 case "score": {
@@ -238,17 +321,18 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         }
     },
     clearFilters: () => {
-        set({ activeGenres: [], score: { from: 0, to: 10 }, showUnaired: false, showPlanning: true, showDropped: false, showPaused: false });
+        const available = get().availableFormats;
+        set({ activeGenres: [], score: { from: 0, to: 10 }, showUnaired: false, showPlanning: true, showDropped: false, showPaused: false, activeFormats: available });
         get().applyFilters();
     },
 
     hasActiveFilters: () => {
         const state = get();
-        return state.activeGenres.length > 0 || state.showUnaired || state.score.from > 0 || state.score.to < 10 || !state.showPlanning || state.showDropped || state.showPaused;
+        return state.activeGenres.length > 0 || state.showUnaired || state.score.from > 0 || state.score.to < 10 || !state.showPlanning || state.showDropped || state.showPaused || state.activeFormats.size < state.availableFormats.size;
     },
     getActiveFilterCount: () => {
         const state = get();
-        return (state.activeGenres.length > 0 ? 1 : 0) + (state.showUnaired ? 1 : 0) + (state.score.from > 0 || state.score.to < 10 ? 1 : 0) + (state.showPlanning ? 0 : 1) + (state.showDropped ? 1 : 0) + (state.showPaused ? 1 : 0);
+        return (state.activeGenres.length > 0 ? 1 : 0) + (state.showUnaired ? 1 : 0) + (state.score.from > 0 || state.score.to < 10 ? 1 : 0) + (state.showPlanning ? 0 : 1) + (state.showDropped ? 1 : 0) + (state.showPaused ? 1 : 0) + (state.activeFormats.size < state.availableFormats.size ? 1 : 0);
     },
 }));
 
@@ -260,13 +344,30 @@ export const useSettingsStore = create<SettingsStore>()(
             showMediaRecommendations: true,
             skipLandingAnimation: false,
             enableTickSounds: true,
+            viewMode: "grid",
 
             setPreferredTitleLanguage: (lang) => set({ preferredTitleLanguage: lang }),
             setPreferredImageSize: (size) => set({ preferredImageSize: size }),
             setShowMediaRecommendations: (show) => set({ showMediaRecommendations: show }),
             setSkipLandingAnimation: (skip) => set({ skipLandingAnimation: skip }),
             setEnableTickSounds: (enable) => set({ enableTickSounds: enable }),
+            setViewMode: (mode) => set({ viewMode: mode }),
         }),
-        { name: "aniwheel-settings" },
+        {
+            name: "aniwheel-settings",
+            version: 2,
+            migrate: (persistedState, version) => {
+                if (!persistedState || typeof persistedState !== "object") return persistedState as Partial<SettingsStore>;
+                const state = persistedState as Record<string, unknown>;
+                const viewMode = state.viewMode;
+                if (version < 2 && viewMode === "compact") {
+                    return { ...state, viewMode: "grid" } as Partial<SettingsStore>;
+                }
+                if (viewMode !== "grid" && viewMode !== "list") {
+                    return { ...state, viewMode: "grid" } as Partial<SettingsStore>;
+                }
+                return persistedState as Partial<SettingsStore>;
+            },
+        },
     ),
 );

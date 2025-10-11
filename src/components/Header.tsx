@@ -4,18 +4,18 @@ import { ExternalLink, LogOut, ShieldHalf } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
+import KanjiAnimation from "~/components/KanjiAnimation";
 import RepoLink from "~/components/RepoLink";
 import SettingsMenu from "~/components/SettingsMenu";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import { Separator } from "~/components/ui/separator";
 import { signOut } from "~/lib/auth";
 import { useAnimeStore } from "~/lib/store";
 import type { MediaItem } from "~/lib/types";
 import { getPrettyProviderName } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
-import KanjiAnimation from "./KanjiAnimation";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Separator } from "./ui/separator";
 
 export default function Header() {
     const session = useSession();
@@ -71,6 +71,7 @@ export default function Header() {
                                             <p>
                                                 {statusesCount.PLANNING} planning &bull; {statusesCount.PAUSED} paused &bull; {statusesCount.DROPPED} dropped
                                             </p>
+                                            <p>Member since {new Date(session.user.createdAt * 1000).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</p>
                                             <p>Signed in with {getPrettyProviderName(session?.activeProvider)}</p>
                                         </div>
                                     )}
@@ -93,6 +94,15 @@ export default function Header() {
                                 Sign Out
                             </Button>
                         </div>
+                        {session && session.activeProvider === "anilist" && session.user.moderatorRoles && (
+                            <>
+                                <Separator />
+                                <div className="p-4">
+                                    <p className="text-sm italic font-bold">Hey there moderator!</p>
+                                    <p className="text-xs">Thank you for making AniList better for all of us. 💗</p>
+                                </div>
+                            </>
+                        )}
                     </PopoverContent>
                 </Popover>
             </div>

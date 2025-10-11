@@ -1,3 +1,9 @@
+export interface MediaDate {
+    day: number | null;
+    month: number | null;
+    year: number | null;
+}
+
 export interface MediaItem {
     id: number;
     title: {
@@ -10,13 +16,18 @@ export interface MediaItem {
         large: string | null;
         medium: string;
     };
-    startDate: Date | null;
+    startDate: MediaDate | null;
+    endDate: MediaDate | null;
     averageScore: number | null;
     episodes: number;
     siteUrl: string;
     genres: string[];
     entryCreatedAt: number | null;
     status: "PLANNING" | "DROPPED" | "PAUSED" | null;
+    format: "TV" | "TV_SHORT" | "MOVIE" | "SPECIAL" | "OVA" | "ONA" | "MUSIC" | "UNKNOWN";
+    duration: number;
+    studios: { name: string; isMain: boolean }[];
+    releasingStatus: "FINISHED" | "RELEASING" | "NOT_YET_RELEASED" | "CANCELLED" | "HIATUS" | null;
 }
 
 export interface MediaRecommendation {
@@ -43,6 +54,11 @@ export interface AniListMediaItem {
         month: number | null;
         year: number | null;
     } | null;
+    endDate: {
+        day: number | null;
+        month: number | null;
+        year: number | null;
+    } | null;
     averageScore: number | null;
     episodes: number | null;
     siteUrl: string;
@@ -51,6 +67,17 @@ export interface AniListMediaItem {
         createdAt: number;
         status: "PLANNING" | "DROPPED" | "PAUSED" | null;
     } | null;
+    format: "TV" | "TV_SHORT" | "MOVIE" | "SPECIAL" | "OVA" | "ONA" | "MUSIC";
+    duration: number | null;
+    status: "FINISHED" | "RELEASING" | "NOT_YET_RELEASED" | "CANCELLED" | "HIATUS" | null;
+    studios: {
+        edges: {
+            isMain: boolean;
+            node: {
+                name: string;
+            };
+        }[];
+    };
 }
 
 export interface AniListMediaRecommendation {
@@ -72,6 +99,7 @@ export interface MALMediaItem {
         large: string | null;
     } | null;
     start_date: string | null;
+    end_date: string | null;
     mean: number | null;
     num_episodes: number;
     genres: { id: number; name: string }[];
@@ -80,6 +108,10 @@ export interface MALMediaItem {
         status: "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch";
         [key: string]: unknown;
     } | null;
+    media_type: "unknown" | "tv" | "ova" | "movie" | "special" | "ona" | "music";
+    average_episode_duration: number | null;
+    status: "finished_airing" | "currently_airing" | "not_yet_aired" | "cancelled" | "on_hiatus" | null;
+    studios?: { id: number; name: string }[] | null;
 }
 
 export type TitleLanguage = keyof MediaItem["title"];

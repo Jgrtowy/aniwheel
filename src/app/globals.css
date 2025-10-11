@@ -45,6 +45,7 @@
 
     --animate-collapsible-down: collapsible-down 200ms ease-out;
     --animate-collapsible-up: collapsible-up 200ms ease-out;
+    --animate-shine: shine 5s linear infinite;
 }
 
 .bg-component-primary {
@@ -80,6 +81,21 @@
         height: 0;
         opacity: 0;
     }
+}
+
+@keyframes shine {
+    0% {
+        background-position: 100%;
+    }
+    100% {
+        background-position: -100%;
+    }
+}
+
+@property --mask-opacity-65 {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
 }
 
 :root {

@@ -11,10 +11,11 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/h
 import { Label } from "~/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { useAnimeStore } from "~/lib/store";
+import type { MediaItem } from "~/lib/types";
 import { cn } from "~/lib/utils";
 
 export default function FiltersPopover() {
-    const { fullMediaList, score, showUnaired, showPlanning, showDropped, showPaused, setScore, setShowUnaired, setShowPlanning, setShowDropped, setShowPaused, clearFilters, hasActiveFilters, getActiveFilterCount } = useAnimeStore();
+    const { fullMediaList, score, showUnaired, showPlanning, showDropped, showPaused, availableFormats, setScore, setShowUnaired, setShowPlanning, setShowDropped, setShowPaused, clearFilters, hasActiveFilters, getActiveFilterCount } = useAnimeStore();
 
     const availableGenres = useMemo(() => {
         const genreSet = new Set<string>();
@@ -74,12 +75,43 @@ export default function FiltersPopover() {
                             </div>
                         </div>
                     </div>
+                    <div className="flex flex-col gap-1 text-sm">
+                        <span>Show formats:</span>
+                        <div className="grid grid-cols-3 gap-y-3">
+                            {Array.from(availableFormats.values()).map((format) => (
+                                <FormatCheckbox key={format} format={format} />
+                            ))}
+                        </div>
+                    </div>
                 </div>
                 <Button variant="outline" onClick={clearFilters} size="sm" disabled={!hasActiveFilters()}>
                     Clear filters
                 </Button>
             </PopoverContent>
         </Popover>
+    );
+}
+
+function FormatCheckbox({ format }: { format: MediaItem["format"] }) {
+    const { activeFormats, addActiveFormat, removeActiveFormat } = useAnimeStore();
+
+    const isChecked = activeFormats.has(format);
+
+    const handleToggle = () => {
+        if (isChecked) {
+            removeActiveFormat(format);
+        } else {
+            addActiveFormat(format);
+        }
+    };
+
+    return (
+        <div className="flex items-center gap-1">
+            <Checkbox id={format} className="cursor-pointer bg-background/50" checked={isChecked} onCheckedChange={handleToggle} />
+            <Label htmlFor={format} className="text-sm cursor-pointer">
+                {format === "TV" ? "TV" : format === "TV_SHORT" ? "TV Short" : format === "ONA" ? "ONA" : format === "OVA" ? "OVA" : format.charAt(0).toUpperCase() + format.slice(1).toLowerCase()}
+            </Label>
+        </div>
     );
 }
 

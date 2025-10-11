@@ -1,9 +1,9 @@
 import { ArrowDown10, ArrowDownUp, ArrowDownZA, ArrowUp01, ArrowUpAZ, CalendarArrowDown, CalendarArrowUp, CalendarPlus, Info, Star, WholeWord } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { useAnimeStore } from "~/lib/store";
 import type { SortField, SortOrder } from "~/lib/types";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 export default function SortingPopover() {
     const { sortField, sortOrder, setSortField, setSortOrder } = useAnimeStore();

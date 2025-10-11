@@ -1,8 +1,7 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { Grid2X2, List, Rows3, Search, X } from "lucide-react";
 import { MotionConfig, motion } from "motion/react";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import Aurora from "~/components/Aurora";
 import BackToTop from "~/components/BackToTop";
@@ -13,11 +12,15 @@ import SidePanel from "~/components/SidePanel";
 import SortingDropdown from "~/components/SortingDropdown";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { useAnimeStore } from "~/lib/store";
+import { useAnimeStore, useSettingsStore } from "~/lib/store";
+import Stats from "./Stats";
+import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function Home() {
     const { searchTerm, setSearchTerm } = useAnimeStore();
     const [colorStops, setColorStops] = useState<string[]>(["#2e1cff", "#ff3161", "#b032ff"]);
+    const { viewMode, setViewMode } = useSettingsStore();
 
     useEffect(() => {
         setColorStops((prev) => [...prev].sort(() => Math.random() - 0.5));
@@ -32,8 +35,8 @@ export default function Home() {
                 <Header />
                 <main className="flex flex-col-reverse md:flex-row gap-4">
                     <section className="flex-1 flex-col rounded-xl border p-4 sm:p-6 space-y-6 bg-component-primary">
-                        <div className="flex justify-between gap-2">
-                            <div className="relative w-full max-w-64">
+                        <div className="flex sm:justify-between justify-center sm:flex-row flex-col items-center gap-2">
+                            <div className="relative w-full sm:max-w-64 max-w-full">
                                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
                                 <Input placeholder="Search..." className="pl-8 text-sm bg-background" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                                 {searchTerm && (
@@ -44,10 +47,23 @@ export default function Home() {
                                 )}
                             </div>
                             <div className="flex gap-2">
+                                <ToggleGroup type="single" variant="outline" className="w-24" value={viewMode} onValueChange={(val) => val && setViewMode(val as "grid" | "list")}>
+                                    <ToggleGroupItem value="grid" className="border dark:border-input cursor-pointer shadow-xs transition-none bg-background hover:bg-accent dark:bg-input/30 dark:hover:bg-input/50 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground!">
+                                        <Grid2X2 />
+                                        <span className="sr-only">Grid view</span>
+                                    </ToggleGroupItem>
+                                    <ToggleGroupItem value="list" className="border dark:border-input cursor-pointer shadow-xs transition-none bg-background hover:bg-accent dark:bg-input/30 dark:hover:bg-input/50 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground!">
+                                        <Rows3 />
+                                        <span className="sr-only">List view</span>
+                                    </ToggleGroupItem>
+                                </ToggleGroup>
                                 <FiltersDropdown />
                                 <SortingDropdown />
                             </div>
                         </div>
+                        {/* <div>
+                            <Stats />
+                        </div> */}
                         <MediaList />
                     </section>
                     <aside className="w-full md:w-[19rem] lg:w-[22rem] flex flex-col gap-4 md:sticky md:top-4 md:self-start">

@@ -9,6 +9,8 @@ interface AniListProfile {
         medium: string;
     };
     siteUrl: string;
+    moderatorRoles: string[] | null;
+    createdAt: number;
 }
 
 export function AniListProvider<P extends AniListProfile>(options: OAuthUserConfig<P>): OAuthConfig<P> {
@@ -44,6 +46,8 @@ export function AniListProvider<P extends AniListProfile>(options: OAuthUserConf
                     medium
                   }
                   siteUrl
+                  moderatorRoles
+                  createdAt
                 }
               }
             `,
@@ -54,8 +58,8 @@ export function AniListProvider<P extends AniListProfile>(options: OAuthUserConf
                 return data.data.Viewer as AniListProfile;
             },
         },
-        profile({ id, name, avatar, siteUrl }: AniListProfile) {
-            return { id: id.toString(), name, image: avatar.large || avatar.medium, url: siteUrl };
+        profile({ id, name, avatar, siteUrl, moderatorRoles, createdAt }: AniListProfile) {
+            return { id: id.toString(), name, image: avatar.large || avatar.medium, url: siteUrl, moderatorRoles: moderatorRoles || null, createdAt };
         },
         options,
     };
