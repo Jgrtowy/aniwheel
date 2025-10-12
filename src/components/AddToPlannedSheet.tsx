@@ -1,4 +1,4 @@
-import { BadgePlus, Clapperboard, LoaderCircle, Music4, Popcorn, Star, Trash2 } from "lucide-react";
+import { BadgePlus, CheckCheck, Clapperboard, LoaderCircle, Music4, Popcorn, Star, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -6,7 +6,7 @@ import AnimeCard from "~/components/AnimeCard";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
 import { useAnimeStore } from "~/lib/store";
 import type { MediaItem } from "~/lib/types";
 import { getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
@@ -137,12 +137,12 @@ export default function AddToPlannedSheet() {
                     Add new title
                 </Button>
             </SheetTrigger>
-            <SheetContent className="gap-0 flex flex-col h-full bg-component-secondary">
+            <SheetContent className="gap-0 flex flex-col h-full bg-component-secondary w-full max-w-full sm:max-w-[445px] !inset-x-auto !right-0 sm:rounded-bl-2xl" showClose={false} side="top">
                 <SheetHeader className="shrink-0">
                     <SheetTitle>Add a title to your planning list</SheetTitle>
                 </SheetHeader>
 
-                <div className="flex flex-col gap-2 flex-1 min-h-0 w-full px-4">
+                <div className="flex flex-col gap-2 px-4">
                     <div className="relative shrink-0">
                         <Input placeholder="Enter anime title..." value={searchQuery} onChange={handleInputChange} />
                         {isSearching && <LoaderCircle className="absolute right-0 p-2 h-full w-auto top-1/2 -translate-y-1/2 text-muted-foreground animate-spin" />}
@@ -191,36 +191,30 @@ export default function AddToPlannedSheet() {
 
                 <SheetFooter className="shrink-0 pt-2">
                     {selectedTitles.length > 0 && (
-                        <ScrollArea type="auto">
-                            <h4 className="mb-2 font-medium">
-                                Selected titles: <span className="text-primary/50 text-xs">(click to remove)</span>
-                            </h4>
-                            <div className="flex w-max h-38 gap-2 pb-3">
-                                {selectedTitles.map((anime) => (
-                                    <div className="relative h-full aspect-square rounded-md overflow-hidden" key={anime.id}>
-                                        <button className="absolute inset-0 transition bg-component-primary flex justify-center items-center cursor-pointer opacity-0 hover:opacity-100 focus-visible:opacity-100 z-10" type="button" onClick={() => handleTitleRemove(anime)}>
-                                            <Trash2 className="size-8 stroke-destructive" />
-                                            <span className="sr-only">Remove {getTitleWithPreference(anime)}</span>
-                                        </button>
-                                        <AnimeCard isStatic={true} anime={anime} variant="compact" />
-                                    </div>
-                                ))}
-                            </div>
-                            <ScrollBar orientation="horizontal" />
-                        </ScrollArea>
+                        <>
+                            <h4 className="font-medium text-lg">Selected titles:</h4>
+                            <ScrollArea type="auto">
+                                <div className="flex w-max gap-2">
+                                    {selectedTitles.map((anime) => (
+                                        <div key={anime.id} className=" flex flex-col gap-2">
+                                            <AnimeCard className="h-32" isStatic={true} anime={anime} variant="compact" />
+                                            <Button variant="destructive" size="sm" onClick={() => handleTitleRemove(anime)}>
+                                                <Trash2 />
+                                                <span className="sr-only">Remove {getTitleWithPreference(anime)}</span>
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <ScrollBar orientation="horizontal" />
+                            </ScrollArea>
+                        </>
                     )}
 
-                    <SheetDescription className="flex flex-col text-center">
-                        <span className="text-destructive font-bold">WARNING!</span>
-                        <span className="text-balance">
-                            Titles added here <span className="font-bold">WILL</span> be set as "planning" on your {session?.activeProvider && getPrettyProviderName(session?.activeProvider)} profile.
-                        </span>
-                    </SheetDescription>
-                    <Button variant="default" className="w-full" disabled={selectedTitles.length === 0 || isAdding} onClick={handleAddTitles}>
+                    <Button size="lg" disabled={selectedTitles.length === 0 || isAdding} onClick={handleAddTitles}>
                         {selectedTitles.length > 0 ? (
                             <>
-                                {isAdding ? <LoaderCircle className="animate-spin size-5" /> : <BadgePlus className="size-5" />}
-                                Add {selectedTitles.length} title{selectedTitles.length > 1 ? "s" : ""}
+                                {isAdding ? <LoaderCircle className="animate-spin size-5" /> : <CheckCheck />}
+                                Set {selectedTitles.length} title{selectedTitles.length > 1 ? "s" : ""} as planning
                             </>
                         ) : (
                             <>
@@ -229,6 +223,12 @@ export default function AddToPlannedSheet() {
                             </>
                         )}
                     </Button>
+                    <SheetClose asChild>
+                        <Button variant="outline" size="lg">
+                            <X />
+                            Close
+                        </Button>
+                    </SheetClose>
                 </SheetFooter>
             </SheetContent>
         </Sheet>
