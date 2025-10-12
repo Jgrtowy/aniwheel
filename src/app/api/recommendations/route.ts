@@ -21,47 +21,79 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
       rating
       media {
         id
-        siteUrl
-        coverImage {
-          extraLarge
-          large
-          medium
-        }
         title {
           english
           native
           romaji
+        }
+        coverImage {
+          extraLarge
+          large
+          medium
         }
         startDate {
           day
           month
           year
         }
+        endDate {
+          day
+          month
+          year
+        }
         averageScore
         episodes
+        siteUrl
         genres
+        format
+        duration
+        status(version: 2)
+        studios {
+          edges {
+            isMain
+            node {
+              name
+            }
+          }
+        }
       }
       mediaRecommendation {
         id
-        siteUrl
-        coverImage {
-          extraLarge
-          large
-          medium
-        }
         title {
           english
           native
           romaji
+        }
+        coverImage {
+          extraLarge
+          large
+          medium
         }
         startDate {
           day
           month
           year
         }
+        endDate {
+          day
+          month
+          year
+        }
         averageScore
         episodes
+        siteUrl
         genres
+        format
+        duration
+        status(version: 2)
+        studios {
+          edges {
+            isMain
+            node {
+              name
+            }
+          }
+        }
       }
     }
   }

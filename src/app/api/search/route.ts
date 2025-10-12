@@ -36,10 +36,26 @@ query Search($search: String, $type: MediaType, $perPage: Int) {
         month
         year
       }
+      endDate {
+        day
+        month
+        year
+      }
       averageScore
       episodes
       siteUrl
       genres
+      format
+      duration
+      status(version: 2)
+      studios {
+        edges {
+          isMain
+          node {
+            name
+          }
+        }
+      }
     }
   }
 }
@@ -65,7 +81,7 @@ query Search($search: String, $type: MediaType, $perPage: Int) {
     if (session.activeProvider === "myanimelist") {
         if (!session.accessToken) return Response.json({ error: "MyAnimeList access token not available" }, { status: 401 });
 
-        const data = await fetch(`https://api.myanimelist.net/v2/anime?q=${encodeURIComponent(body.query)}&limit=10&fields=alternative_titles,start_date,mean,num_episodes,genres,my_list_status`, {
+        const data = await fetch(`https://api.myanimelist.net/v2/anime?q=${encodeURIComponent(body.query)}&limit=10&fields=alternative_titles,start_date,end_date,mean,num_episodes,genres,my_list_status,media_type,average_episode_duration,status,studios`, {
             method: "GET",
             headers: { Authorization: `Bearer ${session.accessToken}` },
         });
