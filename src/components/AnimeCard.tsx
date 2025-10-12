@@ -46,7 +46,7 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
     const cardClasses = useMemo(() => {
         if (variant === "compact") return cn("relative flex flex-col justify-between p-0.5 rounded-lg transition-all overflow-hidden aspect-square", !isStatic && "cursor-pointer", checked ? "brightness-100 opacity-100" : "brightness-75 opacity-75", className);
         return cn(
-            "relative flex flex-col justify-between p-1 sm:p-2 rounded-lg transition-all overflow-hidden brightness-75 opacity-75 w-[calc(100%-2rem)] sm:w-full sm:scale-90 aspect-[4] sm:aspect-square",
+            "relative flex flex-col justify-between p-1 sm:p-2 rounded-lg transition-all brightness-75 opacity-75 w-[calc(100%-2rem)] sm:w-full sm:scale-90 aspect-[4] sm:aspect-square",
             !isStatic && "cursor-pointer outline-none focus-visible:border-ring focus-visible:ring-ring/75 focus-visible:ring-[3px]",
             checked && "brightness-100 opacity-100 w-full sm:scale-100 aspect-[3.5]",
             className,
@@ -59,9 +59,11 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
     return (
         <CardElement className={cardClasses} {...cardProps}>
             {!isStatic && <span className="sr-only">Select {title}</span>}
-            <div className={cn("absolute inset-0 -z-20 rounded-lg transition-all ease-in-out duration-700 scale-75 brightness-50", checked && "scale-100 brightness-50")}>
-                <Image className={cn("object-cover w-full h-full blur-xl rounded-lg")} src={imageUrl} alt={title} fill sizes="100%" priority />
-            </div>
+            {variant !== "compact" && (
+                <div className={cn("absolute inset-0 -z-20 rounded-lg transition-all ease-in-out duration-700 scale-75 brightness-50", checked && "scale-100 brightness-50")}>
+                    <Image className={cn("object-cover w-full h-full blur-xl rounded-lg")} src={imageUrl} alt={title} fill sizes="100%" priority />
+                </div>
+            )}
             <Image className={cn("absolute inset-0 object-cover -z-10 transition-all ease-in-out duration-125 scale-100 rounded-lg", checked && "scale-100 rounded-lg")} src={imageUrl} alt={title} fill sizes="100%" />
             <div className="flex justify-between w-full">
                 <div className="flex-shrink-0">
