@@ -196,9 +196,9 @@ export default function AddToPlannedSheet() {
                             <ScrollArea type="auto">
                                 <div className="flex w-max gap-2">
                                     {selectedTitles.map((anime) => (
-                                        <div key={anime.id} className=" flex flex-col gap-2">
-                                            <AnimeCard className="h-32" isStatic={true} anime={anime} variant="compact" />
-                                            <Button variant="destructive" size="sm" onClick={() => handleTitleRemove(anime)}>
+                                        <div key={anime.id}>
+                                            <AnimeCard className="h-32 rounded-b-none!" isStatic={true} anime={anime} variant="compact" />
+                                            <Button className="w-full rounded-t-none" variant="destructive" size="sm" onClick={() => handleTitleRemove(anime)}>
                                                 <Trash2 />
                                                 <span className="sr-only">Remove {getTitleWithPreference(anime)}</span>
                                             </Button>
@@ -213,13 +213,13 @@ export default function AddToPlannedSheet() {
                     <Button size="lg" disabled={selectedTitles.length === 0 || isAdding} onClick={handleAddTitles}>
                         {selectedTitles.length > 0 ? (
                             <>
-                                {isAdding ? <LoaderCircle className="animate-spin size-5" /> : <CheckCheck />}
+                                {isAdding ? <LoaderCircle className="animate-spin" /> : <CheckCheck />}
                                 Set {selectedTitles.length} title{selectedTitles.length > 1 ? "s" : ""} as planning
                             </>
                         ) : (
                             <>
-                                <BadgePlus className="size-5" />
-                                Add titles
+                                <CheckCheck />
+                                Set as planning
                             </>
                         )}
                     </Button>
