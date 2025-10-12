@@ -1,4 +1,4 @@
-import { Clapperboard, ExternalLink, Popcorn, Star } from "lucide-react";
+import { Clapperboard, ExternalLink, Music4, Popcorn, Star } from "lucide-react";
 import Image from "next/image";
 import { memo, useCallback, useMemo } from "react";
 import { Button } from "~/components/ui/button";
@@ -93,10 +93,22 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
                     )}
                     {anime.episodes > 0 && showDetails && (
                         <div className="flex items-center gap-1 h-7 px-2 text-xs w-fit border rounded-md bg-component-primary">
-                            {anime.format === "MOVIE" ? <Popcorn className="size-3" /> : <Clapperboard className="size-3" />}
-                            <p>{anime.episodes === 1 && anime.format === "MOVIE" && "Movie"}</p>
-                            <p>{anime.episodes !== 1 && (anime.episodes > 1 ? `${anime.episodes} eps` : "1 ep")}</p>
-                            <span className="sr-only">Number of episodes</span>
+                            {anime.format === "MOVIE" ? <Popcorn className="size-3" /> : anime.format === "MUSIC" ? <Music4 className="size-3" /> : <Clapperboard className="size-3" />}
+                            {anime.format === "MOVIE" ? (
+                                anime.episodes <= 1 ? (
+                                    <span>Movie</span>
+                                ) : (
+                                    <span>
+                                        {anime.episodes} ep{anime.episodes === 1 ? "" : "s"}
+                                    </span>
+                                )
+                            ) : anime.format === "MUSIC" ? (
+                                <span>Music</span>
+                            ) : (
+                                <span>
+                                    {anime.episodes} ep{anime.episodes === 1 ? "" : "s"}
+                                </span>
+                            )}
                         </div>
                     )}
                 </div>

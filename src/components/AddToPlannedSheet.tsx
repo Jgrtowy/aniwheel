@@ -1,4 +1,4 @@
-import { BadgePlus, Clapperboard, LoaderCircle, Star, Trash2 } from "lucide-react";
+import { BadgePlus, Clapperboard, LoaderCircle, Music4, Popcorn, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -157,8 +157,22 @@ export default function AddToPlannedSheet() {
                                         <div className="flex items-center gap-2 text-sm leading-tight text-muted-foreground">
                                             {anime.episodes > 0 && (
                                                 <p className="flex items-center gap-1 icon-text-container">
-                                                    <Clapperboard className="size-3" />
-                                                    <span>{anime.episodes !== 1 ? `${anime.episodes} eps` : "1 ep"}</span>
+                                                    {anime.format === "MOVIE" ? <Popcorn className="size-3" /> : anime.format === "MUSIC" ? <Music4 className="size-3" /> : <Clapperboard className="size-3" />}
+                                                    {anime.format === "MOVIE" ? (
+                                                        anime.episodes <= 1 ? (
+                                                            <span>Movie</span>
+                                                        ) : (
+                                                            <span>
+                                                                {anime.episodes} ep{anime.episodes === 1 ? "" : "s"}
+                                                            </span>
+                                                        )
+                                                    ) : anime.format === "MUSIC" ? (
+                                                        <span>Music</span>
+                                                    ) : (
+                                                        <span>
+                                                            {anime.episodes} ep{anime.episodes === 1 ? "" : "s"}
+                                                        </span>
+                                                    )}
                                                 </p>
                                             )}
                                             {anime.averageScore && (
