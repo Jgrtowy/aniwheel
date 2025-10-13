@@ -1,4 +1,5 @@
-import { useAnimeStore, useSettingsStore } from "~/lib/store";
+import { useAnimeStore } from "~/store/anime";
+import { useSettingsStore } from "~/store/settings";
 
 // Shallow selectors to prevent unnecessary re-renders
 const checkedMediaSelector = (state: ReturnType<typeof useAnimeStore.getState>) => state.checkedMedia;

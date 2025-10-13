@@ -8,9 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
-import { useSettingsStore } from "~/lib/store";
 import type { ImageSize } from "~/lib/types";
 import { useSession } from "~/providers/session-provider";
+import { useSettingsStore } from "~/store/settings";
 
 export default function SettingsMenu() {
     const { preferredImageSize, setPreferredImageSize, preferredTitleLanguage, setPreferredTitleLanguage, skipLandingAnimation, setSkipLandingAnimation, enableTickSounds, setEnableTickSounds } = useSettingsStore();

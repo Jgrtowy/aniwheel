@@ -6,10 +6,11 @@ import { Button } from "~/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "~/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import useMediaQuery from "~/hooks/useMediaQuery";
-import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import type { MediaRecommendation } from "~/lib/types";
 import { cn } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
+import { useAnimeStore } from "~/store/anime";
+import { useSettingsStore } from "~/store/settings";
 
 const DESKTOP_DISPLAY_COUNT = 12;
 const MOBILE_DISPLAY_COUNT = 4;

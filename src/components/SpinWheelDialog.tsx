@@ -4,7 +4,7 @@ import { Shuffle, XIcon } from "lucide-react";
 import { SpinWheelContent } from "~/components/SpinWheelContent";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { useAnimeStore } from "~/lib/store";
+import { useAnimeStore } from "~/store/anime";
 
 export function SpinWheelDialog() {
     const { checkedMedia } = useAnimeStore();

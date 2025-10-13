@@ -7,8 +7,8 @@ import AnimeListItem from "~/components/AnimeListItem";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useCheckedMedia, useViewMode } from "~/hooks/useShallowStore";
-import { useAnimeStore } from "~/lib/store";
-import { useUiStore } from "~/lib/ui-store";
+import { useAnimeStore } from "~/store/anime";
+import { useUiStore } from "~/store/ui";
 
 export default function PlannedList() {
     const { mediaList, fullMediaList, setFullMediaList, setActiveGenres, clearFilters, setSearchTerm } = useAnimeStore();

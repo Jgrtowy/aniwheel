@@ -1,5 +1,5 @@
 import React from "react";
-import { useAnimeStore } from "~/lib/store";
+import { useAnimeStore } from "~/store/anime";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function Stats() {

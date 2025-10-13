@@ -7,10 +7,11 @@ import LightRays from "~/components/LightRays";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import useMediaQuery from "~/hooks/useMediaQuery";
-import { useAnimeStore, useSettingsStore } from "~/lib/store";
 import type { MediaItem } from "~/lib/types";
 import { cn, getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
+import { useAnimeStore } from "~/store/anime";
+import { useSettingsStore } from "~/store/settings";
 
 const calculateImageDimensions = (segmentAngle: number, radius: number) => {
     const angleRad = (segmentAngle * Math.PI) / 180;

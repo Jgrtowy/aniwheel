@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { useSettingsStore } from "~/lib/store";
 import type { AniListMediaItem, ImageSize, MALMediaItem, MediaDate, MediaItem, TitleLanguage, UserProfile } from "~/lib/types";
+import { useSettingsStore } from "~/store/settings";
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 

@@ -12,10 +12,10 @@ import { Button } from "~/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { Separator } from "~/components/ui/separator";
 import { signOut } from "~/lib/auth";
-import { useAnimeStore } from "~/lib/store";
 import type { MediaItem } from "~/lib/types";
 import { getPrettyProviderName } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
+import { useAnimeStore } from "~/store/anime";
 
 export default function Header() {
     const session = useSession();

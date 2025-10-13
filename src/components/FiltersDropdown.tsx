@@ -10,9 +10,9 @@ import { DualRangeSlider } from "~/components/ui/dual-range-slider";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
 import { Label } from "~/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import { useAnimeStore } from "~/lib/store";
 import type { MediaItem } from "~/lib/types";
 import { cn } from "~/lib/utils";
+import { useAnimeStore } from "~/store/anime";
 
 export default function FiltersPopover() {
     const { fullMediaList, score, showUnaired, showPlanning, showDropped, showPaused, availableFormats, setScore, setShowUnaired, setShowPlanning, setShowDropped, setShowPaused, clearFilters, hasActiveFilters, getActiveFilterCount } = useAnimeStore();

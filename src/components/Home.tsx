@@ -12,9 +12,10 @@ import SidePanel from "~/components/SidePanel";
 import SortingDropdown from "~/components/SortingDropdown";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { useAnimeStore, useSettingsStore } from "~/lib/store";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
+import { useAnimeStore } from "~/store/anime";
+import { useSettingsStore } from "~/store/settings";
 import Stats from "./Stats";
-import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function Home() {

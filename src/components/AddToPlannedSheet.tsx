@@ -8,12 +8,12 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
-import { useAnimeStore } from "~/lib/store";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import type { MediaItem } from "~/lib/types";
-import { useUiStore } from "~/lib/ui-store";
 import { getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { useAnimeStore } from "~/store/anime";
+import { useUiStore } from "~/store/ui";
 
 export default function AddToPlannedSheet() {
     const session = useSession();

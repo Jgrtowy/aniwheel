@@ -2,8 +2,8 @@ import { ArrowDown10, ArrowDownUp, ArrowDownZA, ArrowUp01, ArrowUpAZ, CalendarAr
 import { Button } from "~/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
-import { useAnimeStore } from "~/lib/store";
 import type { SortField, SortOrder } from "~/lib/types";
+import { useAnimeStore } from "~/store/anime";
 
 export default function SortingPopover() {
     const { sortField, sortOrder, setSortField, setSortOrder } = useAnimeStore();

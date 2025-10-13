@@ -1,19 +1,12 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import type { ImageSize, MediaItem, SortField, SortOrder, TitleLanguage } from "~/lib/types";
+import type { MediaItem, SortField, SortOrder } from "~/lib/types";
 import { getTitleWithPreference, mediaDateToTimestamp } from "~/lib/utils";
+import { useSettingsStore } from "~/store/settings";
 
-interface AnimeStore {
-    // Full, unfiltered list of titles
+export interface AnimeStore {
     fullMediaList: MediaItem[];
-
-    // Currently displayed titles list, can be filtered
     mediaList: MediaItem[];
-
-    // Set of title IDs that are checked (e.g., for bulk actions)
     checkedMedia: Set<number>;
-
-    // Filters
     searchTerm: string;
     activeGenres: string[];
     score: { from: number; to: number };
@@ -23,66 +16,36 @@ interface AnimeStore {
     showUnaired: boolean;
     activeFormats: Set<MediaItem["format"]>;
     availableFormats: Set<MediaItem["format"]>;
-
-    // Sorting
     sortField: SortField;
     sortOrder: SortOrder;
-
     setFullMediaList: (list: MediaItem[]) => void;
-
     setMediaList: (list: MediaItem[]) => void;
-
     setSelectedMedia: (set: Set<number>) => void;
     addSelectedMedia: (id: number | number[]) => void;
     toggleSelectedMedia: (id: number) => void;
     selectAllMedia: () => void;
     deselectAllMedia: () => void;
-
     setSearchTerm: (term: string) => void;
-
     setActiveGenres: (genres: string[]) => void;
     addActiveGenre: (genre: string) => void;
     removeActiveGenre: (genre: string) => void;
-
     setScore: (from: number | null, to: number | null) => void;
-
     setShowPlanning: (show: boolean) => void;
     setShowPaused: (show: boolean) => void;
     setShowDropped: (show: boolean) => void;
-
     setShowUnaired: (show: boolean) => void;
-
     setActiveFormats: (formats: MediaItem["format"][]) => void;
     addActiveFormat: (format: MediaItem["format"]) => void;
     removeActiveFormat: (format: MediaItem["format"]) => void;
-
     setAvailableFormats: (formats: MediaItem["format"][]) => void;
-
     setSortField: (field: SortField) => void;
     setSortOrder: (order: SortOrder) => void;
     setSorting: (field: SortField, order: SortOrder) => void;
-
     initialize: () => void;
     applyFilters: () => void;
     clearFilters: () => void;
     hasActiveFilters: () => boolean;
     getActiveFilterCount: () => number;
-}
-
-interface SettingsStore {
-    preferredTitleLanguage: TitleLanguage;
-    preferredImageSize: ImageSize;
-    showMediaRecommendations: boolean;
-    skipLandingAnimation: boolean;
-    enableTickSounds: boolean;
-    viewMode: "grid" | "list";
-
-    setPreferredTitleLanguage: (lang: TitleLanguage) => void;
-    setPreferredImageSize: (size: ImageSize) => void;
-    setShowMediaRecommendations: (show: boolean) => void;
-    setSkipLandingAnimation: (skip: boolean) => void;
-    setEnableTickSounds: (enable: boolean) => void;
-    setViewMode: (mode: "grid" | "list") => void;
 }
 
 export const useAnimeStore = create<AnimeStore>((set, get) => ({
@@ -116,7 +79,6 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         } else {
             newChecked.add(id);
         }
-        // Only update if there's actually a change
         if (newChecked.size !== currentChecked.size || !currentChecked.has(id) === newChecked.has(id)) {
             set({ checkedMedia: newChecked });
         }
@@ -133,11 +95,9 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
                     hasChanges = true;
                 }
             }
-        } else {
-            if (!newChecked.has(id)) {
-                newChecked.add(id);
-                hasChanges = true;
-            }
+        } else if (!newChecked.has(id)) {
+            newChecked.add(id);
+            hasChanges = true;
         }
 
         if (hasChanges) {
@@ -232,16 +192,13 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         const state = get();
         let filteredAnime = state.fullMediaList;
 
-        // Cache settings for performance
         const settings = useSettingsStore.getState();
         const searchTermLower = state.searchTerm.toLowerCase();
 
-        // Search term filter
         if (state.searchTerm) {
             filteredAnime = filteredAnime.filter((anime) => anime.title.en?.toLowerCase().includes(searchTermLower) || anime.title.romaji?.toLowerCase().includes(searchTermLower) || anime.title.jp?.toLowerCase().includes(searchTermLower));
         }
 
-        // Genre filter
         if (state.activeGenres.length > 0) {
             filteredAnime = filteredAnime.filter((anime) => {
                 if (!anime.genres || anime.genres.length === 0) return false;
@@ -249,7 +206,6 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
             });
         }
 
-        // Show unaired filter
         if (!state.showUnaired) {
             const currentDate = Date.now();
             filteredAnime = filteredAnime.filter((anime) => {
@@ -260,7 +216,6 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
             });
         }
 
-        // Score range filter
         if (state.score.from > 0 || state.score.to < 10) {
             filteredAnime = filteredAnime.filter((anime) => {
                 const score = anime.averageScore;
@@ -269,12 +224,10 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
             });
         }
 
-        // Status filter
         if (!state.showDropped) filteredAnime = filteredAnime.filter((anime) => anime.status !== "DROPPED");
         if (!state.showPaused) filteredAnime = filteredAnime.filter((anime) => anime.status !== "PAUSED");
         if (!state.showPlanning) filteredAnime = filteredAnime.filter((anime) => anime.status !== "PLANNING");
 
-        // Format filter
         if (state.activeFormats.size > 0) {
             filteredAnime = filteredAnime.filter((anime) => {
                 if (!anime.format) return false;
@@ -282,13 +235,12 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
             });
         }
 
-        // Apply sorting
         filteredAnime = filteredAnime.slice().sort((a, b) => {
             let comparison: number;
 
             switch (state.sortField) {
                 case "date": {
-                    comparison = (a.entryCreatedAt ?? 0) < (b.entryCreatedAt ?? 0) ? -1 : (a.entryCreatedAt ?? 0) > (b.entryCreatedAt ?? 0) ? 1 : 1; // I will personally fight a duck-sized horse on live television if you're able to tell me why I put a "1" here despite it should be "0" for the sorting to be correct
+                    comparison = (a.entryCreatedAt ?? 0) < (b.entryCreatedAt ?? 0) ? -1 : (a.entryCreatedAt ?? 0) > (b.entryCreatedAt ?? 0) ? 1 : 1;
                     break;
                 }
                 case "title": {
@@ -296,8 +248,11 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
                     break;
                 }
                 case "score": {
-                    comparison = (a.averageScore || 0) < (b.averageScore || 0) ? -1 : (a.averageScore || 0) > (b.averageScore || 0) ? 1 : 0; // Note: Inverted sort order for better UX (asc is high to low and desc is low to high)
+                    comparison = (a.averageScore || 0) < (b.averageScore || 0) ? -1 : (a.averageScore || 0) > (b.averageScore || 0) ? 1 : 0;
                     break;
+                }
+                default: {
+                    comparison = 0;
                 }
             }
 
@@ -306,7 +261,6 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
 
         set({ mediaList: filteredAnime });
 
-        // Update checked media to only include items that are still in the filtered list
         if (state.checkedMedia.size > 0) {
             const filteredAnimeIds = new Set(filteredAnime.map((anime) => anime.id));
             const updatedCheckedAnime = new Set<number>();
@@ -322,10 +276,17 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     },
     clearFilters: () => {
         const available = get().availableFormats;
-        set({ activeGenres: [], score: { from: 0, to: 10 }, showUnaired: false, showPlanning: true, showDropped: false, showPaused: false, activeFormats: available });
+        set({
+            activeGenres: [],
+            score: { from: 0, to: 10 },
+            showUnaired: false,
+            showPlanning: true,
+            showDropped: false,
+            showPaused: false,
+            activeFormats: available,
+        });
         get().applyFilters();
     },
-
     hasActiveFilters: () => {
         const state = get();
         return state.activeGenres.length > 0 || state.showUnaired || state.score.from > 0 || state.score.to < 10 || !state.showPlanning || state.showDropped || state.showPaused || state.activeFormats.size < state.availableFormats.size;
@@ -335,39 +296,3 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         return (state.activeGenres.length > 0 ? 1 : 0) + (state.showUnaired ? 1 : 0) + (state.score.from > 0 || state.score.to < 10 ? 1 : 0) + (state.showPlanning ? 0 : 1) + (state.showDropped ? 1 : 0) + (state.showPaused ? 1 : 0) + (state.activeFormats.size < state.availableFormats.size ? 1 : 0);
     },
 }));
-
-export const useSettingsStore = create<SettingsStore>()(
-    persist(
-        (set) => ({
-            preferredTitleLanguage: "en",
-            preferredImageSize: "large",
-            showMediaRecommendations: true,
-            skipLandingAnimation: false,
-            enableTickSounds: true,
-            viewMode: "grid",
-
-            setPreferredTitleLanguage: (lang) => set({ preferredTitleLanguage: lang }),
-            setPreferredImageSize: (size) => set({ preferredImageSize: size }),
-            setShowMediaRecommendations: (show) => set({ showMediaRecommendations: show }),
-            setSkipLandingAnimation: (skip) => set({ skipLandingAnimation: skip }),
-            setEnableTickSounds: (enable) => set({ enableTickSounds: enable }),
-            setViewMode: (mode) => set({ viewMode: mode }),
-        }),
-        {
-            name: "aniwheel-settings",
-            version: 2,
-            migrate: (persistedState, version) => {
-                if (!persistedState || typeof persistedState !== "object") return persistedState as Partial<SettingsStore>;
-                const state = persistedState as Record<string, unknown>;
-                const viewMode = state.viewMode;
-                if (version < 2 && viewMode === "compact") {
-                    return { ...state, viewMode: "grid" } as Partial<SettingsStore>;
-                }
-                if (viewMode !== "grid" && viewMode !== "list") {
-                    return { ...state, viewMode: "grid" } as Partial<SettingsStore>;
-                }
-                return persistedState as Partial<SettingsStore>;
-            },
-        },
-    ),
-);

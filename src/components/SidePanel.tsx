@@ -8,8 +8,8 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
-import { useAnimeStore } from "~/lib/store";
 import { getTitleWithPreference } from "~/lib/utils";
+import { useAnimeStore } from "~/store/anime";
 
 export default function SidePanel() {
     const { checkedMedia, mediaList, selectAllMedia, deselectAllMedia, toggleSelectedMedia } = useAnimeStore();
