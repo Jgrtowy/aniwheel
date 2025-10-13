@@ -128,3 +128,18 @@ export interface UserProfile {
     accessToken: string;
     provider: "anilist" | "myanimelist";
 }
+
+export interface MalSessionPayload {
+    user: {
+        id: string;
+        name: string;
+        image: string | null;
+        url: string;
+        anilist: null;
+        createdAt: number;
+    };
+    accessToken: string;
+    refreshToken: string;
+    accessTokenExpires: number;
+    activeProvider: "myanimelist";
+}

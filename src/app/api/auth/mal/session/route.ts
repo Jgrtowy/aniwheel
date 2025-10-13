@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import type { MalSessionPayload } from "~/lib/types";
 
 export async function GET() {
     try {
@@ -8,9 +9,9 @@ export async function GET() {
 
         if (!malSession) return NextResponse.json({ session: null });
 
-        const sessionData = JSON.parse(atob(malSession));
+        const sessionData = JSON.parse(atob(malSession)) as MalSessionPayload;
 
-        if (sessionData.accessTokenExpires && Date.now() > sessionData.accessTokenExpires) {
+        if (Date.now() > sessionData.accessTokenExpires) {
             const refreshResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/mal/refresh`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

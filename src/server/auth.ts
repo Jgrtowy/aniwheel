@@ -2,6 +2,7 @@ import type { NextAuthOptions, Session } from "next-auth";
 import { getServerSession as nextAuthGetServerSession } from "next-auth/next";
 import { AniListProvider } from "~/lib/auth/providers/anilist";
 import { MyAnimeListProvider } from "~/lib/auth/providers/myanimelist";
+import type { MalSessionPayload } from "~/lib/types";
 
 declare module "next-auth" {
     interface User {
@@ -100,10 +101,10 @@ export async function getServerSession(): Promise<Session | null> {
         const malSession = cookieStore.get("mal_session")?.value;
 
         if (malSession) {
-            const sessionData = JSON.parse(atob(malSession));
+            const sessionData = JSON.parse(atob(malSession)) as MalSessionPayload;
 
             // Check if token is expired, if so let client handle refresh
-            if (sessionData.accessTokenExpires && Date.now() > sessionData.accessTokenExpires) return null;
+            if (Date.now() > sessionData.accessTokenExpires) return null;
 
             return {
                 user: sessionData.user,

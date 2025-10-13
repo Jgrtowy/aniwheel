@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import type { MalSessionPayload } from "~/lib/types";
 
 interface MALTokenResponse {
     token_type: string;
@@ -70,14 +71,14 @@ export async function GET(request: NextRequest) {
 
         const user: MALUserResponse = await userResponse.json();
 
-        const sessionData = {
+        const sessionData: MalSessionPayload = {
             user: {
                 id: user.id.toString(),
                 name: user.name,
                 image: user.picture || null,
                 url: `https://myanimelist.net/profile/${user.name}`,
                 anilist: null,
-                createdAt: Number(new Date(user.joined_at).getTime().toString().slice(0, -3)), // Convert to seconds
+                createdAt: typeof user.joined_at === "number" ? user.joined_at : Math.floor(new Date(user.joined_at).getTime() / 1000),
             },
             accessToken: tokens.access_token,
             refreshToken: tokens.refresh_token,
