@@ -36,9 +36,17 @@ export default function SettingsMenu() {
                         <Label>Image Size</Label>
                         <span className="text-xs text-muted-foreground">May affect loading times.</span>
                         <ToggleGroup type="single" variant="outline" value={preferredImageSize} onValueChange={(val) => val && setPreferredImageSize(val as ImageSize)}>
-                            <ToggleGroupItem value="medium">M</ToggleGroupItem>
-                            <ToggleGroupItem value="large">L</ToggleGroupItem>
-                            {session?.activeProvider !== "myanimelist" && <ToggleGroupItem value="extraLarge">XL</ToggleGroupItem>}
+                            <ToggleGroupItem value="medium" className="border dark:border-input cursor-pointer shadow-xs transition-none bg-background hover:bg-accent dark:bg-input/30 dark:hover:bg-input/50 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground!">
+                                M
+                            </ToggleGroupItem>
+                            <ToggleGroupItem value="large" className="border dark:border-input cursor-pointer shadow-xs transition-none bg-background hover:bg-accent dark:bg-input/30 dark:hover:bg-input/50 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground!">
+                                L
+                            </ToggleGroupItem>
+                            {session?.activeProvider !== "myanimelist" && (
+                                <ToggleGroupItem value="extraLarge" className="border dark:border-input cursor-pointer shadow-xs transition-none bg-background hover:bg-accent dark:bg-input/30 dark:hover:bg-input/50 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground!">
+                                    XL
+                                </ToggleGroupItem>
+                            )}
                         </ToggleGroup>
                     </div>
 
