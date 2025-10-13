@@ -1,7 +1,7 @@
 # .github/ISSUE_TEMPLATE/feature_request.yml
 name: ✨ Feature request
 description: Suggest an enhancement or new feature
-title: "[FEATURE]: "
+title: ""
 labels: ["enhancement"]
 body:
   - type: markdown
@@ -23,12 +23,12 @@ body:
     attributes:
       label: Proposed implementation
       placeholder: How would you envision this feature working?
-  - type: input
+  - type: textarea
     id: alternatives
     attributes:
       label: Alternatives considered
       placeholder: Other ways to solve this (if any)
-  - type: input
+  - type: textarea
     id: additional
     attributes:
       label: Additional context

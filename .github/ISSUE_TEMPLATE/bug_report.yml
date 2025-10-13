@@ -1,7 +1,7 @@
 # .github/ISSUE_TEMPLATE/bug_report.yml
 name: 🐛 Bug report
 description: Report a problem or unexpected behavior
-title: "[BUG]: "
+title: ""
 labels: ["bug"]
 body:
   - type: markdown
@@ -23,7 +23,7 @@ body:
     attributes:
       label: What is the expected behavior?
       placeholder: Describe what you expected to happen.
-  - type: input
+  - type: description
     id: steps
     attributes:
       label: Steps to reproduce

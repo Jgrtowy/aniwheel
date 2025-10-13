@@ -60,12 +60,14 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
         <CardElement className={cardClasses} {...cardProps}>
             {!isStatic && <span className="sr-only">Select {title}</span>}
             {variant !== "compact" && (
-                <div className={cn("absolute inset-0 -z-20 rounded-lg transition-all ease-in-out duration-700 scale-75 brightness-50", checked && "scale-100 brightness-50")}>
-                    <Image className={cn("object-cover w-full h-full blur-xl rounded-lg")} src={imageUrl} alt={title} fill sizes="100%" priority />
+                <div className={cn("absolute inset-0 -z-20 rounded-[inherit] opacity-50 ease-out transition-all duration-700 scale-0", checked && "scale-100")}>
+                    <Image className="object-cover size-full blur-xl rounded-[inherit]" src={imageUrl} alt={title} fill sizes="100%" priority={false} />
                 </div>
             )}
-            <Image className={cn("absolute inset-0 object-cover -z-10 transition-all ease-in-out duration-125 scale-100 rounded-lg", checked && "scale-100 rounded-lg")} src={imageUrl} alt={title} fill sizes="100%" />
-            <div className="flex justify-between w-full">
+            <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
+                <Image className={cn("object-cover -z-10 ease-in-out duration-125 scale-130", checked && "scale-100")} src={imageUrl} alt={title} fill sizes="100%" />
+            </div>
+            <div className="flex justify-between w-full z-10">
                 <div className="flex-shrink-0">
                     {anime.siteUrl && showDetails && (
                         <Tooltip>

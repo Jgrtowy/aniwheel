@@ -1,4 +1,5 @@
-import { BadgePlus, Clapperboard, LoaderCircle, Music4, Popcorn, Star, Trash2 } from "lucide-react";
+import { BadgePlus, Check, CheckCheck, Clapperboard, ExternalLink, LoaderCircle, Music4, Popcorn, Star, Trash2, X } from "lucide-react";
+import { motion } from "motion/react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -6,11 +7,12 @@ import AnimeCard from "~/components/AnimeCard";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
 import { useAnimeStore } from "~/lib/store";
 import type { MediaItem } from "~/lib/types";
 import { getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function AddToPlannedSheet() {
     const session = useSession();
@@ -68,8 +70,6 @@ export default function AddToPlannedSheet() {
     const handleTitleSelect = (anime: MediaItem) => {
         if (isAdded(anime)) return;
         setSelectedTitles((prev) => [...prev, anime]);
-        setSearchQuery("");
-        setSearchResults([]);
     };
 
     const handleTitleRemove = (anime: MediaItem) => {
@@ -127,7 +127,9 @@ export default function AddToPlannedSheet() {
         }
     };
 
-    const isAdded = (anime: MediaItem) => selectedTitles.some((title) => title.id === anime.id) || fullMediaList.some((title) => title.id === anime.id);
+    const isSelected = (anime: MediaItem) => selectedTitles.some((title) => title.id === anime.id);
+    const isInMediaList = (anime: MediaItem) => fullMediaList.some((title) => title.id === anime.id);
+    const isAdded = (anime: MediaItem) => isSelected(anime) || isInMediaList(anime);
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
@@ -137,23 +139,25 @@ export default function AddToPlannedSheet() {
                     Add new title
                 </Button>
             </SheetTrigger>
-            <SheetContent className="gap-0 flex flex-col h-full bg-component-secondary">
-                <SheetHeader className="shrink-0">
-                    <SheetTitle>Add a title to your planning list</SheetTitle>
-                </SheetHeader>
-
-                <div className="flex flex-col gap-2 flex-1 min-h-0 w-full px-4">
-                    <div className="relative shrink-0">
+            <SheetContent className="gap-2 p-4 flex flex-col h-full overflow-hidden bg-component-secondary w-full max-w-full sm:max-w-[445px] !inset-x-auto !right-0 sm:rounded-bl-2xl" showClose={false} side="top">
+                <SheetHeader className="p-0 gap-4">
+                    <SheetTitle className="text-lg font-bold">Add titles to your planning list</SheetTitle>
+                    <div className="relative">
                         <Input placeholder="Enter anime title..." value={searchQuery} onChange={handleInputChange} />
                         {isSearching && <LoaderCircle className="absolute right-0 p-2 h-full w-auto top-1/2 -translate-y-1/2 text-muted-foreground animate-spin" />}
                     </div>
-                    <ScrollArea className="flex-1 overflow-hidden" type="auto">
-                        <div className="flex flex-col gap-2">
-                            {searchResults.map((anime) => (
-                                <Button variant="outline" className="h-18 p-2 gap-2 flex justify-start disabled:cursor-not-allowed" onClick={() => handleTitleSelect(anime)} disabled={isAdded(anime)} key={anime.id}>
+                </SheetHeader>
+
+                <ScrollArea className="flex flex-col flex-1 min-h-0" type="auto">
+                    <div className="flex flex-col gap-2 pr-3.5">
+                        {searchResults.map((anime, index) => (
+                            <motion.div key={anime.id} initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.04 }}>
+                                <Button variant="outline" className="h-18 p-2 gap-2 flex flex-row justify-between w-full disabled:cursor-not-allowed" onClick={() => handleTitleSelect(anime)} disabled={isAdded(anime)}>
                                     <Image className="rounded-sm h-full w-auto aspect-[2/3] object-cover" src={getImageUrlWithPreference(anime, "medium")} alt={getTitleWithPreference(anime)} width={64} height={96} />
-                                    <div className="flex flex-col gap-0.5">
-                                        <h3 className="font-bold w-fit leading-tight line-clamp-1">{getTitleWithPreference(anime)}</h3>
+                                    <div className="flex flex-col gap-0.5 justify-self-start w-full">
+                                        <div className="font-bold flex justify-start w-75">
+                                            <span className="truncate">{getTitleWithPreference(anime)}</span>
+                                        </div>
                                         <div className="flex items-center gap-2 text-sm leading-tight text-muted-foreground">
                                             {anime.episodes > 0 && (
                                                 <p className="flex items-center gap-1 icon-text-container">
@@ -181,54 +185,87 @@ export default function AddToPlannedSheet() {
                                                     <span>{anime.averageScore}</span>
                                                 </p>
                                             )}
+                                            {isSelected(anime) && (
+                                                <p className="flex items-center gap-1 icon-text-container">
+                                                    <Check className="size-3" />
+                                                    <span>Selected</span>
+                                                </p>
+                                            )}
+                                            {isInMediaList(anime) && (
+                                                <p className="flex items-center gap-1 icon-text-container">
+                                                    <CheckCheck className="size-3" />
+                                                    <span>In your list</span>
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
-                                </Button>
-                            ))}
-                        </div>
-                    </ScrollArea>
-                </div>
-
-                <SheetFooter className="shrink-0 pt-2">
-                    {selectedTitles.length > 0 && (
-                        <ScrollArea type="auto">
-                            <h4 className="mb-2 font-medium">
-                                Selected titles: <span className="text-primary/50 text-xs">(click to remove)</span>
-                            </h4>
-                            <div className="flex w-max h-38 gap-2 pb-3">
-                                {selectedTitles.map((anime) => (
-                                    <div className="relative h-full aspect-square rounded-md overflow-hidden" key={anime.id}>
-                                        <button className="absolute inset-0 transition bg-component-primary flex justify-center items-center cursor-pointer opacity-0 hover:opacity-100 focus-visible:opacity-100 z-10" type="button" onClick={() => handleTitleRemove(anime)}>
-                                            <Trash2 className="size-8 stroke-destructive" />
-                                            <span className="sr-only">Remove {getTitleWithPreference(anime)}</span>
-                                        </button>
-                                        <AnimeCard isStatic={true} anime={anime} variant="compact" />
+                                    <div>
+                                        {anime.siteUrl && (
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button asChild variant="secondary" className="flex size-7 justify-center items-center aspect-square border rounded-md">
+                                                        <a href={anime.siteUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                                            <ExternalLink className="size-3" />
+                                                            <span className="sr-only">View on {session?.activeProvider}</span>
+                                                        </a>
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                {session?.activeProvider && (
+                                                    <TooltipContent>
+                                                        <p>View on {getPrettyProviderName(session?.activeProvider)}</p>
+                                                    </TooltipContent>
+                                                )}
+                                            </Tooltip>
+                                        )}
                                     </div>
-                                ))}
-                            </div>
-                            <ScrollBar orientation="horizontal" />
-                        </ScrollArea>
+                                </Button>
+                            </motion.div>
+                        ))}
+                    </div>
+                </ScrollArea>
+
+                <SheetFooter className="shrink-0 p-0 flex gap-4">
+                    {selectedTitles.length > 0 && (
+                        <div className="flex flex-col gap-2">
+                            <h4 className="font-bold text-lg">Selected titles:</h4>
+                            <ScrollArea type="auto">
+                                <div className="flex w-max gap-2">
+                                    {selectedTitles.map((anime) => (
+                                        <div key={anime.id}>
+                                            <AnimeCard className="h-32 rounded-b-none!" isStatic={true} anime={anime} variant="compact" />
+                                            <Button className="w-full rounded-t-none" variant="destructive" size="sm" onClick={() => handleTitleRemove(anime)}>
+                                                <Trash2 />
+                                                <span className="sr-only">Remove {getTitleWithPreference(anime)}</span>
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <ScrollBar orientation="horizontal" />
+                            </ScrollArea>
+                        </div>
                     )}
 
-                    <SheetDescription className="flex flex-col text-center">
-                        <span className="text-destructive font-bold">WARNING!</span>
-                        <span className="text-balance">
-                            Titles added here <span className="font-bold">WILL</span> be set as "planning" on your {session?.activeProvider && getPrettyProviderName(session?.activeProvider)} profile.
-                        </span>
-                    </SheetDescription>
-                    <Button variant="default" className="w-full" disabled={selectedTitles.length === 0 || isAdding} onClick={handleAddTitles}>
-                        {selectedTitles.length > 0 ? (
-                            <>
-                                {isAdding ? <LoaderCircle className="animate-spin size-5" /> : <BadgePlus className="size-5" />}
-                                Add {selectedTitles.length} title{selectedTitles.length > 1 ? "s" : ""}
-                            </>
-                        ) : (
-                            <>
-                                <BadgePlus className="size-5" />
-                                Add titles
-                            </>
-                        )}
-                    </Button>
+                    <div className="flex flex-col gap-2">
+                        <Button size="lg" disabled={selectedTitles.length === 0 || isAdding} onClick={handleAddTitles}>
+                            {selectedTitles.length > 0 ? (
+                                <>
+                                    {isAdding ? <LoaderCircle className="animate-spin" /> : <CheckCheck />}
+                                    Set {selectedTitles.length} title{selectedTitles.length > 1 ? "s" : ""} as planning
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCheck />
+                                    Set as planning
+                                </>
+                            )}
+                        </Button>
+                        <SheetClose asChild>
+                            <Button variant="outline" size="lg">
+                                <X />
+                                Close
+                            </Button>
+                        </SheetClose>
+                    </div>
                 </SheetFooter>
             </SheetContent>
         </Sheet>
