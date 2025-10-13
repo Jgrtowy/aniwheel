@@ -95,7 +95,13 @@ export default function PlannedList() {
             {fullMediaList.length === 0 && !isFetching && (
                 <motion.div className="col-span-full text-muted-foreground text-center space-y-0.5 my-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                     <p className="text-2xl font-bold">Your planned list is empty</p>
-                    <p className="text-lg">Why don't you add some titles?</p>
+                    <p className="text-lg">
+                        Why don't you{" "}
+                        <Button variant="link" className="text-lg p-0" onClick={() => {}}>
+                            add some titles
+                        </Button>
+                        ?
+                    </p>
                 </motion.div>
             )}
             {mediaList.length === 0 && fullMediaList.length > 0 && !isFetching && (
