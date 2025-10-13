@@ -8,11 +8,13 @@ import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useCheckedMedia, useViewMode } from "~/hooks/useShallowStore";
 import { useAnimeStore } from "~/lib/store";
+import { useUiStore } from "~/lib/ui-store";
 
 export default function PlannedList() {
     const { mediaList, fullMediaList, setFullMediaList, setActiveGenres, clearFilters, setSearchTerm } = useAnimeStore();
     const checkedMedia = useCheckedMedia();
     const viewMode = useViewMode();
+    const { addToPlannedSheet } = useUiStore();
     const [isFetching, setIsFetching] = useState(true);
 
     const gridTitleWidths = useMemo(() => {
@@ -97,7 +99,7 @@ export default function PlannedList() {
                     <p className="text-2xl font-bold">Your planned list is empty</p>
                     <p className="text-lg">
                         Why don't you{" "}
-                        <Button variant="link" className="text-lg p-0" onClick={() => {}}>
+                        <Button variant="link" className="text-lg p-0" onClick={() => addToPlannedSheet.setOpen(true)}>
                             add some titles
                         </Button>
                         ?

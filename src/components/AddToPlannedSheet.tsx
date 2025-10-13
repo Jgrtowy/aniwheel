@@ -7,9 +7,10 @@ import AnimeCard from "~/components/AnimeCard";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
+import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
 import { useAnimeStore } from "~/lib/store";
 import type { MediaItem } from "~/lib/types";
+import { useUiStore } from "~/lib/ui-store";
 import { getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -17,8 +18,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 export default function AddToPlannedSheet() {
     const session = useSession();
     const { fullMediaList, setFullMediaList, addSelectedMedia, clearFilters } = useAnimeStore();
+    const {
+        addToPlannedSheet: { open, setOpen },
+    } = useUiStore();
 
-    const [open, setOpen] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
