@@ -1,4 +1,5 @@
-import { BadgePlus, CheckCheck, Clapperboard, ExternalLink, LoaderCircle, Music4, Popcorn, Star, Trash2, X } from "lucide-react";
+import { BadgePlus, Check, CheckCheck, Clapperboard, ExternalLink, LoaderCircle, Music4, Popcorn, Star, Trash2, X } from "lucide-react";
+import { motion } from "motion/react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -126,7 +127,9 @@ export default function AddToPlannedSheet() {
         }
     };
 
-    const isAdded = (anime: MediaItem) => selectedTitles.some((title) => title.id === anime.id) || fullMediaList.some((title) => title.id === anime.id);
+    const isSelected = (anime: MediaItem) => selectedTitles.some((title) => title.id === anime.id);
+    const isInMediaList = (anime: MediaItem) => fullMediaList.some((title) => title.id === anime.id);
+    const isAdded = (anime: MediaItem) => isSelected(anime) || isInMediaList(anime);
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
@@ -136,23 +139,23 @@ export default function AddToPlannedSheet() {
                     Add new title
                 </Button>
             </SheetTrigger>
-            <SheetContent className="gap-0 flex flex-col h-full overflow-hidden bg-component-secondary w-full max-w-full sm:max-w-[445px] !inset-x-auto !right-0 sm:rounded-bl-2xl" showClose={false} side="top">
-                <SheetHeader className="shrink-0 px-6 pt-6 pb-4">
-                    <SheetTitle>Add a title to your planning list</SheetTitle>
-                </SheetHeader>
-
-                <div className="flex flex-col gap-2 px-6 flex-1 min-h-0">
-                    <div className="relative shrink-0">
+            <SheetContent className="gap-2 p-4 flex flex-col h-full overflow-hidden bg-component-secondary w-full max-w-full sm:max-w-[445px] !inset-x-auto !right-0 sm:rounded-bl-2xl" showClose={false} side="top">
+                <SheetHeader className="p-0 gap-4">
+                    <SheetTitle className="text-lg font-bold">Add titles to your planning list</SheetTitle>
+                    <div className="relative">
                         <Input placeholder="Enter anime title..." value={searchQuery} onChange={handleInputChange} />
                         {isSearching && <LoaderCircle className="absolute right-0 p-2 h-full w-auto top-1/2 -translate-y-1/2 text-muted-foreground animate-spin" />}
                     </div>
-                    <ScrollArea className="flex-1 min-h-0" type="auto">
-                        <div className="flex flex-col gap-2 pr-4">
-                            {searchResults.map((anime) => (
-                                <Button variant="outline" className="h-18 p-2 gap-2 flex flex-row justify-between w-full disabled:cursor-not-allowed" onClick={() => handleTitleSelect(anime)} disabled={isAdded(anime)} key={anime.id}>
+                </SheetHeader>
+
+                <ScrollArea className="flex flex-col flex-1 min-h-0" type="auto">
+                    <div className="flex flex-col gap-2 pr-3.5">
+                        {searchResults.map((anime, index) => (
+                            <motion.div key={anime.id} initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.04 }}>
+                                <Button variant="outline" className="h-18 p-2 gap-2 flex flex-row justify-between w-full disabled:cursor-not-allowed" onClick={() => handleTitleSelect(anime)} disabled={isAdded(anime)}>
                                     <Image className="rounded-sm h-full w-auto aspect-[2/3] object-cover" src={getImageUrlWithPreference(anime, "medium")} alt={getTitleWithPreference(anime)} width={64} height={96} />
                                     <div className="flex flex-col gap-0.5 justify-self-start w-full">
-                                        <div className="font-bold flex justify-start w-64">
+                                        <div className="font-bold flex justify-start w-75">
                                             <span className="truncate">{getTitleWithPreference(anime)}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm leading-tight text-muted-foreground">
@@ -182,6 +185,18 @@ export default function AddToPlannedSheet() {
                                                     <span>{anime.averageScore}</span>
                                                 </p>
                                             )}
+                                            {isSelected(anime) && (
+                                                <p className="flex items-center gap-1 icon-text-container">
+                                                    <Check className="size-3" />
+                                                    <span>Selected</span>
+                                                </p>
+                                            )}
+                                            {isInMediaList(anime) && (
+                                                <p className="flex items-center gap-1 icon-text-container">
+                                                    <CheckCheck className="size-3" />
+                                                    <span>In your list</span>
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     <div>
@@ -204,15 +219,15 @@ export default function AddToPlannedSheet() {
                                         )}
                                     </div>
                                 </Button>
-                            ))}
-                        </div>
-                    </ScrollArea>
-                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </ScrollArea>
 
-                <SheetFooter className="shrink-0 pt-2">
+                <SheetFooter className="shrink-0 p-0 flex gap-4">
                     {selectedTitles.length > 0 && (
-                        <>
-                            <h4 className="font-medium text-lg">Selected titles:</h4>
+                        <div className="flex flex-col gap-2">
+                            <h4 className="font-bold text-lg">Selected titles:</h4>
                             <ScrollArea type="auto">
                                 <div className="flex w-max gap-2">
                                     {selectedTitles.map((anime) => (
@@ -227,28 +242,30 @@ export default function AddToPlannedSheet() {
                                 </div>
                                 <ScrollBar orientation="horizontal" />
                             </ScrollArea>
-                        </>
+                        </div>
                     )}
 
-                    <Button size="lg" disabled={selectedTitles.length === 0 || isAdding} onClick={handleAddTitles}>
-                        {selectedTitles.length > 0 ? (
-                            <>
-                                {isAdding ? <LoaderCircle className="animate-spin" /> : <CheckCheck />}
-                                Set {selectedTitles.length} title{selectedTitles.length > 1 ? "s" : ""} as planning
-                            </>
-                        ) : (
-                            <>
-                                <CheckCheck />
-                                Set as planning
-                            </>
-                        )}
-                    </Button>
-                    <SheetClose asChild>
-                        <Button variant="outline" size="lg">
-                            <X />
-                            Close
+                    <div className="flex flex-col gap-2">
+                        <Button size="lg" disabled={selectedTitles.length === 0 || isAdding} onClick={handleAddTitles}>
+                            {selectedTitles.length > 0 ? (
+                                <>
+                                    {isAdding ? <LoaderCircle className="animate-spin" /> : <CheckCheck />}
+                                    Set {selectedTitles.length} title{selectedTitles.length > 1 ? "s" : ""} as planning
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCheck />
+                                    Set as planning
+                                </>
+                            )}
                         </Button>
-                    </SheetClose>
+                        <SheetClose asChild>
+                            <Button variant="outline" size="lg">
+                                <X />
+                                Close
+                            </Button>
+                        </SheetClose>
+                    </div>
                 </SheetFooter>
             </SheetContent>
         </Sheet>
