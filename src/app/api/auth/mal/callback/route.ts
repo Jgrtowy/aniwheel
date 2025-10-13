@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
                 name: user.name,
                 image: user.picture || null,
                 url: `https://myanimelist.net/profile/${user.name}`,
-                moderatorRoles: null,
+                anilist: null,
                 createdAt: Number(new Date(user.joined_at).getTime().toString().slice(0, -3)), // Convert to seconds
             },
             accessToken: tokens.access_token,

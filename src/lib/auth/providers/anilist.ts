@@ -8,8 +8,13 @@ interface AniListProfile {
         large: string;
         medium: string;
     };
+    bannerImage: string | null;
     siteUrl: string;
     moderatorRoles: string[] | null;
+    options: {
+        profileColor: "blue" | "purple" | "pink" | "orange" | "red" | "green" | "gray";
+        titleLanguage: "ROMAJI" | "ENGLISH" | "NATIVE" | "ROMAJI_STYLISED" | "ENGLISH_STYLISED" | "NATIVE_STYLISED";
+    };
     createdAt: number;
 }
 
@@ -45,8 +50,13 @@ export function AniListProvider<P extends AniListProfile>(options: OAuthUserConf
                     large
                     medium
                   }
+                  bannerImage
                   siteUrl
                   moderatorRoles
+                  options {
+                    profileColor
+                    titleLanguage
+                  }
                   createdAt
                 }
               }
@@ -58,8 +68,20 @@ export function AniListProvider<P extends AniListProfile>(options: OAuthUserConf
                 return data.data.Viewer as AniListProfile;
             },
         },
-        profile({ id, name, avatar, siteUrl, moderatorRoles, createdAt }: AniListProfile) {
-            return { id: id.toString(), name, image: avatar.large || avatar.medium, url: siteUrl, moderatorRoles: moderatorRoles || null, createdAt };
+        profile({ id, name, avatar, bannerImage, siteUrl, moderatorRoles, options, createdAt }: AniListProfile) {
+            return {
+                id: id.toString(),
+                name,
+                image: avatar.large || avatar.medium,
+                url: siteUrl,
+                anilist: {
+                    moderatorRoles: moderatorRoles || null,
+                    profileColor: options.profileColor,
+                    titleLanguage: options.titleLanguage,
+                    bannerImage,
+                },
+                createdAt,
+            };
         },
         options,
     };

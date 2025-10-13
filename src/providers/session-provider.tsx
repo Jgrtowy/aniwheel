@@ -9,6 +9,9 @@ interface MALSession {
         id: string;
         name: string;
         image: string | null;
+        url: string;
+        anilist: null;
+        createdAt: number;
     };
     accessToken: string;
     refreshToken: string;

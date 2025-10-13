@@ -94,7 +94,7 @@ export default function Header() {
                                 Sign Out
                             </Button>
                         </div>
-                        {session && session.activeProvider === "anilist" && session.user.moderatorRoles && (
+                        {session && session.activeProvider === "anilist" && session.user.anilist?.moderatorRoles && (
                             <>
                                 <Separator />
                                 <div className="p-4">

@@ -9,7 +9,12 @@ declare module "next-auth" {
         name: string;
         image: string;
         url: string;
-        moderatorRoles: string[] | null;
+        anilist: {
+            moderatorRoles: string[] | null;
+            profileColor: "blue" | "purple" | "pink" | "orange" | "red" | "green" | "gray";
+            titleLanguage: "ROMAJI" | "ENGLISH" | "NATIVE" | "ROMAJI_STYLISED" | "ENGLISH_STYLISED" | "NATIVE_STYLISED";
+            bannerImage: string | null;
+        } | null;
         createdAt: number;
     }
 
@@ -28,7 +33,12 @@ declare module "next-auth/jwt" {
         url: string;
         accessToken: string;
         activeProvider: "anilist" | "myanimelist";
-        moderatorRoles: string[] | null;
+        anilist: {
+            moderatorRoles: string[] | null;
+            profileColor: "blue" | "purple" | "pink" | "orange" | "red" | "green" | "gray";
+            titleLanguage: "ROMAJI" | "ENGLISH" | "NATIVE" | "ROMAJI_STYLISED" | "ENGLISH_STYLISED" | "NATIVE_STYLISED";
+            bannerImage: string | null;
+        } | null;
         createdAt: number;
     }
 }
@@ -54,7 +64,7 @@ export const authOptions: NextAuthOptions = {
                 token.url = user.url;
                 token.accessToken = account.access_token as string;
                 token.activeProvider = account.provider as "anilist" | "myanimelist";
-                token.moderatorRoles = user.moderatorRoles;
+                token.anilist = user.anilist;
                 token.createdAt = user.createdAt;
             }
             return token;
@@ -68,7 +78,7 @@ export const authOptions: NextAuthOptions = {
                 session.user.url = token.url;
                 session.accessToken = token.accessToken;
                 session.activeProvider = token.activeProvider;
-                session.user.moderatorRoles = token.moderatorRoles;
+                session.user.anilist = token.anilist;
                 session.user.createdAt = token.createdAt;
             }
             return session;
