@@ -1,7 +1,5 @@
 import type { OAuthConfig, OAuthUserConfig } from "next-auth/providers/oauth";
-
-// AniList Provider Configuration
-interface AniListProfile {
+export interface AniListProfile {
     id: number;
     name: string;
     avatar: {
@@ -12,7 +10,7 @@ interface AniListProfile {
     siteUrl: string;
     moderatorRoles: string[] | null;
     options: {
-        profileColor: "blue" | "purple" | "pink" | "orange" | "red" | "green" | "gray";
+        profileColor: "blue" | "purple" | "green" | "orange" | "red" | "pink" | "gray";
         titleLanguage: "ROMAJI" | "ENGLISH" | "NATIVE" | "ROMAJI_STYLISED" | "ENGLISH_STYLISED" | "NATIVE_STYLISED";
     };
     createdAt: number;

@@ -1,5 +1,6 @@
 "use client";
 
+import type { Session } from "next-auth";
 import { signIn as nextAuthSignIn, signOut as nextAuthSignOut } from "next-auth/react";
 import type { MalSessionPayload } from "./types";
 
@@ -38,3 +39,10 @@ export const signOut = async (options?: { callbackUrl?: string }) => {
 
     return nextAuthSignOut(options);
 };
+
+export type AniListSession = Session & {
+    activeProvider: "anilist";
+    user: Session["user"] & { anilist: NonNullable<Session["user"]["anilist"]> };
+};
+
+export const isAniListSession = (session: Session | null | undefined): session is AniListSession => !!session && session.activeProvider === "anilist" && session.user?.anilist !== null;
