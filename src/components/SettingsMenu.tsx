@@ -49,7 +49,7 @@ export default function SettingsMenu() {
                     <Settings />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 py-4 px-0 space-y-4 bg-component-secondary" align="end">
+            <PopoverContent className="w-80 py-4 px-0 space-y-4 bg-component-secondary">
                 <h4 className="font-bold text-lg px-4">User Settings</h4>
                 <Separator />
                 <div className="grid gap-4">
