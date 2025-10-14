@@ -45,4 +45,4 @@ export type AniListSession = Session & {
     user: Session["user"] & { anilist: NonNullable<Session["user"]["anilist"]> };
 };
 
-export const isAniListSession = (session: Session | null | undefined): session is AniListSession => !!session && session.activeProvider === "anilist" && session.user?.anilist !== null;
+export const isAniListSession = (session: Session | null | undefined): session is AniListSession => !!session && session.activeProvider === "anilist" && !!session.user?.anilist;
