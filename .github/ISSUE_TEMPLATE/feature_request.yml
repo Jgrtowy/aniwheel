@@ -1,7 +1,7 @@
 # .github/ISSUE_TEMPLATE/feature_request.yml
 name: ✨ Feature request
 description: Suggest an enhancement or new feature
-title: ""
+title: "[FEATURE] "
 labels: ["enhancement"]
 body:
   - type: markdown
