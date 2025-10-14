@@ -1,4 +1,5 @@
 import { Laptop, Moon, Settings, Sun } from "lucide-react";
+import type { Session } from "next-auth";
 import { useTheme } from "next-themes";
 import React, { useEffect } from "react";
 import { Button } from "~/components/ui/button";
@@ -8,9 +9,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
-import type { ImageSize } from "~/lib/types";
+import { isAniListSession } from "~/lib/auth";
+import type { ImageSize, TitleLanguage } from "~/lib/types";
 import { useSession } from "~/providers/session-provider";
 import { useSettingsStore } from "~/store/settings";
+
+type AniListTitleLanguage = NonNullable<Session["user"]["anilist"]>["titleLanguage"];
+const aniListTitleLanguages: Record<AniListTitleLanguage, TitleLanguage> = {
+    ROMAJI: "romaji",
+    ENGLISH: "en",
+    NATIVE: "jp",
+    ROMAJI_STYLISED: "romaji",
+    ENGLISH_STYLISED: "en",
+    NATIVE_STYLISED: "jp",
+};
 
 export default function SettingsMenu() {
     const { preferredImageSize, setPreferredImageSize, preferredTitleLanguage, setPreferredTitleLanguage, skipLandingAnimation, setSkipLandingAnimation, enableTickSounds, setEnableTickSounds } = useSettingsStore();
@@ -21,6 +33,15 @@ export default function SettingsMenu() {
         if (session?.activeProvider === "myanimelist" && preferredImageSize === "extraLarge") setPreferredImageSize("large");
     }, [session?.activeProvider, preferredImageSize]);
 
+    const handleSyncWithAniList = () => {
+        if (!isAniListSession(session)) return;
+        const targetLanguage = aniListTitleLanguages[session.user.anilist.titleLanguage];
+        if (targetLanguage) {
+            const settings = useSettingsStore.getState();
+            if (settings.preferredTitleLanguage !== targetLanguage) settings.setPreferredTitleLanguage(targetLanguage);
+        }
+    };
+
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -28,7 +49,7 @@ export default function SettingsMenu() {
                     <Settings />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 py-4 px-0 space-y-4 bg-component-secondary">
+            <PopoverContent className="w-80 py-4 px-0 space-y-4 bg-component-secondary" align="end">
                 <h4 className="font-bold text-lg px-4">User Settings</h4>
                 <Separator />
                 <div className="grid gap-4">
@@ -76,7 +97,14 @@ export default function SettingsMenu() {
                     </div>
                     <Separator />
                     <div className="flex flex-col gap-1 px-4">
-                        <Label>Title language</Label>
+                        <Label>
+                            Title language
+                            {isAniListSession(session) && aniListTitleLanguages[session.user.anilist.titleLanguage] !== preferredTitleLanguage && (
+                                <Button variant="link" className="p-0 h-3.5" onClick={handleSyncWithAniList}>
+                                    Sync with AniList
+                                </Button>
+                            )}
+                        </Label>
                         <span className="text-xs text-muted-foreground">Changes the language of anime titles.</span>
                         <Select value={preferredTitleLanguage} onValueChange={setPreferredTitleLanguage}>
                             <SelectTrigger className="w-34">{preferredTitleLanguage === "en" ? "English" : preferredTitleLanguage === "romaji" ? "Romaji" : "Japanese"}</SelectTrigger>

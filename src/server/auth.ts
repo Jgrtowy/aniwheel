@@ -2,6 +2,7 @@ import type { NextAuthOptions, Session } from "next-auth";
 import { getServerSession as nextAuthGetServerSession } from "next-auth/next";
 import { AniListProvider } from "~/lib/auth/providers/anilist";
 import { MyAnimeListProvider } from "~/lib/auth/providers/myanimelist";
+import type { MalSessionPayload } from "~/lib/types";
 
 declare module "next-auth" {
     interface User {
@@ -9,7 +10,12 @@ declare module "next-auth" {
         name: string;
         image: string;
         url: string;
-        moderatorRoles: string[] | null;
+        anilist: {
+            moderatorRoles: string[] | null;
+            profileColor: "blue" | "purple" | "pink" | "orange" | "red" | "green" | "gray";
+            titleLanguage: "ROMAJI" | "ENGLISH" | "NATIVE" | "ROMAJI_STYLISED" | "ENGLISH_STYLISED" | "NATIVE_STYLISED";
+            bannerImage: string | null;
+        } | null;
         createdAt: number;
     }
 
@@ -28,7 +34,12 @@ declare module "next-auth/jwt" {
         url: string;
         accessToken: string;
         activeProvider: "anilist" | "myanimelist";
-        moderatorRoles: string[] | null;
+        anilist: {
+            moderatorRoles: string[] | null;
+            profileColor: "blue" | "purple" | "pink" | "orange" | "red" | "green" | "gray";
+            titleLanguage: "ROMAJI" | "ENGLISH" | "NATIVE" | "ROMAJI_STYLISED" | "ENGLISH_STYLISED" | "NATIVE_STYLISED";
+            bannerImage: string | null;
+        } | null;
         createdAt: number;
     }
 }
@@ -54,7 +65,7 @@ export const authOptions: NextAuthOptions = {
                 token.url = user.url;
                 token.accessToken = account.access_token as string;
                 token.activeProvider = account.provider as "anilist" | "myanimelist";
-                token.moderatorRoles = user.moderatorRoles;
+                token.anilist = user.anilist;
                 token.createdAt = user.createdAt;
             }
             return token;
@@ -68,7 +79,7 @@ export const authOptions: NextAuthOptions = {
                 session.user.url = token.url;
                 session.accessToken = token.accessToken;
                 session.activeProvider = token.activeProvider;
-                session.user.moderatorRoles = token.moderatorRoles;
+                session.user.anilist = token.anilist;
                 session.user.createdAt = token.createdAt;
             }
             return session;
@@ -90,10 +101,10 @@ export async function getServerSession(): Promise<Session | null> {
         const malSession = cookieStore.get("mal_session")?.value;
 
         if (malSession) {
-            const sessionData = JSON.parse(atob(malSession));
+            const sessionData = JSON.parse(atob(malSession)) as MalSessionPayload;
 
             // Check if token is expired, if so let client handle refresh
-            if (sessionData.accessTokenExpires && Date.now() > sessionData.accessTokenExpires) return null;
+            if (Date.now() > sessionData.accessTokenExpires) return null;
 
             return {
                 user: sessionData.user,

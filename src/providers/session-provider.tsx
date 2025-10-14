@@ -2,18 +2,13 @@
 
 import type { Session } from "next-auth";
 import { SessionProvider as NextAuthSessionProvider, useSession as nextAuthUseSession } from "next-auth/react";
-import { type ReactNode, createContext, useCallback, useContext, useEffect, useState } from "react";
+import { type ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
+import { fetchMalSession } from "~/lib/auth";
+import type { MalSessionPayload } from "~/lib/types";
 
-interface MALSession {
-    user: {
-        id: string;
-        name: string;
-        image: string | null;
-    };
-    accessToken: string;
-    refreshToken: string;
-    accessTokenExpires: number;
-    activeProvider: "myanimelist";
+interface MalSessionState {
+    data: MalSessionPayload | null;
+    checked: boolean;
 }
 
 interface SessionContextType {
@@ -28,61 +23,54 @@ const SessionContext = createContext<SessionContextType>({
 
 function CustomSessionProvider({ children }: { children: ReactNode }) {
     const nextAuthSession = nextAuthUseSession();
-    const [malSession, setMalSession] = useState<MALSession | null>(null);
-    const [malSessionChecked, setMalSessionChecked] = useState(false);
-
-    const checkMALSession = useCallback(async () => {
-        if (malSessionChecked) return; // Prevent duplicate checks
-
-        try {
-            const response = await fetch("/api/auth/mal/session");
-            if (response.ok) {
-                const data = await response.json();
-                if (data.session) {
-                    setMalSession(data.session);
-                }
-            }
-        } catch (error) {
-            console.error("Error checking MAL session:", error);
-        } finally {
-            setMalSessionChecked(true);
-        }
-    }, [malSessionChecked]);
+    const [malSessionState, setMalSessionState] = useState<MalSessionState>({ data: null, checked: false });
 
     useEffect(() => {
-        // Only check MAL session if:
-        // 1. NextAuth session is not loading and not available
-        // 2. We haven't checked MAL session yet
-        if (nextAuthSession.status === "unauthenticated" && !malSessionChecked) {
-            checkMALSession();
-        }
-    }, [nextAuthSession.status, malSessionChecked, checkMALSession]);
+        if (nextAuthSession.status !== "unauthenticated" || malSessionState.checked) return;
 
-    const getSession = (): Session | null => {
-        // Return NextAuth session if available
+        let cancelled = false;
+
+        (async () => {
+            try {
+                const session = await fetchMalSession();
+                if (!cancelled) {
+                    setMalSessionState({ data: session, checked: true });
+                }
+            } catch (_error) {
+                if (!cancelled) {
+                    setMalSessionState({ data: null, checked: true });
+                }
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [nextAuthSession.status, malSessionState.checked]);
+
+    const mergedSession = useMemo((): Session | null => {
         if (nextAuthSession.data) {
             return nextAuthSession.data;
         }
 
-        // Return MAL session converted to NextAuth format
-        if (malSession) {
+        if (malSessionState.data) {
             return {
-                user: malSession.user,
-                accessToken: malSession.accessToken,
-                activeProvider: malSession.activeProvider,
-                expires: new Date(malSession.accessTokenExpires).toISOString(),
+                user: malSessionState.data.user,
+                accessToken: malSessionState.data.accessToken,
+                activeProvider: malSessionState.data.activeProvider,
+                expires: new Date(malSessionState.data.accessTokenExpires).toISOString(),
             } as Session;
         }
 
         return null;
-    };
+    }, [nextAuthSession.data, malSessionState.data]);
 
-    const isLoading = nextAuthSession.status === "loading" || (!nextAuthSession.data && !malSessionChecked);
+    const isLoading = nextAuthSession.status === "loading" || (!nextAuthSession.data && !malSessionState.checked);
 
     return (
         <SessionContext.Provider
             value={{
-                session: getSession(),
+                session: mergedSession,
                 loading: isLoading,
             }}
         >
