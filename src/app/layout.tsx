@@ -80,7 +80,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <ClientSessionProvider>{children}</ClientSessionProvider>
                 </ThemeProvider>
-                <Toaster richColors />
+                <Toaster richColors toastOptions={{ className: `${comfortaa.className} antialiased` }} />
             </body>
         </html>
     );
