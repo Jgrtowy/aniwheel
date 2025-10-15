@@ -1,9 +1,10 @@
 "use client";
 
-import { Grid2X2, List, Rows3, Search, X } from "lucide-react";
-import { MotionConfig, motion } from "motion/react";
+import { Grid2X2, Rows3, Search, X } from "lucide-react";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import Aurora from "~/components/Aurora";
 import BackToTop from "~/components/BackToTop";
 import FiltersDropdown from "~/components/FiltersDropdown";
@@ -17,21 +18,57 @@ import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { useAnimeStore } from "~/store/anime";
 import { useSettingsStore } from "~/store/settings";
 import Stats from "./Stats";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function Home() {
     const { searchTerm, setSearchTerm } = useAnimeStore();
     const [colorStops, setColorStops] = useState<string[]>(["#2e1cff", "#ff3161", "#b032ff"]);
-    const { viewMode, setViewMode } = useSettingsStore();
-    const [rolled] = useState(Math.random() < 0.01);
+    const { viewMode, setViewMode, hasSeenMai, setHasSeenMai } = useSettingsStore();
+
+    const [showMai, setShowMai] = useState(false);
+    const handleMaiHover = () => {
+        if (!showMai) return;
+        setShowMai(false);
+        setHasSeenMai(true);
+        toast("You think you saw a bunny girl?", { description: "Congratulations, you're officially suffering from Adolescence Syndrome.", duration: 5000, position: "bottom-center", className: "justify-center text-center [&_[data-title]]:text-lg [&_[data-title]]:font-black! [&_[data-description]]:text-sm" });
+    };
 
     useEffect(() => {
         setColorStops((prev) => [...prev].sort(() => Math.random() - 0.5));
     }, []);
 
+    useEffect(() => {
+        if (hasSeenMai) {
+            setShowMai(false);
+            return;
+        }
+
+        let isActive = true;
+
+        (async () => {
+            try {
+                const response = await fetch("/api/maiEligibility");
+                if (!response.ok) {
+                    if (isActive) setShowMai(false);
+                    console.error("Failed to check Mai eligibility", response.statusText);
+                    return;
+                }
+
+                const data = (await response.json()) as { showMai?: boolean };
+                if (isActive) setShowMai(Boolean(data.showMai));
+            } catch (error) {
+                if (isActive) setShowMai(false);
+                console.error("Failed to check Mai eligibility", error);
+            }
+        })();
+
+        return () => {
+            isActive = false;
+        };
+    }, [hasSeenMai]);
+
     return (
-        <div className="relative">
-            <MotionConfig reducedMotion="user">
+        <MotionConfig reducedMotion="user">
+            <div className="relative">
                 <motion.div className="fixed w-full h-3/4 sm:h-full -z-10 pointer-events-none brightness-[140%]" initial={{ opacity: 0, y: -250 }} animate={{ opacity: 0.8, y: 0, transition: { duration: 2 } }}>
                     <Aurora colorStops={colorStops} blend={1} amplitude={0.75} speed={0.5} />
                 </motion.div>
@@ -78,8 +115,21 @@ export default function Home() {
                 <div className="fixed bottom-6 right-6">
                     <BackToTop />
                 </div>
-            </MotionConfig>
-            {rolled && <Image src="/mai.webp" alt="Sakurajima Mai Easter Egg" width={750} height={1000} className={`absolute bottom-0 left-0 xl:w-24 w-16 h-auto opacity-50 transition ${!rolled && "hidden"}`} />}
-        </div>
+                <AnimatePresence>
+                    {showMai && (
+                        <motion.div
+                            className="absolute bottom-0 left-2 cursor-help"
+                            onHoverStart={handleMaiHover}
+                            onTapStart={handleMaiHover}
+                            initial={{ opacity: 0, filter: "blur(0px)" }}
+                            animate={{ opacity: 1, transition: { duration: 0.5, ease: "easeInOut" } }}
+                            exit={{ opacity: 0, filter: "blur(100px)", transition: { duration: 1.5, ease: "easeInOut" } }}
+                        >
+                            <Image className="w-24" src="/mai.webp" alt="Some strange bunny girl" width={750} height={1000} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </MotionConfig>
     );
 }
