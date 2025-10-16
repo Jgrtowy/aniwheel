@@ -60,7 +60,7 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
         <CardElement className={cardClasses} {...cardProps}>
             {!isStatic && <span className="sr-only">Select {title}</span>}
             {variant !== "compact" && (
-                <div className={cn("absolute inset-0 -z-20 rounded-[inherit] opacity-50 ease-out transition-all duration-700 scale-0", checked && "scale-100")}>
+                <div className={cn("absolute inset-0 -z-20 rounded-[inherit] opacity-50 ease-out transition-all duration-700 scale-0 lg:block hidden", checked && "scale-100")}>
                     <Image className="object-cover size-full blur-xl rounded-[inherit]" src={imageUrl} alt={title} fill sizes="100%" priority={false} />
                 </div>
             )}
