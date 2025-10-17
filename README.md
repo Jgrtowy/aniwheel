@@ -12,22 +12,33 @@
 
 ## Features ⭐
 
-- MyAnimeList and AniList support
-- Multiple filter & sorting options
-- Option to include "Dropped" and "On-hold" titles
-- User settings (image size, theme, language preferences...)
-- Ability to add new titles to your "Planning" list on your selected anime tracker
-- User recommendations
-*...and more to come!*
+- [x] MyAnimeList and AniList support
+- [x] Multiple filter & sorting options
+- [x] Option to include "Dropped" and "On-hold" titles
+- [x] User settings (image size, theme, language preferences...)
+- [x] Ability to add new titles to your "Planning" list on your selected anime tracker
+- [x] User recommendations
+- [x] Short summary of your list stats
+- [ ] Demo mode (view app without OAuth login)
+- [ ] Advanced user stats page
+- [ ] Manga mode
+- [ ] *...and more to come!*
 
 <details>
   <summary><h2><a href="#">&#x200B;</a>Screenshots 📷</h2><sub>*click!*</sub></summary>
-  <img width="1582" height="1030" alt="SCR-20250817-tdjx" src="https://github.com/user-attachments/assets/119385a3-ea87-4671-acb6-58772a8940ce" />
-  <img width="1582" height="1030" alt="SCR-20250817-tdyh" src="https://github.com/user-attachments/assets/7a243ea0-f0b7-453a-add0-26d8fe5b31c8" />
-  <img width="1582" height="1030" alt="SCR-20250817-tdwq" src="https://github.com/user-attachments/assets/511b4c38-b105-4e72-b370-62e7141e4c36" />
-  <img width="1582" height="1030" alt="SCR-20250817-tebz" src="https://github.com/user-attachments/assets/831dd79a-dbba-4f78-9e6d-97b10fff4909" />
-  <img width="1582" height="1030" alt="SCR-20250817-teel" src="https://github.com/user-attachments/assets/d134c71e-c2ce-48e3-824e-a52af6d6db57" />
-  <img width="1582" height="1030" alt="SCR-20250817-tfzz" src="https://github.com/user-attachments/assets/149200ba-5a59-4a18-93b7-f0991f509e76" />
+  <p align="center">
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/f3c98e54-e469-4156-9e94-724cd324ee1d" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/5e0c6ff2-a25e-4996-8cf1-064c79a81d13" />
+    <br />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/c5af3548-dc8f-400b-83af-1955f7e55980" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/a279b925-2ece-4f99-a34b-c89b9a289324" />
+    <br />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/7cfa5df0-1eef-484c-af6c-4ad7e9d5d15b" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/1f50e263-1eb3-407c-8978-8fab8f355c07" />
+    <br />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/b0d67cc4-1233-4163-a118-a60c5228f342" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/96b5c9f1-f240-4093-959d-584a1394919c" />
+  </p>
 </details>
 
 ## Developing 🧑‍💻
