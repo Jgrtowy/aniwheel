@@ -105,9 +105,8 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         }
     },
     selectAllMedia: () => {
-        const currentSelected = get().selectedMedia;
         const filteredIds = get().mediaList.map((a) => a.id);
-        const newSelected = new Set([...currentSelected, ...filteredIds]);
+        const newSelected = new Set([...filteredIds]);
         set({ selectedMedia: newSelected });
     },
     deselectAllMedia: () => set({ selectedMedia: new Set() }),
