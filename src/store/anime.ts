@@ -6,7 +6,7 @@ import { useSettingsStore } from "~/store/settings";
 export interface AnimeStore {
     fullMediaList: MediaItem[];
     mediaList: MediaItem[];
-    checkedMedia: Set<number>;
+    selectedMedia: Set<number>;
     searchTerm: string;
     activeGenres: string[];
     score: { from: number; to: number };
@@ -51,7 +51,7 @@ export interface AnimeStore {
 export const useAnimeStore = create<AnimeStore>((set, get) => ({
     fullMediaList: [],
     mediaList: [],
-    checkedMedia: new Set(),
+    selectedMedia: new Set(),
     searchTerm: "",
     activeGenres: [],
     score: { from: 0, to: 10 },
@@ -70,42 +70,47 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         get().initialize();
     },
     setMediaList: (list) => set({ mediaList: list }),
-    setSelectedMedia: (checked) => set({ checkedMedia: checked }),
+    setSelectedMedia: (selected) => set({ selectedMedia: selected }),
     toggleSelectedMedia: (id) => {
-        const currentChecked = get().checkedMedia;
-        const newChecked = new Set(currentChecked);
-        if (newChecked.has(id)) {
-            newChecked.delete(id);
+        const currentSelected = get().selectedMedia;
+        const newSelected = new Set(currentSelected);
+        if (newSelected.has(id)) {
+            newSelected.delete(id);
         } else {
-            newChecked.add(id);
+            newSelected.add(id);
         }
-        if (newChecked.size !== currentChecked.size || !currentChecked.has(id) === newChecked.has(id)) {
-            set({ checkedMedia: newChecked });
+        if (newSelected.size !== currentSelected.size || !currentSelected.has(id) === newSelected.has(id)) {
+            set({ selectedMedia: newSelected });
         }
     },
     addSelectedMedia: (id) => {
-        const currentChecked = get().checkedMedia;
-        const newChecked = new Set(currentChecked);
+        const currentSelected = get().selectedMedia;
+        const newSelected = new Set(currentSelected);
         let hasChanges = false;
 
         if (Array.isArray(id)) {
             for (const itemId of id) {
-                if (!newChecked.has(itemId)) {
-                    newChecked.add(itemId);
+                if (!newSelected.has(itemId)) {
+                    newSelected.add(itemId);
                     hasChanges = true;
                 }
             }
-        } else if (!newChecked.has(id)) {
-            newChecked.add(id);
+        } else if (!newSelected.has(id)) {
+            newSelected.add(id);
             hasChanges = true;
         }
 
         if (hasChanges) {
-            set({ checkedMedia: newChecked });
+            set({ selectedMedia: newSelected });
         }
     },
-    selectAllMedia: () => set({ checkedMedia: new Set(get().mediaList.map((a) => a.id)) }),
-    deselectAllMedia: () => set({ checkedMedia: new Set() }),
+    selectAllMedia: () => {
+        const currentSelected = get().selectedMedia;
+        const filteredIds = get().mediaList.map((a) => a.id);
+        const newSelected = new Set([...currentSelected, ...filteredIds]);
+        set({ selectedMedia: newSelected });
+    },
+    deselectAllMedia: () => set({ selectedMedia: new Set() }),
     setSearchTerm: (term) => {
         set({ searchTerm: term });
         get().applyFilters();
@@ -260,19 +265,6 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         });
 
         set({ mediaList: filteredAnime });
-
-        if (state.checkedMedia.size > 0) {
-            const filteredAnimeIds = new Set(filteredAnime.map((anime) => anime.id));
-            const updatedCheckedAnime = new Set<number>();
-
-            for (const animeId of state.checkedMedia) {
-                if (filteredAnimeIds.has(animeId)) updatedCheckedAnime.add(animeId);
-            }
-
-            if (updatedCheckedAnime.size !== state.checkedMedia.size) {
-                set({ checkedMedia: updatedCheckedAnime });
-            }
-        }
     },
     clearFilters: () => {
         const available = get().availableFormats;

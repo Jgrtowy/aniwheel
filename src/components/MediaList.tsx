@@ -6,13 +6,13 @@ import AnimeCard from "~/components/AnimeCard";
 import AnimeListItem from "~/components/AnimeListItem";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useCheckedMedia, useViewMode } from "~/hooks/useShallowStore";
+import { useSelectedMedia, useViewMode } from "~/hooks/useShallowStore";
 import { useAnimeStore } from "~/store/anime";
 import { useUiStore } from "~/store/ui";
 
 export default function PlannedList() {
     const { mediaList, fullMediaList, setFullMediaList, setActiveGenres, clearFilters, setSearchTerm } = useAnimeStore();
-    const checkedMedia = useCheckedMedia();
+    const selectedMedia = useSelectedMedia();
     const viewMode = useViewMode();
     const { addToPlannedSheet } = useUiStore();
     const [isFetching, setIsFetching] = useState(true);
@@ -91,7 +91,7 @@ export default function PlannedList() {
             {!isFetching &&
                 mediaList.map((anime, index) => (
                     <motion.div className="space-y-2" key={`${viewMode}-${anime.id}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15, delay: Math.min(index * 0.01, 0.5) }} layout={false}>
-                        {viewMode === "grid" ? <AnimeCard anime={anime} checked={checkedMedia.has(anime.id)} className="mx-auto" /> : <AnimeListItem anime={anime} checked={checkedMedia.has(anime.id)} />}
+                        {viewMode === "grid" ? <AnimeCard anime={anime} checked={selectedMedia.has(anime.id)} className="mx-auto" /> : <AnimeListItem anime={anime} checked={selectedMedia.has(anime.id)} />}
                     </motion.div>
                 ))}
             {fullMediaList.length === 0 && !isFetching && (

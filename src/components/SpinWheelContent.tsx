@@ -35,9 +35,9 @@ const BASE_ROTATION_RANGE = 1440; // Additional random rotations
 const TICK_SOUND_DELAY = 30;
 
 export function SpinWheelContent() {
-    const { checkedMedia, fullMediaList } = useAnimeStore();
+    const { selectedMedia, fullMediaList } = useAnimeStore();
     const { enableTickSounds } = useSettingsStore();
-    const items = fullMediaList.filter((anime) => checkedMedia.has(anime.id));
+    const items = fullMediaList.filter((anime) => selectedMedia.has(anime.id));
 
     const session = useSession();
 

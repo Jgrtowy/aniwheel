@@ -7,12 +7,12 @@ import { Dialog, DialogContent, DialogHeader, DialogOverlay, DialogTitle, Dialog
 import { useAnimeStore } from "~/store/anime";
 
 export function SpinWheelDialog() {
-    const { checkedMedia } = useAnimeStore();
+    const { selectedMedia } = useAnimeStore();
 
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button disabled={checkedMedia.size < 2} size="lg" className="w-full">
+                <Button disabled={selectedMedia.size < 2} size="lg" className="w-full">
                     <Shuffle className="size-5 mr-2" />
                     Spin the wheel!
                 </Button>

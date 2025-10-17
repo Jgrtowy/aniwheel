@@ -12,20 +12,20 @@ import { getTitleWithPreference } from "~/lib/utils";
 import { useAnimeStore } from "~/store/anime";
 
 export default function SidePanel() {
-    const { checkedMedia, mediaList, selectAllMedia, deselectAllMedia, toggleSelectedMedia } = useAnimeStore();
+    const { selectedMedia, fullMediaList, mediaList, selectAllMedia, deselectAllMedia, toggleSelectedMedia } = useAnimeStore();
 
-    const checkedAnimeList = mediaList.filter((anime) => checkedMedia.has(anime.id));
+    const selectedAnimeList = fullMediaList.filter((anime) => selectedMedia.has(anime.id));
     return (
         <div className="flex flex-col gap-4 md:max-w-sm w-full">
             <Card className="w-full bg-component-primary">
                 <CardContent className="flex flex-col items-center gap-2">
                     <div className="flex flex-col gap-2 w-full">
                         <div className="flex gap-2">
-                            <Button onClick={selectAllMedia} variant="outline" size="sm" className="flex-1" disabled={mediaList.length === 0 || checkedMedia.size === mediaList.length}>
+                            <Button onClick={selectAllMedia} variant="outline" size="sm" className="flex-1" disabled={mediaList.length === 0 || selectedMedia.size === mediaList.length}>
                                 <CheckCheck />
                                 Select All
                             </Button>
-                            <Button onClick={deselectAllMedia} variant="outline" size="sm" className="flex-1" disabled={mediaList.length === 0 || checkedMedia.size === 0}>
+                            <Button onClick={deselectAllMedia} variant="outline" size="sm" className="flex-1" disabled={mediaList.length === 0 || selectedMedia.size === 0}>
                                 <X />
                                 Deselect All
                             </Button>
@@ -33,19 +33,19 @@ export default function SidePanel() {
                         <SpinWheelDialog />
                     </div>
                     <Badge variant="secondary" className="text-sm">
-                        {checkedMedia.size} of {mediaList.length} selected
+                        {selectedMedia.size} of {mediaList.length} selected
                     </Badge>
 
                     <div className="h-36 sm:h-44 my-2 w-full overflow-hidden">
-                        {checkedMedia.size !== 0 ? (
+                        {selectedMedia.size !== 0 ? (
                             <ScrollArea className="h-full" type="auto">
                                 <div className="space-y-1">
-                                    {checkedAnimeList.map((anime, i) => (
+                                    {selectedAnimeList.map((anime, i) => (
                                         <div key={anime.id}>
                                             <span className="text-xs rounded hover:line-through transition-colors cursor-pointer" onClick={() => toggleSelectedMedia(anime.id)}>
                                                 {getTitleWithPreference(anime)}
                                             </span>
-                                            {i !== checkedAnimeList.length - 1 && <Separator className="mt-1" />}
+                                            {i !== selectedAnimeList.length - 1 && <Separator className="mt-1" />}
                                         </div>
                                     ))}
                                 </div>
