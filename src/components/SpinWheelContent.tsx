@@ -1,17 +1,19 @@
-"use client";
-
-import { ChevronDown, Clapperboard, ExternalLink, Star } from "lucide-react";
+import { Howl } from "howler";
+import { Building2, ChevronDown, Clapperboard, Clock, ExternalLink, Star } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LightRays from "~/components/LightRays";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import type { MediaItem } from "~/lib/types";
-import { cn, getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
+import { cn, getImageUrlWithPreference, getPrettyMediaFormat, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
 import { useAnimeStore } from "~/store/anime";
 import { useSettingsStore } from "~/store/settings";
+import { Badge } from "./ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const calculateImageDimensions = (segmentAngle: number, radius: number) => {
     const angleRad = (segmentAngle * Math.PI) / 180;
@@ -51,10 +53,25 @@ export function SpinWheelContent() {
     const wheelRef = useRef<SVGSVGElement>(null);
     const currentAnimationRef = useRef<Animation | null>(null);
 
-    const audioContextRef = useRef<AudioContext | null>(null);
-    const audioBufferRef = useRef<AudioBuffer | null>(null);
+    const tickSoundRef = useRef<Howl | null>(null);
     const lastTickTimeRef = useRef<number>(0);
     const lastCrossedSegmentRef = useRef<number>(-1);
+
+    useEffect(() => {
+        let animationFrameId: number;
+
+        const idleSpin = () => {
+            if (!isSpinning && !selectedItem) return;
+            setRotation((prev) => (prev + 0.05) % 360);
+            animationFrameId = requestAnimationFrame(idleSpin);
+        };
+
+        if (items.length > 0) animationFrameId = requestAnimationFrame(idleSpin);
+
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, [isSpinning, selectedItem, items.length]);
 
     const wheelSize = useMemo(() => {
         if (isMobile) return WHEEL_SIZE_MOBILE;
@@ -67,52 +84,27 @@ export function SpinWheelContent() {
     const segmentAngle = 360 / items.length;
 
     useEffect(() => {
-        if (!enableTickSounds) return;
+        if (!enableTickSounds) {
+            tickSoundRef.current?.unload();
+            return;
+        }
 
-        const initAudio = async () => {
-            try {
-                if (!audioContextRef.current) {
-                    audioContextRef.current = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-                }
-
-                if (!audioBufferRef.current) {
-                    const response = await fetch("/tick.mp3");
-                    const arrayBuffer = await response.arrayBuffer();
-                    audioBufferRef.current = await audioContextRef.current.decodeAudioData(arrayBuffer);
-                }
-            } catch (error) {
-                console.warn("Failed to initialize audio:", error);
-            }
-        };
-
-        initAudio();
+        tickSoundRef.current = new Howl({ src: ["/tick.mp3"] });
 
         return () => {
-            if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-                audioContextRef.current.close();
-                audioContextRef.current = null;
-                audioBufferRef.current = null;
-            }
+            tickSoundRef.current?.unload();
         };
     }, [enableTickSounds]);
 
     const playTickSound = useCallback(() => {
-        if (!enableTickSounds || !audioContextRef.current || !audioBufferRef.current) return;
-        if (audioContextRef.current.state === "closed") return;
+        if (!tickSoundRef.current) return;
 
         const now = Date.now();
         if (now - lastTickTimeRef.current < TICK_SOUND_DELAY) return;
 
-        try {
-            const source = audioContextRef.current.createBufferSource();
-            source.buffer = audioBufferRef.current;
-            source.connect(audioContextRef.current.destination);
-            source.start();
-            lastTickTimeRef.current = now;
-        } catch (error) {
-            console.warn("Failed to play tick sound:", error);
-        }
-    }, [enableTickSounds]);
+        tickSoundRef.current.play();
+        lastTickTimeRef.current = now;
+    }, []);
 
     const checkSegmentCrossing = useCallback(
         (currentRotation: number) => {
@@ -122,9 +114,7 @@ export function SpinWheelContent() {
             const pointerPosition = (270 - normalizedRotation + 360) % 360;
             const currentSegment = Math.floor(pointerPosition / segmentAngle) % items.length;
 
-            if (lastCrossedSegmentRef.current !== -1 && currentSegment !== lastCrossedSegmentRef.current) {
-                playTickSound();
-            }
+            if (lastCrossedSegmentRef.current !== -1 && currentSegment !== lastCrossedSegmentRef.current) playTickSound();
 
             lastCrossedSegmentRef.current = currentSegment;
         },
@@ -191,26 +181,18 @@ export function SpinWheelContent() {
 
             currentAnimationRef.current = animation;
 
-            const startTime = performance.now();
             const startRotation = rotation;
-            let lastUpdateTime = startTime;
 
             const trackRotation = () => {
                 if (!animation || animation.playState === "finished") return;
 
-                const now = performance.now();
-                const elapsed = now - startTime;
-                const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
-
-                const easedProgress = cubicBezierEasing(progress);
-                const currentRotation = startRotation + (targetRotation - startRotation) * easedProgress;
-
-                if (now - lastUpdateTime >= 16) {
+                const timing = animation.effect?.getComputedTiming();
+                if (timing && typeof timing.progress === "number") {
+                    const currentRotation = startRotation + (targetRotation - startRotation) * timing.progress;
                     checkSegmentCrossing(currentRotation);
-                    lastUpdateTime = now;
                 }
 
-                if (progress < 1) requestAnimationFrame(trackRotation);
+                requestAnimationFrame(trackRotation);
             };
 
             requestAnimationFrame(trackRotation);
@@ -224,40 +206,15 @@ export function SpinWheelContent() {
         }
     };
 
-    const cubicBezierEasing = (t: number): number => {
-        if (t <= 0) return 0;
-        if (t >= 1) return 1;
-
-        const cx = 3 * 0.2;
-        const bx = 3 * (0.05 - 0.2) - cx;
-        const ax = 1 - cx - bx;
-
-        const cy = 3 * -0.2;
-        const by = 3 * (1 - -0.2) - cy;
-        const ay = 1 - cy - by;
-
-        let start = 0;
-        let end = 1;
-        let mid = t;
-
-        for (let i = 0; i < 10; i++) {
-            const currentX = ((ax * mid + bx) * mid + cx) * mid;
-            if (Math.abs(currentX - t) < 0.001) break;
-
-            if (currentX < t) start = mid;
-            else end = mid;
-            mid = (start + end) / 2;
-        }
-
-        return ((ay * mid + by) * mid + cy) * mid;
-    };
-
     useEffect(() => {
         return () => {
             currentAnimationRef.current?.cancel();
-            if (audioContextRef.current && audioContextRef.current.state !== "closed") audioContextRef.current.close();
+            tickSoundRef.current?.unload();
         };
     }, []);
+
+    const mainStudios = selectedItem?.studios.filter((studio) => studio.isMain) || [];
+    const producerStudios = selectedItem?.studios.filter((studio) => !studio.isMain) || [];
 
     return (
         <>
@@ -316,25 +273,72 @@ export function SpinWheelContent() {
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         >
                             <Card className="w-72 lg:w-80 overflow-hidden shadow-2xl p-0 gap-0">
-                                <div className="relative">
-                                    <img src={getImageUrlWithPreference(selectedItem)} alt={getTitleWithPreference(selectedItem)} className="w-full h-72 lg:h-96 object-cover" />
+                                <div className="relative w-full h-72 lg:h-96 rounded-xl overflow-hidden">
+                                    <Image className="object-cover" src={getImageUrlWithPreference(selectedItem, "extraLarge")} alt={getTitleWithPreference(selectedItem)} fill />
                                     <div className="absolute bottom-0 w-full h-3/6 bg-gradient-to-t from-black/95 to-transparent" />
-                                    <div className="absolute bottom-0 left-0 right-0 text-primary flex flex-col gap-2 p-2 pb-4">
-                                        <h3 className="text-xl lg:text-2xl font-bold text-primary-foreground line-clamp-2">{getTitleWithPreference(selectedItem)}</h3>
-                                        <div className="flex gap-2 font-medium leading-tight whitespace-nowrap text-sm">
+                                    <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-1 p-4">
+                                        <h3 className="text-lg lg:text-xl font-black text-primary-foreground line-clamp-2">{getTitleWithPreference(selectedItem)}</h3>
+                                        <div className="flex flex-wrap gap-1">
+                                            <Badge variant="outline" className="bg-component-primary tracking-tight icon-text-container" key="format">
+                                                <p>{getPrettyMediaFormat(selectedItem.format)}</p>
+                                                <span className="sr-only">Media format</span>
+                                            </Badge>
                                             {selectedItem.averageScore && (
-                                                <div className="flex items-center gap-1 h-7 px-2 text-md text-accent-foreground w-fit border rounded-md bg-component-primary">
-                                                    <Star className="size-4" />
-                                                    <p>{selectedItem.averageScore}</p>
-                                                    <span className="sr-only">Average score</span>
-                                                </div>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Badge variant="outline" className="bg-component-primary tracking-tight icon-text-container">
+                                                            <Star className="size-3" />
+                                                            <p>{selectedItem.averageScore}</p>
+                                                            <span className="sr-only">Average score</span>
+                                                        </Badge>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Weighted user average score</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
                                             )}
                                             {selectedItem.episodes > 0 && (
-                                                <div className="flex items-center gap-1 h-7 px-2 text-md text-accent-foreground w-fit border rounded-md bg-component-primary">
-                                                    <Clapperboard className="size-4" />
-                                                    <p>{selectedItem.episodes !== 1 ? `${selectedItem.episodes} eps` : "1 ep"}</p>
-                                                    <span className="sr-only">Number of episodes</span>
-                                                </div>
+                                                <Tooltip key="episodes">
+                                                    <TooltipTrigger asChild>
+                                                        <Badge variant="outline" className="bg-component-primary tracking-tight icon-text-container">
+                                                            <Clapperboard className="size-3" />
+                                                            <p>
+                                                                {selectedItem.episodes} {selectedItem.episodes === 1 ? "ep" : "eps"}
+                                                            </p>
+                                                            <span className="sr-only">Number of episodes</span>
+                                                        </Badge>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Total number of episodes</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            )}
+                                            {selectedItem.studios.length > 0 && (
+                                                <Tooltip key="studios">
+                                                    <TooltipTrigger asChild>
+                                                        <Badge variant="outline" className="bg-component-primary tracking-tight icon-text-container">
+                                                            <Building2 className="size-3" />
+                                                            <p>{mainStudios.map((studio) => studio.name).join(", ")}</p>
+                                                            <span className="sr-only">Studios</span>
+                                                        </Badge>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className="flex flex-col gap-2">
+                                                        <div className="mb-1">
+                                                            <h6 className="font-bold text-sm">Studios:</h6>
+                                                            {mainStudios.map((studio) => (
+                                                                <p key={studio.name}>{studio.name}</p>
+                                                            ))}
+                                                        </div>
+                                                        {producerStudios.length > 0 && (
+                                                            <div className="mb-1">
+                                                                <h6 className="font-bold text-sm">Producers:</h6>
+                                                                {producerStudios.map((studio) => (
+                                                                    <p key={studio.name}>{studio.name}</p>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </TooltipContent>
+                                                </Tooltip>
                                             )}
                                         </div>
                                     </div>
