@@ -66,6 +66,15 @@ export const mediaDateToTimestamp = (date: MediaDate | null, options: { useEndOf
     return parsedDate ? parsedDate.getTime() : null;
 };
 
+export const formatCustomLists = (lists: { [key: string]: boolean }): string[] | null => {
+    const formattedLists: string[] = [];
+    if (!lists || Object.keys(lists).length === 0) return null;
+    for (const list of Object.keys(lists)) {
+        if (lists[list]) formattedLists.push(list);
+    }
+    return formattedLists;
+};
+
 export function aniListToMediaItem(item: AniListMediaItem): MediaItem {
     return {
         id: item.id,
@@ -91,6 +100,7 @@ export function aniListToMediaItem(item: AniListMediaItem): MediaItem {
         duration: item.duration || 0,
         studios: item.studios?.edges.map((edge) => ({ name: edge.node.name, isMain: edge.isMain })) || [],
         releasingStatus: item.status || null,
+        customLists: formatCustomLists(item.mediaListEntry?.customLists || {}),
     };
 }
 
@@ -127,6 +137,7 @@ export function malToMediaItem(item: MALMediaItem): MediaItem {
         duration: Math.round((item.average_episode_duration || 0) / 60),
         studios: item.studios?.map((studio) => ({ name: studio.name, isMain: true })) || [],
         releasingStatus: item.status ? malStatusToReleasingStatus[item.status] || null : null,
+        customLists: [],
     };
 }
 

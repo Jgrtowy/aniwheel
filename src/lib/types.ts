@@ -28,6 +28,7 @@ export interface MediaItem {
     duration: number;
     studios: { name: string; isMain: boolean }[];
     releasingStatus: "FINISHED" | "RELEASING" | "NOT_YET_RELEASED" | "CANCELLED" | "HIATUS" | null;
+    customLists: string[] | null;
 }
 
 export interface MediaRecommendation {
@@ -66,6 +67,7 @@ export interface AniListMediaItem {
     mediaListEntry: {
         createdAt: number;
         status: "PLANNING" | "DROPPED" | "PAUSED" | null;
+        customLists?: { [key: string]: boolean } | null;
     } | null;
     format: "TV" | "TV_SHORT" | "MOVIE" | "SPECIAL" | "OVA" | "ONA" | "MUSIC";
     duration: number | null;
@@ -112,6 +114,7 @@ export interface MALMediaItem {
     average_episode_duration: number | null;
     status: "finished_airing" | "currently_airing" | "not_yet_aired" | "cancelled" | "on_hiatus" | null;
     studios?: { id: number; name: string }[] | null;
+    customLists: [];
 }
 
 export type TitleLanguage = keyof MediaItem["title"];

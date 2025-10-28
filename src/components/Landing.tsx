@@ -147,15 +147,20 @@ export default function Landing() {
                                     MyAnimeList
                                 </Button>
                             </nav>
-                            <nav className="flex flex-row gap-4">
+                            <div className="flex w-full items-center gap-3 px-6 text-sm text-muted-foreground">
+                                <Separator className="flex-1" />
+                                <span>or</span>
+                                <Separator className="flex-1" />
+                            </div>
+                            <nav className="flex flex-col items-center sm:flex-row gap-4 sm:gap-6">
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button variant="outline" size="lg" className="flex items-center text-muted-foreground cursor-not-allowed hover:text-muted-foreground" aria-label="Sign in with username (coming soon)">
-                                            Sign in with username <CircleArrowRight className="ml-2 w-45 py-6.5 sm:py-7 font-bold gap-3" />
+                                        <Button variant="outline" size="lg" className="w-50 h-10 text-sm flex items-center text-muted-foreground cursor-not-allowed hover:text-muted-foreground" aria-label="Sign in with username (coming soon)">
+                                            Username
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>Comming soon!</p>
+                                        <p>Coming soon!</p>
                                     </TooltipContent>
                                 </Tooltip>
                                 {/* <Dialog>
@@ -191,9 +196,11 @@ export default function Landing() {
                                     <Button variant="secondary">Live demo</Button>
                                 </DialogContent>
                             </Dialog> */}
+                                <Separator className="data-[orientation=horizontal]:w-5/6 data-[orientation=vertical]:h-2/3" orientation={isDesktop ? "vertical" : "horizontal"} />
+
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button variant="outline" className="flex items-center text-muted-foreground cursor-not-allowed hover:text-muted-foreground" aria-label="Demo mode (coming soon)">
+                                        <Button variant="outline" className="w-50 text-sm h-10 flex items-center text-muted-foreground cursor-not-allowed hover:text-muted-foreground" aria-label="Demo mode (coming soon)">
                                             Demo mode
                                         </Button>
                                     </TooltipTrigger>

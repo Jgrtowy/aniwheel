@@ -15,7 +15,7 @@ import { cn } from "~/lib/utils";
 import { useAnimeStore } from "~/store/anime";
 
 export default function FiltersPopover() {
-    const { fullMediaList, score, showUnaired, showPlanning, showDropped, showPaused, availableFormats, setScore, setShowUnaired, setShowPlanning, setShowDropped, setShowPaused, clearFilters, hasActiveFilters, getActiveFilterCount } = useAnimeStore();
+    const { fullMediaList, score, showUnaired, showPlanning, showDropped, showPaused, availableFormats, availableCustomLists, setScore, setShowUnaired, setShowPlanning, setShowDropped, setShowPaused, clearFilters, hasActiveFilters, getActiveFilterCount } = useAnimeStore();
 
     const availableGenres = useMemo(() => {
         const genreSet = new Set<string>();
@@ -83,6 +83,16 @@ export default function FiltersPopover() {
                             ))}
                         </div>
                     </div>
+                    {availableCustomLists.size > 0 && (
+                        <div className="flex flex-col gap-1 text-sm">
+                            <span>Show custom lists:</span>
+                            <div className="grid grid-cols-3 gap-y-3">
+                                {Array.from(availableCustomLists.values()).map((list) => (
+                                    <CustomListsCheckbox key={list} list={list} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <Button variant="outline" onClick={clearFilters} size="sm" disabled={!hasActiveFilters()}>
                     Clear filters
@@ -188,5 +198,25 @@ function GenreCombobox({ availableGenres }: { availableGenres: string[] }) {
                 </Command>
             </PopoverContent>
         </Popover>
+    );
+}
+
+function CustomListsCheckbox({ list }: { list: string }) {
+    const { activeCustomLists, addActiveCustomList, removeActiveCustomList } = useAnimeStore();
+    const isChecked = activeCustomLists.has(list);
+    const handleToggle = () => {
+        if (isChecked) {
+            removeActiveCustomList(list);
+        } else {
+            addActiveCustomList(list);
+        }
+    };
+    return (
+        <div className="flex items-center gap-1">
+            <Checkbox id={list} className="cursor-pointer bg-background/50" checked={isChecked} onCheckedChange={handleToggle} />
+            <Label htmlFor={list} className="text-sm cursor-pointer">
+                {list}
+            </Label>
+        </div>
     );
 }

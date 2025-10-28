@@ -18,6 +18,8 @@ export interface AnimeStore {
     availableFormats: Set<MediaItem["format"]>;
     sortField: SortField;
     sortOrder: SortOrder;
+    activeCustomLists: Set<string>;
+    availableCustomLists: Set<string>;
     setFullMediaList: (list: MediaItem[]) => void;
     setMediaList: (list: MediaItem[]) => void;
     setSelectedMedia: (set: Set<number>) => void;
@@ -38,6 +40,9 @@ export interface AnimeStore {
     addActiveFormat: (format: MediaItem["format"]) => void;
     removeActiveFormat: (format: MediaItem["format"]) => void;
     setAvailableFormats: (formats: MediaItem["format"][]) => void;
+    setActiveCustomLists: (lists: string[]) => void;
+    addActiveCustomList: (list: string) => void;
+    removeActiveCustomList: (list: string) => void;
     setSortField: (field: SortField) => void;
     setSortOrder: (order: SortOrder) => void;
     setSorting: (field: SortField, order: SortOrder) => void;
@@ -63,6 +68,8 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     showDropped: false,
     activeFormats: new Set(),
     availableFormats: new Set(),
+    activeCustomLists: new Set(),
+    availableCustomLists: new Set(),
 
     setFullMediaList: (list) => {
         set({ fullMediaList: list });
@@ -150,6 +157,22 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         set({ availableFormats: new Set(formats) });
         get().applyFilters();
     },
+    setActiveCustomLists: (lists) => {
+        set({ activeCustomLists: new Set(lists) });
+        get().applyFilters();
+    },
+    addActiveCustomList: (list) => {
+        const current = get().activeCustomLists;
+        if (!current.has(list)) {
+            set({ activeCustomLists: new Set([...current, list]) });
+            get().applyFilters();
+        }
+    },
+    removeActiveCustomList: (list) => {
+        const current = get().activeCustomLists;
+        set({ activeCustomLists: new Set([...current].filter((f) => f !== list)) });
+        get().applyFilters();
+    },
     setScore: (from, to) => {
         set({ score: { from: from ?? get().score.from, to: to ?? get().score.to } });
         get().applyFilters();
@@ -187,6 +210,18 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         const state = get();
         const FORMAT_ORDER = ["TV", "TV_SHORT", "ONA", "OVA", "MOVIE", "SPECIAL", "UNKNOWN"];
         const availableFormatsArr = Array.from(new Set(state.fullMediaList.map((anime) => anime.format).filter((format): format is MediaItem["format"] => format !== null))).sort((a, b) => FORMAT_ORDER.indexOf(a) - FORMAT_ORDER.indexOf(b));
+
+        const availableCustomListsSet = new Set<string>();
+        for (const anime of state.fullMediaList) {
+            if (anime.customLists && anime.customLists.length > 0) {
+                for (const list of anime.customLists) {
+                    availableCustomListsSet.add(list);
+                }
+            }
+        }
+        const availableCustomListsArr = Array.from(availableCustomListsSet).sort((a, b) => a.localeCompare(b));
+
+        set({ availableCustomLists: new Set(availableCustomListsArr) });
         set({
             availableFormats: new Set(availableFormatsArr),
             activeFormats: new Set(availableFormatsArr),
@@ -238,6 +273,12 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
                 return state.activeFormats.has(anime.format);
             });
         }
+        if (state.activeCustomLists.size > 0) {
+            filteredAnime = filteredAnime.filter((anime) => {
+                if (!anime.customLists || anime.customLists.length === 0) return false;
+                return Array.from(state.activeCustomLists).every((list) => anime.customLists?.includes(list));
+            });
+        }
 
         filteredAnime = filteredAnime.slice().sort((a, b) => {
             let comparison: number;
@@ -275,15 +316,25 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
             showDropped: false,
             showPaused: false,
             activeFormats: available,
+            activeCustomLists: new Set(),
         });
         get().applyFilters();
     },
     hasActiveFilters: () => {
         const state = get();
-        return state.activeGenres.length > 0 || state.showUnaired || state.score.from > 0 || state.score.to < 10 || !state.showPlanning || state.showDropped || state.showPaused || state.activeFormats.size < state.availableFormats.size;
+        return state.activeGenres.length > 0 || state.showUnaired || state.score.from > 0 || state.score.to < 10 || !state.showPlanning || state.showDropped || state.showPaused || state.activeFormats.size < state.availableFormats.size || state.activeCustomLists.size > 0;
     },
     getActiveFilterCount: () => {
         const state = get();
-        return (state.activeGenres.length > 0 ? 1 : 0) + (state.showUnaired ? 1 : 0) + (state.score.from > 0 || state.score.to < 10 ? 1 : 0) + (state.showPlanning ? 0 : 1) + (state.showDropped ? 1 : 0) + (state.showPaused ? 1 : 0) + (state.activeFormats.size < state.availableFormats.size ? 1 : 0);
+        return (
+            (state.activeGenres.length > 0 ? 1 : 0) +
+            (state.showUnaired ? 1 : 0) +
+            (state.score.from > 0 || state.score.to < 10 ? 1 : 0) +
+            (state.showPlanning ? 0 : 1) +
+            (state.showDropped ? 1 : 0) +
+            (state.showPaused ? 1 : 0) +
+            (state.activeFormats.size < state.availableFormats.size ? 1 : 0) +
+            (state.activeCustomLists.size > 0 ? 1 : 0)
+        );
     },
 }));
