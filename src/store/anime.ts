@@ -205,27 +205,15 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         set({ sortField: field, sortOrder: order });
         get().applyFilters();
     },
-
     initialize: () => {
-        const state = get();
-        const FORMAT_ORDER = ["TV", "TV_SHORT", "ONA", "OVA", "MOVIE", "SPECIAL", "UNKNOWN"];
-        const availableFormatsArr = Array.from(new Set(state.fullMediaList.map((anime) => anime.format).filter((format): format is MediaItem["format"] => format !== null))).sort((a, b) => FORMAT_ORDER.indexOf(a) - FORMAT_ORDER.indexOf(b));
+        const { fullMediaList } = get();
 
-        const availableCustomListsSet = new Set<string>();
-        for (const anime of state.fullMediaList) {
-            if (anime.customLists && anime.customLists.length > 0) {
-                for (const list of anime.customLists) {
-                    availableCustomListsSet.add(list);
-                }
-            }
-        }
-        const availableCustomListsArr = Array.from(availableCustomListsSet).sort((a, b) => a.localeCompare(b));
+        const FORMAT_ORDER = ["TV", "TV_SHORT", "MOVIE", "ONA", "OVA", "SPECIAL", "UNKNOWN"];
+        const availableFormats = new Set([...new Set(fullMediaList.map((anime) => anime.format).filter((format): format is MediaItem["format"] => format !== null))].sort((a, b) => FORMAT_ORDER.indexOf(a) - FORMAT_ORDER.indexOf(b)));
+        set({ availableFormats, activeFormats: availableFormats });
 
-        set({ availableCustomLists: new Set(availableCustomListsArr) });
-        set({
-            availableFormats: new Set(availableFormatsArr),
-            activeFormats: new Set(availableFormatsArr),
-        });
+        const availableCustomLists = new Set([...new Set(fullMediaList.flatMap((anime) => anime.customLists ?? []))].sort((a, b) => a.localeCompare(b)));
+        set({ availableCustomLists });
     },
     applyFilters: () => {
         const state = get();

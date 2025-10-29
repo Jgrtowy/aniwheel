@@ -57,6 +57,7 @@
 
 .icon-text-container > span,
 .icon-text-container > p,
+.icon-text-container > label,
 .icon-text-container > div:not([class*="lucide"]) {
     transform: translateY(var(--comfortaa-baseline-offset));
 }
