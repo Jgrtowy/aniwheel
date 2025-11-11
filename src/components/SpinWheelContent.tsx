@@ -24,7 +24,7 @@ const WHEEL_SIZE_MOBILE = 200;
 const WHEEL_SIZE_TABLET = 275;
 const WHEEL_SIZE_DESKTOP = 375;
 
-const ANIMATION_DURATION = 1000; // 10 seconds
+const ANIMATION_DURATION = 10000; // 10 seconds
 const EASEING_FUNCTION = "cubic-bezier(0.2, -0.25, 0.01, 1)";
 const BASE_ROTATION_MIN = 1440; // Minimum 4 full rotations
 const BASE_ROTATION_RANGE = 1440; // Additional random rotations
