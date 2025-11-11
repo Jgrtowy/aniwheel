@@ -177,10 +177,10 @@ export const getPrettyMediaFormat = (format: MediaItem["format"]) => mediaFormat
 export const getPrettyReleasingStatus = (status: MediaItem["releasingStatus"]) => (status ? releasingStatusLabels[status] || "Unknown Status" : "Unknown Status");
 
 export const getPrettyDuration = (duration: number) => {
-    if (duration < 60) return `${duration} minute${duration === 1 ? "" : "s"}`;
+    if (duration < 60) return `${duration} min${duration === 1 ? "" : "s"}`;
     const hours = Math.floor(duration / 60);
     const minutes = duration % 60;
-    return minutes > 0 ? `${hours} hour${hours === 1 ? "" : "s"} ${minutes} minute${minutes === 1 ? "" : "s"}` : `${hours} hour${hours === 1 ? "" : "s"}`;
+    return minutes > 0 ? `${hours} hour${hours === 1 ? "" : "s"} ${minutes} min${minutes === 1 ? "" : "s"}` : `${hours} hour${hours === 1 ? "" : "s"}`;
 };
 
 export const fetchMediaList = async ({ session, selectMedia }: { session: Session; selectMedia: number | number[] }) => {
