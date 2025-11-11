@@ -7,6 +7,7 @@ export interface AnimeStore {
     fullMediaList: MediaItem[];
     mediaList: MediaItem[];
     selectedMedia: Set<number>;
+    temporaryWatching: Map<number, MediaItem>;
     searchTerm: string;
     activeGenres: string[];
     score: { from: number; to: number };
@@ -24,9 +25,12 @@ export interface AnimeStore {
     setMediaList: (list: MediaItem[]) => void;
     setSelectedMedia: (set: Set<number>) => void;
     addSelectedMedia: (id: number | number[]) => void;
+    removeSelectedMedia: (id: number | number[]) => void;
     toggleSelectedMedia: (id: number) => void;
     selectAllMedia: () => void;
     deselectAllMedia: () => void;
+    addTemporaryWatching: (anime: MediaItem) => void;
+    clearTemporaryWatching: () => void;
     setSearchTerm: (term: string) => void;
     setActiveGenres: (genres: string[]) => void;
     addActiveGenre: (genre: string) => void;
@@ -57,6 +61,7 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     fullMediaList: [],
     mediaList: [],
     selectedMedia: new Set(),
+    temporaryWatching: new Map(),
     searchTerm: "",
     activeGenres: [],
     score: { from: 0, to: 10 },
@@ -107,9 +112,26 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
             hasChanges = true;
         }
 
-        if (hasChanges) {
-            set({ selectedMedia: newSelected });
+        if (hasChanges) set({ selectedMedia: newSelected });
+    },
+    removeSelectedMedia: (id) => {
+        const currentSelected = get().selectedMedia;
+        const newSelected = new Set(currentSelected);
+        let hasChanges = false;
+
+        if (Array.isArray(id)) {
+            for (const itemId of id) {
+                if (newSelected.has(itemId)) {
+                    newSelected.delete(itemId);
+                    hasChanges = true;
+                }
+            }
+        } else if (newSelected.has(id)) {
+            newSelected.delete(id);
+            hasChanges = true;
         }
+
+        if (hasChanges) set({ selectedMedia: newSelected });
     },
     selectAllMedia: () => {
         const filteredIds = get().mediaList.map((a) => a.id);
@@ -117,6 +139,14 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         set({ selectedMedia: newSelected });
     },
     deselectAllMedia: () => set({ selectedMedia: new Set() }),
+    addTemporaryWatching: (anime) => {
+        const current = get().temporaryWatching;
+        current.set(anime.id, anime);
+        set({ temporaryWatching: current });
+    },
+    clearTemporaryWatching: () => {
+        set({ temporaryWatching: new Map() });
+    },
     setSearchTerm: (term) => {
         set({ searchTerm: term });
         get().applyFilters();

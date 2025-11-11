@@ -1,15 +1,12 @@
-"use client";
-
-import { ChevronDown, Clapperboard, ExternalLink, Star } from "lucide-react";
+import { Howl } from "howler";
+import { ChevronDown } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import AnimeDetails from "~/components/AnimeDetails";
 import LightRays from "~/components/LightRays";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import type { MediaItem } from "~/lib/types";
-import { cn, getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
-import { useSession } from "~/providers/session-provider";
+import { cn, getImageUrlWithPreference } from "~/lib/utils";
 import { useAnimeStore } from "~/store/anime";
 import { useSettingsStore } from "~/store/settings";
 
@@ -27,19 +24,17 @@ const WHEEL_SIZE_MOBILE = 200;
 const WHEEL_SIZE_TABLET = 275;
 const WHEEL_SIZE_DESKTOP = 375;
 
-const ANIMATION_DURATION = 10000; // 10 seconds
-const EASEING_FUNCTION = "cubic-bezier(0.2, -0.2, 0.05, 1)";
+const ANIMATION_DURATION = 1000; // 10 seconds
+const EASEING_FUNCTION = "cubic-bezier(0.2, -0.25, 0.01, 1)";
 const BASE_ROTATION_MIN = 1440; // Minimum 4 full rotations
 const BASE_ROTATION_RANGE = 1440; // Additional random rotations
 
 const TICK_SOUND_DELAY = 30;
 
 export function SpinWheelContent() {
-    const { selectedMedia, fullMediaList } = useAnimeStore();
+    const { selectedMedia, fullMediaList, temporaryWatching } = useAnimeStore();
     const { enableTickSounds } = useSettingsStore();
-    const items = fullMediaList.filter((anime) => selectedMedia.has(anime.id));
-
-    const session = useSession();
+    const items = [fullMediaList.filter((anime) => selectedMedia.has(anime.id)), Array.from(temporaryWatching.values())].flat();
 
     const isMobile = useMediaQuery("(max-width: 640px)");
     const isTablet = useMediaQuery("(max-width: 1024px)");
@@ -47,14 +42,34 @@ export function SpinWheelContent() {
     const [isSpinning, setIsSpinning] = useState(false);
     const [rotation, setRotation] = useState(0);
     const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
+    const [showDetail, setShowDetail] = useState(false);
 
     const wheelRef = useRef<SVGSVGElement>(null);
     const currentAnimationRef = useRef<Animation | null>(null);
 
-    const audioContextRef = useRef<AudioContext | null>(null);
-    const audioBufferRef = useRef<AudioBuffer | null>(null);
+    const tickSoundRef = useRef<Howl | null>(null);
     const lastTickTimeRef = useRef<number>(0);
     const lastCrossedSegmentRef = useRef<number>(-1);
+
+    useEffect(() => {
+        let animationFrameId: number;
+
+        const idleSpin = () => {
+            if (isSpinning) return;
+            setRotation((prev) => (prev + 0.075) % 360);
+            animationFrameId = requestAnimationFrame(idleSpin);
+        };
+
+        if (items.length > 0) animationFrameId = requestAnimationFrame(idleSpin);
+
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, [isSpinning, selectedItem, items.length]);
+
+    useEffect(() => {
+        if (selectedItem) setShowDetail(true);
+    }, [selectedItem]);
 
     const wheelSize = useMemo(() => {
         if (isMobile) return WHEEL_SIZE_MOBILE;
@@ -67,52 +82,27 @@ export function SpinWheelContent() {
     const segmentAngle = 360 / items.length;
 
     useEffect(() => {
-        if (!enableTickSounds) return;
+        if (!enableTickSounds) {
+            tickSoundRef.current?.unload();
+            return;
+        }
 
-        const initAudio = async () => {
-            try {
-                if (!audioContextRef.current) {
-                    audioContextRef.current = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-                }
-
-                if (!audioBufferRef.current) {
-                    const response = await fetch("/tick.mp3");
-                    const arrayBuffer = await response.arrayBuffer();
-                    audioBufferRef.current = await audioContextRef.current.decodeAudioData(arrayBuffer);
-                }
-            } catch (error) {
-                console.warn("Failed to initialize audio:", error);
-            }
-        };
-
-        initAudio();
+        tickSoundRef.current = new Howl({ src: ["/tick.mp3"] });
 
         return () => {
-            if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-                audioContextRef.current.close();
-                audioContextRef.current = null;
-                audioBufferRef.current = null;
-            }
+            tickSoundRef.current?.unload();
         };
     }, [enableTickSounds]);
 
     const playTickSound = useCallback(() => {
-        if (!enableTickSounds || !audioContextRef.current || !audioBufferRef.current) return;
-        if (audioContextRef.current.state === "closed") return;
+        if (!tickSoundRef.current) return;
 
         const now = Date.now();
         if (now - lastTickTimeRef.current < TICK_SOUND_DELAY) return;
 
-        try {
-            const source = audioContextRef.current.createBufferSource();
-            source.buffer = audioBufferRef.current;
-            source.connect(audioContextRef.current.destination);
-            source.start();
-            lastTickTimeRef.current = now;
-        } catch (error) {
-            console.warn("Failed to play tick sound:", error);
-        }
-    }, [enableTickSounds]);
+        tickSoundRef.current.play();
+        lastTickTimeRef.current = now;
+    }, []);
 
     const checkSegmentCrossing = useCallback(
         (currentRotation: number) => {
@@ -122,9 +112,7 @@ export function SpinWheelContent() {
             const pointerPosition = (270 - normalizedRotation + 360) % 360;
             const currentSegment = Math.floor(pointerPosition / segmentAngle) % items.length;
 
-            if (lastCrossedSegmentRef.current !== -1 && currentSegment !== lastCrossedSegmentRef.current) {
-                playTickSound();
-            }
+            if (lastCrossedSegmentRef.current !== -1 && currentSegment !== lastCrossedSegmentRef.current) playTickSound();
 
             lastCrossedSegmentRef.current = currentSegment;
         },
@@ -191,26 +179,18 @@ export function SpinWheelContent() {
 
             currentAnimationRef.current = animation;
 
-            const startTime = performance.now();
             const startRotation = rotation;
-            let lastUpdateTime = startTime;
 
             const trackRotation = () => {
                 if (!animation || animation.playState === "finished") return;
 
-                const now = performance.now();
-                const elapsed = now - startTime;
-                const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
-
-                const easedProgress = cubicBezierEasing(progress);
-                const currentRotation = startRotation + (targetRotation - startRotation) * easedProgress;
-
-                if (now - lastUpdateTime >= 16) {
+                const timing = animation.effect?.getComputedTiming();
+                if (timing && typeof timing.progress === "number") {
+                    const currentRotation = startRotation + (targetRotation - startRotation) * timing.progress;
                     checkSegmentCrossing(currentRotation);
-                    lastUpdateTime = now;
                 }
 
-                if (progress < 1) requestAnimationFrame(trackRotation);
+                requestAnimationFrame(trackRotation);
             };
 
             requestAnimationFrame(trackRotation);
@@ -224,38 +204,10 @@ export function SpinWheelContent() {
         }
     };
 
-    const cubicBezierEasing = (t: number): number => {
-        if (t <= 0) return 0;
-        if (t >= 1) return 1;
-
-        const cx = 3 * 0.2;
-        const bx = 3 * (0.05 - 0.2) - cx;
-        const ax = 1 - cx - bx;
-
-        const cy = 3 * -0.2;
-        const by = 3 * (1 - -0.2) - cy;
-        const ay = 1 - cy - by;
-
-        let start = 0;
-        let end = 1;
-        let mid = t;
-
-        for (let i = 0; i < 10; i++) {
-            const currentX = ((ax * mid + bx) * mid + cx) * mid;
-            if (Math.abs(currentX - t) < 0.001) break;
-
-            if (currentX < t) start = mid;
-            else end = mid;
-            mid = (start + end) / 2;
-        }
-
-        return ((ay * mid + by) * mid + cy) * mid;
-    };
-
     useEffect(() => {
         return () => {
             currentAnimationRef.current?.cancel();
-            if (audioContextRef.current && audioContextRef.current.state !== "closed") audioContextRef.current.close();
+            tickSoundRef.current?.unload();
         };
     }, []);
 
@@ -268,23 +220,17 @@ export function SpinWheelContent() {
                     </motion.div>
                 )}
             </AnimatePresence>
-            <motion.div layout className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16 p-4" transition={{ type: "spring", stiffness: 300, damping: 30 }}>
-                <AnimatePresence initial={false}>
-                    <motion.button
-                        key="spin-wheel"
-                        className="relative cursor-pointer rounded-full appearance-none"
-                        style={{ width: `${wheelSize}px`, height: `${wheelSize}px` }}
-                        type="button"
-                        onClick={spin}
-                        disabled={isSpinning}
-                        aria-label={isSpinning ? "Spinning..." : "Spin the wheel!"}
-                        layout
-                        animate={{ scale: selectedItem ? 1 : isMobile || isTablet ? 1.6 : 1.3 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.2 }}
-                    >
+            <div className="grid grid-cols-4 grid-rows-4 md:gap-8 md:p-8 gap-0 p-4 min-h-0">
+                <motion.div
+                    className={cn("md:col-span-2 md:col-start-2 row-span-4 row-start-1 col-span-4 flex items-center justify-center md:p-0 p-4", showDetail && "md:row-span-2 md:col-span-1 md:row-start-2 md:col-start-1 row-span-1 col-span-2 row-start-1 col-start-2")}
+                    layout
+                    transition={{ type: "spring", stiffness: 600, damping: 30 }}
+                    key="spin-wheel"
+                >
+                    <button className="relative cursor-pointer rounded-full appearance-none md:w-full md:h-auto w-auto h-full aspect-square" type="button" onClick={spin} disabled={isSpinning}>
+                        <span className="sr-only">Click to spin the wheel!</span>
                         <img src="/Click_to_spin.svg" alt="Click to spin!" className={cn("absolute inset-0 object-cover z-10 rounded-full opacity-100 pointer-events-none transition-opacity", isSpinning && "opacity-0")} />
                         <svg ref={wheelRef} width="100%" height="100%" viewBox={`0 0 ${wheelSize} ${wheelSize}`} className="absolute inset-0 overflow-hidden rounded-full" style={{ transform: `rotate(${rotation}deg)` }}>
-                            <title>{isSpinning ? "Spinning..." : "Click to spin the wheel!"}</title>
                             <defs>
                                 {wheelSegments.map(({ textPathData }, index) => (
                                     <clipPath key={`text-clip-${index}`} id={`text-clip-path-${index}`}>
@@ -298,60 +244,23 @@ export function SpinWheelContent() {
                                     <clipPath id={`clip-path-${index}`}>
                                         <path d={pathData} />
                                     </clipPath>
-                                    <image href={getImageUrlWithPreference(item, "large")} x={imageX - imageDimensions.width / 2} y={imageY - imageDimensions.height / 2} width={imageDimensions.width} height={imageDimensions.height} preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-path-${index})`} />
+                                    <image href={getImageUrlWithPreference(item)} x={imageX - imageDimensions.width / 2} y={imageY - imageDimensions.height / 2} width={imageDimensions.width} height={imageDimensions.height} preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-path-${index})`} />
                                 </g>
                             ))}
                         </svg>
                         <ChevronDown strokeWidth={2} className="size-12 lg:w-16 lg:h-16 absolute -top-10 lg:-top-13 left-1/2 text-primary-foreground -translate-x-1/2" />
                         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 lg:w-8 lg:h-8 bg-white border-2 lg:border-4 border-gray-300 rounded-full" />
-                    </motion.button>
+                    </button>
+                </motion.div>
+                <AnimatePresence onExitComplete={() => setShowDetail(false)}>
                     {selectedItem && (
-                        <motion.div
-                            key="selected-item"
-                            layout
-                            className="flex justify-center w-full lg:w-auto max-w-sm lg:max-w-none"
-                            initial={{ opacity: 0, x: isMobile ? 0 : 50, y: isMobile ? 50 : 0 }}
-                            animate={{ opacity: 1, x: 0, y: 0 }}
-                            exit={{ opacity: 0, x: isMobile ? 0 : 50, y: isMobile ? 50 : 0 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        >
-                            <Card className="w-72 lg:w-80 overflow-hidden shadow-2xl p-0 gap-0">
-                                <div className="relative">
-                                    <img src={getImageUrlWithPreference(selectedItem)} alt={getTitleWithPreference(selectedItem)} className="w-full h-72 lg:h-96 object-cover" />
-                                    <div className="absolute bottom-0 w-full h-3/6 bg-gradient-to-t from-black/95 to-transparent" />
-                                    <div className="absolute bottom-0 left-0 right-0 text-primary flex flex-col gap-2 p-2 pb-4">
-                                        <h3 className="text-xl lg:text-2xl font-bold text-primary-foreground line-clamp-2">{getTitleWithPreference(selectedItem)}</h3>
-                                        <div className="flex gap-2 font-medium leading-tight whitespace-nowrap text-sm">
-                                            {selectedItem.averageScore && (
-                                                <div className="flex items-center gap-1 h-7 px-2 text-md text-accent-foreground w-fit border rounded-md bg-component-primary">
-                                                    <Star className="size-4" />
-                                                    <p>{selectedItem.averageScore}</p>
-                                                    <span className="sr-only">Average score</span>
-                                                </div>
-                                            )}
-                                            {selectedItem.episodes > 0 && (
-                                                <div className="flex items-center gap-1 h-7 px-2 text-md text-accent-foreground w-fit border rounded-md bg-component-primary">
-                                                    <Clapperboard className="size-4" />
-                                                    <p>{selectedItem.episodes !== 1 ? `${selectedItem.episodes} eps` : "1 ep"}</p>
-                                                    <span className="sr-only">Number of episodes</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                                <CardContent className="p-3 lg:p-4">
-                                    <Button asChild className="w-full" size="lg">
-                                        <a href={selectedItem.siteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 icon-text-container">
-                                            {session?.activeProvider && <span className="text-sm lg:text-base">View on {getPrettyProviderName(session?.activeProvider)}</span>}
-                                            <ExternalLink className="w-4 h-4" />
-                                        </a>
-                                    </Button>
-                                </CardContent>
-                            </Card>
+                        <motion.div className="md:row-span-4 md:col-span-3 row-span-3 col-span-4" layout initial={{ opacity: 0, x: 80 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 80 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} key="selected-item">
+                            <span className="sr-only">Selected anime</span>
+                            <AnimeDetails anime={selectedItem} className="size-full" />
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </motion.div>
+            </div>
         </>
     );
 }

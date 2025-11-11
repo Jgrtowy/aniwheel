@@ -28,6 +28,11 @@ export interface MediaItem {
     duration: number;
     studios: { name: string; isMain: boolean }[];
     releasingStatus: "FINISHED" | "RELEASING" | "NOT_YET_RELEASED" | "CANCELLED" | "HIATUS" | null;
+    trailer: {
+        id: string;
+        site: "youtube" | "dailymotion";
+    } | null;
+    description: string | null;
     customLists: string[] | null;
 }
 
@@ -80,6 +85,11 @@ export interface AniListMediaItem {
             };
         }[];
     };
+    trailer: {
+        id: string;
+        site: "youtube" | "dailymotion";
+    } | null;
+    description: string | null;
 }
 
 export interface AniListMediaRecommendation {
@@ -114,7 +124,7 @@ export interface MALMediaItem {
     average_episode_duration: number | null;
     status: "finished_airing" | "currently_airing" | "not_yet_aired" | "cancelled" | "on_hiatus" | null;
     studios?: { id: number; name: string }[] | null;
-    customLists: [];
+    synopsis: string | null;
 }
 
 export type TitleLanguage = keyof MediaItem["title"];

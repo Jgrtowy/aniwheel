@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "~/component
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import type { MediaRecommendation } from "~/lib/types";
-import { cn } from "~/lib/utils";
+import { cn, fetchMediaList } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
 import { useAnimeStore } from "~/store/anime";
 import { useSettingsStore } from "~/store/settings";
@@ -49,45 +49,30 @@ export default function Recommendations() {
         setDisplayCount(isMobile ? MOBILE_DISPLAY_COUNT : DESKTOP_DISPLAY_COUNT); // Reset display count when recommendations change
     }, [fullRecommendations, fullMediaList, isMobile]);
 
-    const refreshPlannedList = async (animeId: number) => {
-        if (!session?.activeProvider) return;
-
-        try {
-            const response = await fetch("/api/mediaList");
-            if (response.ok) {
-                const data = await response.json();
-                clearFilters();
-                setFullMediaList(data);
-                addSelectedMedia(animeId);
-            }
-        } catch (error) {
-            console.error("Failed to refresh planned list:", error);
-        }
-    };
-
     const handleAddTitle = async (id: number) => {
+        if (!session) return;
         setLoadingIds((prev) => [...prev, id]);
 
         try {
-            const response = await fetch("/api/setPlanned", {
-                method: "POST",
+            const response = await fetch("/api/status", {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ animeIds: id }),
+                body: JSON.stringify({ animeIds: id, status: "planning" }),
             });
 
             if (response.ok) {
                 const result = await response.json();
 
-                toast.success(`Successfully added ${result.success} title${result.success > 1 ? "s" : ""} to your planning list!`);
+                toast.success(`Successfully added ${result.success} title${result.success > 1 ? "s" : ""} to your Planning list!`);
 
-                await refreshPlannedList(id);
+                await fetchMediaList({ session, selectMedia: id });
             } else {
-                console.error("Failed to add titles:", response.statusText);
-                toast.error(`Failed to add titles: ${response.statusText}`);
+                console.error("Failed to change status", response.statusText);
+                toast.error("Failed to change status", { description: response.statusText });
             }
         } catch (error) {
-            console.error("Error adding titles:", error);
-            toast.error(`Error adding titles: ${error instanceof Error ? error.message : "Unknown error"}`);
+            console.error("Failed to change status", error);
+            toast.error("Failed to change status", { description: error instanceof Error ? error.message : "Unknown error" });
         } finally {
             setLoadingIds((prev) => prev.filter((titleId) => titleId !== id));
         }

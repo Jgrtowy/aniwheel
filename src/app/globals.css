@@ -41,7 +41,7 @@
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
 
-    --comfortaa-baseline-offset: 0.1em;
+    --comfortaa-baseline-offset: 0.07em;
 
     --animate-collapsible-down: collapsible-down 200ms ease-out;
     --animate-collapsible-up: collapsible-up 200ms ease-out;

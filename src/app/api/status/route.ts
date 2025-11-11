@@ -1,17 +1,50 @@
 import { getServerSession } from "~/server/auth";
 
-export async function POST(request: Request) {
+type AniListStatus = "PLANNING" | "CURRENT" | "COMPLETED" | "DROPPED" | "PAUSED" | "REPEATING";
+type MALStatus = "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch";
+
+const aniListStatusMap: Record<string, AniListStatus> = {
+    planning: "PLANNING",
+    watching: "CURRENT",
+    current: "CURRENT",
+    completed: "COMPLETED",
+    dropped: "DROPPED",
+    paused: "PAUSED",
+    on_hold: "PAUSED",
+    repeating: "REPEATING",
+};
+
+const malStatusMap: Record<string, MALStatus> = {
+    planning: "plan_to_watch",
+    plan_to_watch: "plan_to_watch",
+    watching: "watching",
+    current: "watching",
+    completed: "completed",
+    dropped: "dropped",
+    paused: "on_hold",
+    on_hold: "on_hold",
+};
+
+export async function PUT(request: Request) {
     const session = await getServerSession();
     if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    let { animeIds } = body;
+    let { animeIds, status } = body;
 
     if (!animeIds || (Array.isArray(animeIds) && animeIds.length === 0)) return Response.json({ error: "No anime IDs provided" }, { status: 400 });
+
+    if (!status) return Response.json({ error: "No status provided" }, { status: 400 });
+
     if (!Array.isArray(animeIds)) animeIds = [animeIds];
+
+    const normalizedStatus = status.toLowerCase().trim();
 
     if (session.activeProvider === "anilist") {
         if (!session.accessToken) return Response.json({ error: "AniList access token not available" }, { status: 401 });
+
+        const aniListStatus = aniListStatusMap[normalizedStatus];
+        if (!aniListStatus) return Response.json({ error: `Invalid status. Allowed values: ${Object.keys(aniListStatusMap).join(", ")}` }, { status: 400 });
 
         const results = [];
         const errors = [];
@@ -30,10 +63,7 @@ mutation ($mediaId: Int, $status: MediaListStatus) {
     }
 }
 `,
-                        variables: {
-                            mediaId: animeId,
-                            status: "PLANNING",
-                        },
+                        variables: { mediaId: animeId, status: aniListStatus },
                     }),
                 });
 
@@ -66,6 +96,9 @@ mutation ($mediaId: Int, $status: MediaListStatus) {
     if (session.activeProvider === "myanimelist") {
         if (!session.accessToken) return Response.json({ error: "MyAnimeList access token not available" }, { status: 401 });
 
+        const malStatus = malStatusMap[normalizedStatus];
+        if (!malStatus) return Response.json({ error: `Invalid status. Allowed values: ${Object.keys(malStatusMap).join(", ")}` }, { status: 400 });
+
         const results = [];
         const errors = [];
 
@@ -74,7 +107,7 @@ mutation ($mediaId: Int, $status: MediaListStatus) {
                 const response = await fetch(`https://api.myanimelist.net/v2/anime/${animeId}/my_list_status`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/x-www-form-urlencoded", Authorization: `Bearer ${session.accessToken}` },
-                    body: new URLSearchParams({ status: "plan_to_watch" }),
+                    body: new URLSearchParams({ status: malStatus }),
                 });
 
                 if (response.ok) {
