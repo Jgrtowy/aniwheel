@@ -47,6 +47,7 @@ query MediaList($userName: String, $statusIn: [MediaListStatus], $type: MediaTyp
           mediaListEntry {
             createdAt
             status
+            customLists
           }
           format
           duration
@@ -73,12 +74,14 @@ query MediaList($userName: String, $statusIn: [MediaListStatus], $type: MediaTyp
                 variables: { userName: session.user.name, statusIn: ["PLANNING", "DROPPED", "PAUSED"], type: "ANIME" },
             }),
         });
+
         if (!data.ok) return Response.json({ error: "Failed to fetch planned items from AniList" }, { status: 500 });
 
         const response = await data.json();
         const mediaList = response.data.MediaListCollection.lists.flatMap((list: { entries: { media: AniListMediaItem }[] }) => list.entries) as { media: AniListMediaItem }[];
 
-        const formattedMediaList: MediaItem[] = mediaList.map((item: { media: AniListMediaItem }) => aniListToMediaItem(item.media));
+        const uniqueMediaList = mediaList.filter((item, index, self) => index === self.findIndex((t) => t.media.id === item.media.id));
+        const formattedMediaList: MediaItem[] = uniqueMediaList.map((item: { media: AniListMediaItem }) => aniListToMediaItem(item.media));
 
         return Response.json(formattedMediaList, { status: 200 });
     }

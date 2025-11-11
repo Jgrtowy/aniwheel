@@ -13,9 +13,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover
 import type { MediaItem } from "~/lib/types";
 import { cn } from "~/lib/utils";
 import { useAnimeStore } from "~/store/anime";
+import { Switch } from "./ui/switch";
 
 export default function FiltersPopover() {
-    const { fullMediaList, score, showUnaired, showPlanning, showDropped, showPaused, availableFormats, setScore, setShowUnaired, setShowPlanning, setShowDropped, setShowPaused, clearFilters, hasActiveFilters, getActiveFilterCount } = useAnimeStore();
+    const { fullMediaList, score, showUnaired, showPlanning, showDropped, showPaused, availableFormats, availableCustomLists, setScore, setShowUnaired, setShowPlanning, setShowDropped, setShowPaused, clearFilters, hasActiveFilters, getActiveFilterCount } = useAnimeStore();
 
     const availableGenres = useMemo(() => {
         const genreSet = new Set<string>();
@@ -27,6 +28,10 @@ export default function FiltersPopover() {
         return Array.from(genreSet).sort();
     }, [fullMediaList]);
 
+    const planningCount = fullMediaList.filter((anime) => anime.status === "PLANNING").length;
+    const pausedCount = fullMediaList.filter((anime) => anime.status === "PAUSED").length;
+    const droppedCount = fullMediaList.filter((anime) => anime.status === "DROPPED").length;
+
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -35,7 +40,7 @@ export default function FiltersPopover() {
                     Filter
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 flex flex-col gap-6 p-4 bg-component-secondary">
+            <PopoverContent className="w-96 flex flex-col gap-6 p-4 bg-component-secondary">
                 <h4 className="font-bold text-lg">Filter</h4>
                 <div className="grid gap-6">
                     <div className="flex flex-col gap-1 text-sm">
@@ -48,29 +53,23 @@ export default function FiltersPopover() {
                     </div>
                     <div className="flex flex-col gap-1 text-sm">
                         <span>Show lists:</span>
-                        <div className="grid grid-cols-3 gap-y-3">
+                        <div className="flex flex-wrap gap-3">
                             <div className="flex items-center gap-1">
                                 <Checkbox id="planning" className="cursor-pointer bg-background/50" checked={showPlanning} onCheckedChange={setShowPlanning} />
                                 <Label htmlFor="planning" className="text-sm cursor-pointer">
-                                    Planning
+                                    Planning ({planningCount})
                                 </Label>
                             </div>
                             <div className="flex items-center gap-1">
                                 <Checkbox id="paused" className="cursor-pointer bg-background/50" checked={showPaused} onCheckedChange={setShowPaused} />
                                 <Label htmlFor="paused" className="text-sm cursor-pointer">
-                                    Paused
+                                    Paused ({pausedCount})
                                 </Label>
                             </div>
                             <div className="flex items-center gap-1">
                                 <Checkbox id="dropped" className="cursor-pointer bg-background/50" checked={showDropped} onCheckedChange={setShowDropped} />
                                 <Label htmlFor="dropped" className="text-sm cursor-pointer">
-                                    Dropped
-                                </Label>
-                            </div>
-                            <div className="flex items-center gap-2 col-span-3">
-                                <Checkbox id="aired-only" className="cursor-pointer bg-background/50" checked={showUnaired} onCheckedChange={setShowUnaired} />
-                                <Label htmlFor="aired-only" className="text-sm cursor-pointer">
-                                    Include unaired
+                                    Dropped ({droppedCount})
                                 </Label>
                             </div>
                         </div>
@@ -83,35 +82,22 @@ export default function FiltersPopover() {
                             ))}
                         </div>
                     </div>
+                    <div className="flex flex-col gap-1 text-sm">
+                        <span>Filter by custom lists:</span>
+                        <div className="flex flex-wrap gap-3">
+                            <div className="col-span-3 flex flex-wrap gap-3">{availableCustomLists.size > 0 && Array.from(availableCustomLists.values()).map((list) => <CustomListsCheckbox key={list} list={list} />)}</div>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 icon-text-container">
+                        <Switch id="show-unaired" className="cursor-pointer" checked={showUnaired} onCheckedChange={setShowUnaired} />
+                        <Label htmlFor="show-unaired">Include unaired titles</Label>
+                    </div>
                 </div>
                 <Button variant="outline" onClick={clearFilters} size="sm" disabled={!hasActiveFilters()}>
                     Clear filters
                 </Button>
             </PopoverContent>
         </Popover>
-    );
-}
-
-function FormatCheckbox({ format }: { format: MediaItem["format"] }) {
-    const { activeFormats, addActiveFormat, removeActiveFormat } = useAnimeStore();
-
-    const isChecked = activeFormats.has(format);
-
-    const handleToggle = () => {
-        if (isChecked) {
-            removeActiveFormat(format);
-        } else {
-            addActiveFormat(format);
-        }
-    };
-
-    return (
-        <div className="flex items-center gap-1">
-            <Checkbox id={format} className="cursor-pointer bg-background/50" checked={isChecked} onCheckedChange={handleToggle} />
-            <Label htmlFor={format} className="text-sm cursor-pointer">
-                {format === "TV" ? "TV" : format === "TV_SHORT" ? "TV Short" : format === "ONA" ? "ONA" : format === "OVA" ? "OVA" : format.charAt(0).toUpperCase() + format.slice(1).toLowerCase()}
-            </Label>
-        </div>
     );
 }
 
@@ -188,5 +174,47 @@ function GenreCombobox({ availableGenres }: { availableGenres: string[] }) {
                 </Command>
             </PopoverContent>
         </Popover>
+    );
+}
+
+function FormatCheckbox({ format }: { format: MediaItem["format"] }) {
+    const { activeFormats, addActiveFormat, removeActiveFormat } = useAnimeStore();
+
+    const isChecked = activeFormats.has(format);
+
+    const handleToggle = () => {
+        if (isChecked) removeActiveFormat(format);
+        else addActiveFormat(format);
+    };
+
+    return (
+        <div className="flex items-center gap-1">
+            <Checkbox id={format} className="cursor-pointer bg-background/50" checked={isChecked} onCheckedChange={handleToggle} />
+            <Label htmlFor={format} className="text-sm cursor-pointer">
+                {format === "TV" ? "TV" : format === "TV_SHORT" ? "TV Short" : format === "ONA" ? "ONA" : format === "OVA" ? "OVA" : format.charAt(0).toUpperCase() + format.slice(1).toLowerCase()}
+            </Label>
+        </div>
+    );
+}
+
+function CustomListsCheckbox({ list }: { list: string }) {
+    const { activeCustomLists, addActiveCustomList, removeActiveCustomList, mediaList } = useAnimeStore();
+
+    const isChecked = activeCustomLists.has(list);
+
+    const handleToggle = () => {
+        if (isChecked) removeActiveCustomList(list);
+        else addActiveCustomList(list);
+    };
+
+    const customListCount = mediaList.filter((anime) => anime.customLists?.includes(list)).length;
+
+    return (
+        <div className="flex items-center gap-1">
+            <Checkbox id={list} className="cursor-pointer bg-background/50" checked={isChecked} onCheckedChange={handleToggle} />
+            <Label htmlFor={list} className="text-sm cursor-pointer">
+                {list} ({customListCount})
+            </Label>
+        </div>
     );
 }

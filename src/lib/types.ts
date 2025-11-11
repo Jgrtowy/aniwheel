@@ -33,6 +33,7 @@ export interface MediaItem {
         site: "youtube" | "dailymotion";
     } | null;
     description: string | null;
+    customLists: string[] | null;
 }
 
 export interface MediaRecommendation {
@@ -71,6 +72,7 @@ export interface AniListMediaItem {
     mediaListEntry: {
         createdAt: number;
         status: "PLANNING" | "DROPPED" | "PAUSED" | null;
+        customLists?: { [key: string]: boolean } | null;
     } | null;
     format: "TV" | "TV_SHORT" | "MOVIE" | "SPECIAL" | "OVA" | "ONA" | "MUSIC";
     duration: number | null;
