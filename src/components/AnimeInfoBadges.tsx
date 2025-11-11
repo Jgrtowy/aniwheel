@@ -182,7 +182,6 @@ export function AnimeInfoBadges({ anime, activeProvider, badges, className, badg
             if (anime.studios.length === 0) return null;
             const mainStudios = anime.studios.filter((studio) => studio.isMain);
             const producerStudios = anime.studios.filter((studio) => !studio.isMain);
-
             return (
                 <Tooltip key="studios" disableHoverableContent={disableHoverableContent}>
                     <TooltipTrigger asChild>
@@ -220,7 +219,7 @@ export function AnimeInfoBadges({ anime, activeProvider, badges, className, badg
                         <Badge variant="outline" className="bg-component-primary" asChild>
                             <a href={anime.siteUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                 <ExternalLink />
-                                <span className="sr-only">{activeProvider ? `View on ${getPrettyProviderName(activeProvider)}` : "View on provider"}</span>
+                                <span className="sr-only">{activeProvider && `View on ${getPrettyProviderName(activeProvider)}`}</span>
                             </a>
                         </Badge>
                     </TooltipTrigger>

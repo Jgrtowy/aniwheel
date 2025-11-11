@@ -72,7 +72,7 @@ const AnimeCard = memo(function AnimeCard(props: AnimeCardProps) {
                     {anime.siteUrl && showDetails && (
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button asChild variant="secondary" className="flex size-7 justify-center items-center aspect-square border rounded-md bg-component-primary">
+                                <Button asChild variant="outline" className="size-7 bg-component-primary">
                                     <a href={anime.siteUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                         <ExternalLink className="size-3" />
                                         <span className="sr-only">View on {session?.activeProvider}</span>

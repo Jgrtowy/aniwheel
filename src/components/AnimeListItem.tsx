@@ -36,7 +36,6 @@ const AnimeListItem = memo(function AnimeListItem({ anime, checked, showDetails 
     const imageMaskStyle = getImageMaskStyle(checked);
     const rawActiveProvider = session?.activeProvider;
     const activeProvider = rawActiveProvider === "anilist" || rawActiveProvider === "myanimelist" ? rawActiveProvider : undefined;
-    const badges = showDetails ? undefined : (["format", "score", "episodes", "duration", "status", "airing", "studios"] as const).slice();
 
     return (
         <div className={containerClasses}>
@@ -47,7 +46,7 @@ const AnimeListItem = memo(function AnimeListItem({ anime, checked, showDetails 
                 <Checkbox className="size-7 transition-transform duration-200 hover:scale-115 sm:size-6 cursor-pointer data-[state=unchecked]:bg-background/50!" id={`anime-checkbox-${anime.id}`} checked={checked} onCheckedChange={() => toggleSelectedMedia(anime.id)} />
                 <div className="flex flex-col gap-1">
                     <h2 className="w-fit leading-tight line-clamp-2 sm:line-clamp-1 text-lg sm:text-xl bg-component-primary border rounded-md px-2 py-0.5">{title}</h2>
-                    <AnimeInfoBadges anime={anime} activeProvider={activeProvider} badges={badges} className="flex flex-wrap gap-1" disableHoverableContent />
+                    <AnimeInfoBadges anime={anime} activeProvider={activeProvider} badges={["format", "score", "episodes", "duration", "status", "airing", "studios", "siteLink"]} className="flex flex-wrap gap-1" disableHoverableContent />
                 </div>
             </Label>
         </div>
