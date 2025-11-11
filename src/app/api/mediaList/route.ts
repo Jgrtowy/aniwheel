@@ -59,6 +59,11 @@ query MediaList($userName: String, $statusIn: [MediaListStatus], $type: MediaTyp
               }
             }
           }
+          trailer {
+            id
+            site
+          }
+          description
         }
       }
     }
@@ -83,7 +88,7 @@ query MediaList($userName: String, $statusIn: [MediaListStatus], $type: MediaTyp
 
         const formattedMediaList: MediaItem[] = [];
 
-        const data = await fetch(`https://api.myanimelist.net/v2/users/@me/animelist?limit=1000&offset=${formattedMediaList.length}&fields=alternative_titles,start_date,end_date,mean,num_episodes,genres,my_list_status,media_type,average_episode_duration,status,studios`, {
+        const data = await fetch(`https://api.myanimelist.net/v2/users/@me/animelist?limit=1000&offset=${formattedMediaList.length}&fields=alternative_titles,start_date,end_date,mean,num_episodes,genres,my_list_status,media_type,average_episode_duration,status,studios,synopsis`, {
             method: "GET",
             headers: { Authorization: `Bearer ${session.accessToken}` },
         });

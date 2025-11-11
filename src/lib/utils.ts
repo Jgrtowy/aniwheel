@@ -1,6 +1,9 @@
 import { type ClassValue, clsx } from "clsx";
+import type { Session } from "next-auth";
+import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
 import type { AniListMediaItem, ImageSize, MALMediaItem, MediaDate, MediaItem, TitleLanguage, UserProfile } from "~/lib/types";
+import { useAnimeStore } from "~/store/anime";
 import { useSettingsStore } from "~/store/settings";
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
@@ -85,12 +88,14 @@ export function aniListToMediaItem(item: AniListMediaItem): MediaItem {
         episodes: item.episodes || 0,
         siteUrl: item.siteUrl || `https://anilist.co/anime/${item.id}`,
         genres: item.genres || [],
-        entryCreatedAt: item.mediaListEntry?.createdAt || null,
+        entryCreatedAt: item.mediaListEntry?.createdAt ? item.mediaListEntry.createdAt * 1000 : null,
         status: item.mediaListEntry?.status || null,
         format: item.format || "UNKNOWN",
         duration: item.duration || 0,
         studios: item.studios?.edges.map((edge) => ({ name: edge.node.name, isMain: edge.isMain })) || [],
         releasingStatus: item.status || null,
+        trailer: item.trailer ? { site: item.trailer.site, id: item.trailer.id } : null,
+        description: item.description || null,
     };
 }
 
@@ -127,6 +132,8 @@ export function malToMediaItem(item: MALMediaItem): MediaItem {
         duration: Math.round((item.average_episode_duration || 0) / 60),
         studios: item.studios?.map((studio) => ({ name: studio.name, isMain: true })) || [],
         releasingStatus: item.status ? malStatusToReleasingStatus[item.status] || null : null,
+        trailer: null,
+        description: item.synopsis || null,
     };
 }
 
@@ -157,3 +164,30 @@ const releasingStatusLabels: Record<Exclude<MediaItem["releasingStatus"], null>,
 export const getPrettyMediaFormat = (format: MediaItem["format"]) => mediaFormatLabels[format] || "Unknown Format";
 
 export const getPrettyReleasingStatus = (status: MediaItem["releasingStatus"]) => (status ? releasingStatusLabels[status] || "Unknown Status" : "Unknown Status");
+
+export const getPrettyDuration = (duration: number) => {
+    if (duration < 60) return `${duration} minute${duration === 1 ? "" : "s"}`;
+    const hours = Math.floor(duration / 60);
+    const minutes = duration % 60;
+    return minutes > 0 ? `${hours} hour${hours === 1 ? "" : "s"} ${minutes} minute${minutes === 1 ? "" : "s"}` : `${hours} hour${hours === 1 ? "" : "s"}`;
+};
+
+export const fetchMediaList = async ({ session, selectMedia }: { session: Session; selectMedia: number | number[] }) => {
+    if (!session?.activeProvider) return;
+
+    if (!Array.isArray(selectMedia)) selectMedia = [selectMedia];
+
+    const { setFullMediaList, addSelectedMedia } = useAnimeStore.getState();
+
+    try {
+        const response = await fetch("/api/mediaList");
+        if (response.ok) {
+            const data = await response.json();
+            setFullMediaList(data);
+            addSelectedMedia(selectMedia);
+        }
+    } catch (error) {
+        toast.error("Failed to fetch media list", { description: error instanceof Error ? error.message : "Unknown error" });
+        console.error("Failed to fetch media list", error);
+    }
+};

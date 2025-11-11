@@ -10,14 +10,14 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import type { MediaItem } from "~/lib/types";
-import { getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
+import { fetchMediaList, getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
 import { useAnimeStore } from "~/store/anime";
 import { useUiStore } from "~/store/ui";
 
 export default function AddToPlannedSheet() {
     const session = useSession();
-    const { fullMediaList, setFullMediaList, addSelectedMedia, clearFilters } = useAnimeStore();
+    const { fullMediaList, setFullMediaList, addSelectedMedia } = useAnimeStore();
     const {
         addToPlannedSheet: { open, setOpen },
     } = useUiStore();
@@ -79,33 +79,17 @@ export default function AddToPlannedSheet() {
         setSelectedTitles((prev) => prev.filter((title) => title.id !== anime.id));
     };
 
-    const refreshPlannedList = async (animeIds: number[]) => {
-        if (!session?.activeProvider) return;
-
-        try {
-            const response = await fetch("/api/mediaList");
-            if (response.ok) {
-                const data = await response.json();
-                clearFilters();
-                setFullMediaList(data);
-                addSelectedMedia(animeIds);
-            }
-        } catch (error) {
-            console.error("Failed to refresh planned list:", error);
-        }
-    };
-
     const handleAddTitles = async () => {
-        if (selectedTitles.length === 0 || !session?.activeProvider) return;
+        if (selectedTitles.length === 0 || !session) return;
         setIsAdding(true);
 
         try {
             const animeIds = selectedTitles.map((anime) => anime.id);
 
-            const response = await fetch("/api/setPlanned", {
-                method: "POST",
+            const response = await fetch("/api/status", {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ animeIds }),
+                body: JSON.stringify({ animeIds, status: "planning" }),
             });
 
             if (response.ok) {
@@ -114,17 +98,17 @@ export default function AddToPlannedSheet() {
                 if (result.errors > 0) toast.error(`Added ${result.success} title${result.success > 1 ? "s" : ""}, but ${result.errors} failed.`);
                 else toast.success(`Successfully added ${result.success} title${result.success > 1 ? "s" : ""} to your planning list!`);
 
-                await refreshPlannedList(animeIds);
+                await fetchMediaList({ session, selectMedia: animeIds });
 
                 setOpen(false);
                 setSelectedTitles([]);
             } else {
-                console.error("Failed to add titles:", response.statusText);
-                toast.error(`Failed to add titles: ${response.statusText}`);
+                console.error("Failed to change status", response.statusText);
+                toast.error("Failed to change status", { description: response.statusText });
             }
         } catch (error) {
-            console.error("Error adding titles:", error);
-            toast.error(`Error adding titles: ${error instanceof Error ? error.message : "Unknown error"}`);
+            console.error("Failed to change status", error);
+            toast.error("Failed to change status", { description: error instanceof Error ? error.message : "Unknown error" });
         } finally {
             setIsAdding(false);
         }
