@@ -82,12 +82,18 @@ export default function FiltersPopover() {
                             ))}
                         </div>
                     </div>
-                    <div className="flex flex-col gap-1 text-sm">
-                        <span>Filter by custom lists:</span>
-                        <div className="flex flex-wrap gap-3">
-                            <div className="col-span-3 flex flex-wrap gap-3">{availableCustomLists.size > 0 && Array.from(availableCustomLists.values()).map((list) => <CustomListsCheckbox key={list} list={list} />)}</div>
+                    {availableCustomLists.size > 0 && (
+                        <div className="flex flex-col gap-1 text-sm">
+                            <span>Filter by custom lists:</span>
+                            <div className="flex flex-wrap gap-3">
+                                <div className="col-span-3 flex flex-wrap gap-3">
+                                    {Array.from(availableCustomLists.values()).map((list) => (
+                                        <CustomListsCheckbox key={list} list={list} />
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    )}
                     <div className="flex items-center gap-2 icon-text-container">
                         <Switch id="show-unaired" className="cursor-pointer" checked={showUnaired} onCheckedChange={setShowUnaired} />
                         <Label htmlFor="show-unaired">Include unaired titles</Label>
