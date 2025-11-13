@@ -25,8 +25,8 @@ export function SpinWheelDialog() {
             <DialogContent className="h-dvh w-dvw max-w-dvw sm:max-w-dvw overflow-hidden bg-transparent border-none p-0" showCloseButton={false}>
                 <VisuallyHidden>
                     <DialogHeader>
-                        <DialogTitle>Spin Wheel Dialog</DialogTitle>
-                        <DialogDescription>Spin the wheel to randomly select an anime from your list.</DialogDescription>
+                        <DialogTitle>Spin Wheel</DialogTitle>
+                        <DialogDescription>Spin it to randomly select an anime from your list.</DialogDescription>
                     </DialogHeader>
                 </VisuallyHidden>
                 <SpinWheelContent />

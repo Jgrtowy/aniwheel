@@ -220,43 +220,39 @@ export function SpinWheelContent() {
                     </motion.div>
                 )}
             </AnimatePresence>
-            <div className="grid grid-cols-4 grid-rows-4 md:gap-8 md:p-8 gap-0 p-4 min-h-0">
-                <motion.div
-                    className={cn("md:col-span-2 md:col-start-2 row-span-4 row-start-1 col-span-4 flex items-center justify-center md:p-0 p-4", showDetail && "md:row-span-2 md:col-span-1 md:row-start-2 md:col-start-1 row-span-1 col-span-2 row-start-1 col-start-2")}
-                    layout
-                    transition={{ type: "spring", stiffness: 600, damping: 30 }}
-                    key="spin-wheel"
-                >
-                    <button className="relative cursor-pointer rounded-full appearance-none md:w-full md:h-auto w-auto h-full aspect-square" type="button" onClick={spin} disabled={isSpinning}>
-                        <span className="sr-only">Click to spin the wheel!</span>
-                        <img src="/Click_to_spin.svg" alt="Click to spin!" className={cn("absolute inset-0 object-cover z-10 rounded-full opacity-100 pointer-events-none transition-opacity", isSpinning && "opacity-0")} />
-                        <svg ref={wheelRef} width="100%" height="100%" viewBox={`0 0 ${wheelSize} ${wheelSize}`} className="absolute inset-0 overflow-hidden rounded-full" style={{ transform: `rotate(${rotation}deg)` }}>
-                            <defs>
-                                {wheelSegments.map(({ textPathData }, index) => (
-                                    <clipPath key={`text-clip-${index}`} id={`text-clip-path-${index}`}>
-                                        <path d={textPathData} />
-                                    </clipPath>
+            <div className="flex flex-col justify-center lg:p-10 md:p-6 sm:p-4 p-2 gap-4 overflow-hidden">
+                <motion.div className={cn("flex justify-center items-center", showDetail ? "flex-[1]" : "flex-[4]")} layout transition={{ type: "spring", stiffness: 600, damping: 30 }} key="spin-wheel">
+                    <div className="h-full max-h-[600px] max-w-full aspect-square flex items-center">
+                        <button className="relative aspect-square w-full cursor-pointer rounded-full appearance-none" type="button" onClick={spin} disabled={isSpinning}>
+                            <img src="/Click_to_spin.svg" alt="Click to spin the wheel!" className={cn("absolute inset-0 object-cover z-10 rounded-full opacity-100 pointer-events-none transition-opacity", isSpinning && "opacity-0")} />
+                            <svg ref={wheelRef} width="100%" height="100%" viewBox={`0 0 ${wheelSize} ${wheelSize}`} className="absolute inset-0 overflow-hidden rounded-full" style={{ transform: `rotate(${rotation}deg)` }}>
+                                <defs>
+                                    {wheelSegments.map(({ textPathData }, index) => (
+                                        <clipPath key={`text-clip-${index}`} id={`text-clip-path-${index}`}>
+                                            <path d={textPathData} />
+                                        </clipPath>
+                                    ))}
+                                </defs>
+                                {wheelSegments.map(({ item, index, pathData, imageDimensions, imageX, imageY }) => (
+                                    <g key={index}>
+                                        <path d={pathData} fill="black" stroke="white" strokeWidth="2" />
+                                        <clipPath id={`clip-path-${index}`}>
+                                            <path d={pathData} />
+                                        </clipPath>
+                                        <image href={getImageUrlWithPreference(item)} x={imageX - imageDimensions.width / 2} y={imageY - imageDimensions.height / 2} width={imageDimensions.width} height={imageDimensions.height} preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-path-${index})`} />
+                                    </g>
                                 ))}
-                            </defs>
-                            {wheelSegments.map(({ item, index, pathData, imageDimensions, imageX, imageY }) => (
-                                <g key={index}>
-                                    <path d={pathData} fill="black" stroke="white" strokeWidth="2" />
-                                    <clipPath id={`clip-path-${index}`}>
-                                        <path d={pathData} />
-                                    </clipPath>
-                                    <image href={getImageUrlWithPreference(item)} x={imageX - imageDimensions.width / 2} y={imageY - imageDimensions.height / 2} width={imageDimensions.width} height={imageDimensions.height} preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-path-${index})`} />
-                                </g>
-                            ))}
-                        </svg>
-                        <ChevronDown strokeWidth={2} className="size-12 lg:w-16 lg:h-16 absolute -top-10 lg:-top-13 left-1/2 text-primary-foreground -translate-x-1/2" />
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 lg:w-8 lg:h-8 bg-white border-2 lg:border-4 border-gray-300 rounded-full" />
-                    </button>
+                            </svg>
+                            <ChevronDown strokeWidth={2} className="size-12 lg:w-16 lg:h-16 absolute -top-10 lg:-top-13 left-1/2 text-primary-foreground -translate-x-1/2" />
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 lg:w-8 lg:h-8 bg-white border-2 lg:border-4 border-gray-300 rounded-full" />
+                        </button>
+                    </div>
                 </motion.div>
                 <AnimatePresence onExitComplete={() => setShowDetail(false)}>
                     {selectedItem && (
-                        <motion.div className="md:row-span-4 md:col-span-3 row-span-3 col-span-4" layout initial={{ opacity: 0, x: 80 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 80 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} key="selected-item">
+                        <motion.div className="flex-[3] flex justify-center items-center min-h-0 overflow-hidden" layout initial={{ opacity: 0, y: 80 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 80 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} key="selected-item">
                             <span className="sr-only">Selected anime</span>
-                            <AnimeDetails anime={selectedItem} className="size-full" />
+                            <AnimeDetails anime={selectedItem} className="size-full max-w-4xl max-h-full" />
                         </motion.div>
                     )}
                 </AnimatePresence>

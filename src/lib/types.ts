@@ -34,6 +34,11 @@ export interface MediaItem {
     } | null;
     description: string | null;
     customLists: string[] | null;
+    startSeason: {
+        year: number | null;
+        season: "WINTER" | "SPRING" | "SUMMER" | "FALL" | null;
+    };
+    externalLinks: { site: string; type: "INFO" | "STREAMING" | "SOCIAL"; url: string; language: string | null; notes: string | null; icon: string | null; color: string | null }[] | null;
 }
 
 export interface MediaRecommendation {
@@ -90,6 +95,9 @@ export interface AniListMediaItem {
         site: "youtube" | "dailymotion";
     } | null;
     description: string | null;
+    season: "WINTER" | "SPRING" | "SUMMER" | "FALL" | null;
+    seasonYear: number | null;
+    externalLinks: { site: string; type: "INFO" | "STREAMING" | "SOCIAL"; url: string; language: string | null; notes: string | null; icon: string | null; color: string | null }[] | null;
 }
 
 export interface AniListMediaRecommendation {
@@ -123,8 +131,13 @@ export interface MALMediaItem {
     media_type: "unknown" | "tv" | "ova" | "movie" | "special" | "ona" | "music";
     average_episode_duration: number | null;
     status: "finished_airing" | "currently_airing" | "not_yet_aired" | "cancelled" | "on_hiatus" | null;
-    studios?: { id: number; name: string }[] | null;
+    studios: { id: number; name: string }[] | null;
     synopsis: string | null;
+    start_season: {
+        year: number;
+        season: "winter" | "spring" | "summer" | "fall";
+    } | null;
+    external_links: null;
 }
 
 export type TitleLanguage = keyof MediaItem["title"];

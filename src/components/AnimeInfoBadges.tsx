@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import type { MediaItem, UserProfile } from "~/lib/types";
-import { cn, getPrettyDuration, getPrettyMediaFormat, getPrettyProviderName, getPrettyReleasingStatus, mediaDateToDate } from "~/lib/utils";
+import { cn, getPrettyDuration, getPrettyMediaFormat, getPrettyProviderName, getPrettyReleasingStatus, getReleasingStatusDescription, mediaDateToDate } from "~/lib/utils";
 
 type BadgeType = "format" | "score" | "episodes" | "duration" | "status" | "airing" | "studios" | "siteLink";
 
@@ -17,14 +17,6 @@ interface AnimeDetailBadgesProps {
 }
 
 type AiringDateInfo = { label: string; isRange: boolean };
-
-const releasingStatusDescriptions: Record<NonNullable<MediaItem["releasingStatus"]>, string> = {
-    FINISHED: "Has completed and is no longer being released",
-    RELEASING: "Currently releasing",
-    NOT_YET_RELEASED: "To be released at a later date",
-    CANCELLED: "Ended before the work could be finished",
-    HIATUS: "Is currently paused from releasing and will resume at a later date",
-};
 
 const getAiringDateInfo = (anime: MediaItem): AiringDateInfo | null => {
     const dateFormatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "numeric" });
@@ -143,7 +135,7 @@ export function AnimeInfoBadges({ anime, activeProvider, badges, className, badg
         },
 
         status: () => {
-            const statusDescription = anime.releasingStatus ? releasingStatusDescriptions[anime.releasingStatus] : undefined;
+            const statusDescription = getReleasingStatusDescription(anime.releasingStatus);
             return (
                 <Tooltip key="status" disableHoverableContent={disableHoverableContent}>
                     <TooltipTrigger asChild>

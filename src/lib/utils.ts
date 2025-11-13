@@ -106,6 +106,8 @@ export function aniListToMediaItem(item: AniListMediaItem): MediaItem {
         trailer: item.trailer ? { site: item.trailer.site, id: item.trailer.id } : null,
         description: item.description || null,
         customLists: formatCustomLists(item.mediaListEntry?.customLists || {}),
+        startSeason: { season: item.season, year: item.seasonYear },
+        externalLinks: item.externalLinks,
     };
 }
 
@@ -145,6 +147,8 @@ export function malToMediaItem(item: MALMediaItem): MediaItem {
         trailer: null,
         description: item.synopsis || null,
         customLists: [],
+        startSeason: { season: (item.start_season?.season?.toUpperCase() as Uppercase<NonNullable<MALMediaItem["start_season"]>["season"]> | null) || null, year: item.start_season?.year || null },
+        externalLinks: null,
     };
 }
 
@@ -164,17 +168,71 @@ const mediaFormatLabels: Record<MediaItem["format"], string> = {
     UNKNOWN: "Unknown Format",
 };
 
-const releasingStatusLabels: Record<Exclude<MediaItem["releasingStatus"], null>, string> = {
+const releasingStatusLabels: Record<NonNullable<MediaItem["releasingStatus"]>, string> = {
     FINISHED: "Finished",
     RELEASING: "Releasing",
     NOT_YET_RELEASED: "Not Yet Released",
     CANCELLED: "Cancelled",
     HIATUS: "Hiatus",
 };
+const releasingStatusDescriptions: Record<NonNullable<MediaItem["releasingStatus"]>, string> = {
+    FINISHED: "Has completed and is no longer being released",
+    RELEASING: "Currently releasing",
+    NOT_YET_RELEASED: "To be released at a later date",
+    CANCELLED: "Ended before the work could be finished",
+    HIATUS: "Is currently paused from releasing and will resume at a later date",
+};
 
 export const getPrettyMediaFormat = (format: MediaItem["format"]) => mediaFormatLabels[format] || "Unknown Format";
 
 export const getPrettyReleasingStatus = (status: MediaItem["releasingStatus"]) => (status ? releasingStatusLabels[status] || "Unknown Status" : "Unknown Status");
+export const getReleasingStatusDescription = (status: MediaItem["releasingStatus"]) => (status ? releasingStatusDescriptions[status] || "No releasing status has been provided" : "No releasing status has been provided");
+
+type AiringDateInfo = { isRange: true; label: { from: string; to: string } } | { isRange: false; label: { from: string | null; to: string | null } };
+export const getAiringDateInfo = (anime: MediaItem): AiringDateInfo | null => {
+    const dateFormatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "numeric" });
+
+    const formatDate = (date: MediaItem["startDate"]) => {
+        if (!date || !date.year) return null;
+
+        if (date.month && date.day) {
+            const parsedDate = mediaDateToDate(date);
+            if (!parsedDate) return null;
+
+            try {
+                return dateFormatter.format(parsedDate);
+            } catch (error) {
+                return parsedDate.toISOString().slice(0, 10);
+            }
+        }
+
+        if (date.month) {
+            const parsedDate = mediaDateToDate({ ...date, day: 1 });
+            if (!parsedDate) return null;
+
+            try {
+                return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short" }).format(parsedDate);
+            } catch (error) {
+                return `${date.year}-${String(date.month).padStart(2, "0")}`;
+            }
+        }
+
+        return String(date.year);
+    };
+
+    const formattedStart = formatDate(anime.startDate);
+    const formattedEnd = formatDate(anime.endDate);
+
+    if (formattedStart && formattedEnd) {
+        if (formattedStart === formattedEnd) return { label: { from: formattedStart, to: null }, isRange: false };
+        return { label: { from: formattedStart, to: formattedEnd }, isRange: true };
+    }
+
+    if (formattedStart) return { label: { from: formattedStart, to: null }, isRange: false };
+    if (formattedEnd) return { label: { from: null, to: formattedEnd }, isRange: false };
+
+    return null;
+};
 
 export const getPrettyDuration = (duration: number) => {
     if (duration < 60) return `${duration} min${duration === 1 ? "" : "s"}`;
