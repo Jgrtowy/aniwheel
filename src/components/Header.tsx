@@ -96,12 +96,12 @@ export default function Header() {
                     <PopoverContent className="w-[360px] p-0 bg-component-secondary overflow-hidden" align="end">
                         <div className="flex flex-col gap-2 relative p-4">
                             <div className="flex flex-col items-start">
-                                <a className="font-bold truncate flex items-center gap-1 hover:underline underline-offset-2" href={session?.user.url} target="_blank" rel="noopener noreferrer">
+                                <a className="font-bold truncate flex items-center gap-1 hover:underline underline-offset-2 text-[#fafafa]" href={session?.user.url} target="_blank" rel="noopener noreferrer">
                                     {session?.user.name}
                                     <ExternalLink className="size-3" />
                                 </a>
                                 {session && (
-                                    <div className="flex flex-col text-xs text-muted-foreground">
+                                    <div className="flex flex-col text-xs text-[#9f9fa9]">
                                         <span>Signed in with {getPrettyProviderName(session?.activeProvider)}</span>
                                         <span>Member since {new Date(session.user.createdAt * 1000).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</span>
                                     </div>
@@ -109,8 +109,8 @@ export default function Header() {
                             </div>
                             {session && (
                                 <div>
-                                    <h4 className="font-medium text-sm">Your stats:</h4>
-                                    <p className="text-xs text-muted-foreground flex flex-col">
+                                    <h4 className="font-medium text-sm text-[#fafafa]">Your stats:</h4>
+                                    <p className="text-xs text-[#9f9fa9] flex flex-col">
                                         {fullMediaList.length > 0 ? (
                                             <>
                                                 <span>
@@ -127,7 +127,7 @@ export default function Header() {
                                     </p>
                                 </div>
                             )}
-                            {isAniListSession(session) && session.user.anilist.bannerImage && <Image className="absolute object-cover -z-10 brightness-45 opacity-75" src={session.user.anilist.bannerImage} alt={`${session.user.name}'s banner`} fill sizes="100%" />}
+                            {isAniListSession(session) && session.user.anilist.bannerImage && <Image className="absolute object-cover -z-10 brightness-45 opacity-80" src={session.user.anilist.bannerImage} alt={`${session.user.name}'s banner`} fill sizes="100%" />}
                         </div>
                         <Separator />
                         <div className="grid p-2">
