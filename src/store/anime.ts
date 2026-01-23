@@ -266,10 +266,8 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         if (!state.showUnaired) {
             const currentDate = Date.now();
             filteredAnime = filteredAnime.filter((anime) => {
-                if (!anime.startDate) return false;
-                const releaseTimestamp = mediaDateToTimestamp(anime.startDate);
-                if (releaseTimestamp === null) return false;
-                return releaseTimestamp <= currentDate;
+                if (anime.releasingStatus === "NOT_YET_RELEASED") return false;
+                return true;
             });
         }
 
