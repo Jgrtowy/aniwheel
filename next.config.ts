@@ -6,13 +6,11 @@ const nextConfig: NextConfig = {
             {
                 protocol: "https",
                 hostname: "*.anilist.co",
-                port: "",
                 pathname: "/**",
             },
             {
                 protocol: "https",
                 hostname: "cdn.myanimelist.net",
-                port: "",
                 pathname: "/**",
             },
         ],
@@ -30,6 +28,7 @@ const nextConfig: NextConfig = {
         ];
     },
     output: "standalone",
+    reactCompiler: true,
 };
 
 export default nextConfig;
