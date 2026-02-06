@@ -1,6 +1,7 @@
 "use client";
+"use no memo";
 
-import { ArrowDown, CircleArrowRight, LoaderCircle, LogIn } from "lucide-react";
+import { LoaderCircle, LogIn } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,9 +19,6 @@ import { signIn } from "~/lib/auth";
 import type { UserProfile } from "~/lib/types";
 import { cn } from "~/lib/utils";
 import { useSettingsStore } from "~/store/settings";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 const TITLE_ANIMATION_DURATION = 0.5;
 
@@ -39,9 +37,6 @@ export default function Landing() {
     const [isLoggingIn, setIsLoggingIn] = useState<string | null>(null);
     const [colorStops, setColorStops] = useState<string[]>(["#2e1cff", "#ff3161", "#b032ff"]);
     const [isKanjiTooltipOpen, setIsKanjiTooltipOpen] = useState(false);
-
-    const [service, setService] = useState<"anilist" | "myanimelist">("anilist");
-    const [username, setUsername] = useState("");
 
     useEffect(() => {
         setColorStops((prev) => [...prev].sort(() => Math.random() - 0.5));
@@ -80,23 +75,6 @@ export default function Landing() {
             setIsLoggingIn(null);
         }
     };
-
-    // Function to handle pasting username (commented due to disabled feature)
-
-    // const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    //     e.preventDefault();
-    //     let pasted = e.clipboardData.getData("text/plain");
-    //     if (pasted.startsWith("https://myanimelist.net/profile/")) {
-    //         setService("myanimelist");
-    //     }
-    //     if (pasted.startsWith("https://anilist.co/user/")) {
-    //         setService("anilist");
-    //     }
-    //     pasted = pasted.replace("https://myanimelist.net/profile/", "");
-    //     pasted = pasted.replace("https://anilist.co/user/", "");
-    //     pasted = pasted.split("/")[0];
-    //     setUsername(pasted);
-    // };
 
     return (
         <MotionConfig reducedMotion="user">
@@ -146,68 +124,6 @@ export default function Landing() {
                                     {isLoggingIn === "myanimelist" ? <LoaderCircle className="animate-spin" /> : <LogIn />}
                                     MyAnimeList
                                 </Button>
-                            </nav>
-                            <div className="flex w-full items-center gap-3 px-6 text-sm text-muted-foreground">
-                                <Separator className="flex-1" />
-                                <span>or</span>
-                                <Separator className="flex-1" />
-                            </div>
-                            <nav className="flex flex-col items-center sm:flex-row gap-4 sm:gap-6">
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button variant="outline" size="lg" className="w-50 h-10 text-sm flex items-center text-muted-foreground cursor-not-allowed hover:text-muted-foreground" aria-label="Sign in with username (coming soon)">
-                                            Username
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Coming soon!</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                                {/* <Dialog>
-                                <DialogTrigger asChild>
-                                    <div className="flex flex-row w-full items-center justify-center gap-2 text-sm text-muted-foreground">
-                                        <Button variant="outline" size="lg" className="flex items-center text-muted-foreground">
-                                            Sign in with username <CircleArrowRight className="ml-2" />
-                                        </Button>
-                                    </div>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle className="text-2xl">Sign in with username</DialogTitle>
-                                    </DialogHeader>
-                                    <div className="flex flex-row gap-2">
-                                        <Select value={service} onValueChange={setService as (val: "anilist" | "myanimelist") => void}>
-                                            <SelectTrigger className="w-64">{service === "anilist" ? "anilist.co/user/" : "myanimelist.net/profile/"}</SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="anilist">anilist.co/user/</SelectItem>
-                                                <SelectItem value="myanimelist">myanimelist.net/profile/</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <Input placeholder="e.g. yoghurt" value={username} onChange={(e) => setUsername(e.target.value)} onPasteCapture={handlePaste} />
-                                    </div>
-                                    <DialogDescription>
-                                        This method is read-only and lacks some features. <br />
-                                        Your anime list needs to be public. If you want to keep it private, consider signing in with one of the supported OAuth providers.
-                                    </DialogDescription>
-                                    <Button variant="default" disabled={username.trim().length === 0}>
-                                        Continue
-                                    </Button>
-                                    <Separator />
-                                    <Button variant="secondary">Live demo</Button>
-                                </DialogContent>
-                            </Dialog> */}
-                                <Separator className="data-[orientation=horizontal]:w-5/6 data-[orientation=vertical]:h-2/3" orientation={isDesktop ? "vertical" : "horizontal"} />
-
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button variant="outline" className="w-50 text-sm h-10 flex items-center text-muted-foreground cursor-not-allowed hover:text-muted-foreground" aria-label="Demo mode (coming soon)">
-                                            Demo mode
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Coming soon(er)!</p>
-                                    </TooltipContent>
-                                </Tooltip>
                             </nav>
 
                             <AnimatePresence>

@@ -56,6 +56,7 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
             }
           }
         }
+        type
       }
       mediaRecommendation {
         id
@@ -94,6 +95,7 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
             }
           }
         }
+        type
       }
     }
   }
@@ -120,7 +122,9 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
             mediaRecommendation: aniListToMediaItem({ ...mediaRecommendation, mediaListEntry: null }),
         }));
 
-        return Response.json(formattedMediaList, { status: 200 });
+        const filteredMediaList = formattedMediaList.filter((rec) => rec.media.type === "ANIME" && rec.mediaRecommendation.type === "ANIME");
+
+        return Response.json(filteredMediaList, { status: 200 });
     }
 
     return Response.json({ error: "Service not supported" }, { status: 400 });

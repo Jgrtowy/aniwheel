@@ -25,6 +25,15 @@ const nextConfig: NextConfig = {
                     { key: "Referrer-Policy", value: "origin-when-cross-origin" },
                 ],
             },
+            {
+                source: "/Rider_of_black.webp",
+                headers: [
+                    {
+                        key: "X-Robots-Tag",
+                        value: "noindex, nofollow",
+                    },
+                ],
+            },
         ];
     },
     output: "standalone",

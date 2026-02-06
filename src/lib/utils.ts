@@ -108,6 +108,7 @@ export function aniListToMediaItem(item: AniListMediaItem): MediaItem {
         customLists: formatCustomLists(item.mediaListEntry?.customLists || {}),
         startSeason: { season: item.season, year: item.seasonYear },
         externalLinks: item.externalLinks,
+        type: item.type,
     };
 }
 
@@ -149,6 +150,7 @@ export function malToMediaItem(item: MALMediaItem): MediaItem {
         customLists: [],
         startSeason: { season: (item.start_season?.season?.toUpperCase() as Uppercase<NonNullable<MALMediaItem["start_season"]>["season"]> | null) || null, year: item.start_season?.year || null },
         externalLinks: null,
+        type: "ANIME",
     };
 }
 

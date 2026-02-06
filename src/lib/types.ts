@@ -39,6 +39,7 @@ export interface MediaItem {
         season: "WINTER" | "SPRING" | "SUMMER" | "FALL" | null;
     };
     externalLinks: { site: string; type: "INFO" | "STREAMING" | "SOCIAL"; url: string; language: string | null; notes: string | null; icon: string | null; color: string | null }[] | null;
+    type: "ANIME" | "MANGA";
 }
 
 export interface MediaRecommendation {
@@ -98,6 +99,7 @@ export interface AniListMediaItem {
     season: "WINTER" | "SPRING" | "SUMMER" | "FALL" | null;
     seasonYear: number | null;
     externalLinks: { site: string; type: "INFO" | "STREAMING" | "SOCIAL"; url: string; language: string | null; notes: string | null; icon: string | null; color: string | null }[] | null;
+    type: "ANIME" | "MANGA";
 }
 
 export interface AniListMediaRecommendation {

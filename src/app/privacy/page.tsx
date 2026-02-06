@@ -24,7 +24,7 @@ export default function PrivacyPage() {
                         Go back to Aniwheel
                     </Button>
                 </Link>
-                <p className="text-sm text-muted-foreground">Last updated: August 10, 2025</p>
+                <p className="text-sm text-muted-foreground">Last updated: January 30, 2025 </p>
                 <h1 className="text-3xl font-bold">Privacy Policy</h1>
                 <h2 className="text-lg">
                     <span className="font-bold italic">TL;DR</span> We do not collect any personal data - we don't need it for anything.
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
 
                 <section>
                     <h2 className="text-xl font-bold">Web privacy & security</h2>
-                    <p>We use Cloudflare for DDoS protection, proxying connections, and Vercel for hosting our app. Both of these services are GDPR and HIPAA compliant.</p>
+                    <p>We use Cloudflare for DDoS protection, proxying connections, and Oracle Private Cloud for hosting our app. Both of these services are GDPR and HIPAA compliant.</p>
                 </section>
 
                 <section>
