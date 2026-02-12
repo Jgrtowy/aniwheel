@@ -21,7 +21,7 @@ export function SpinWheelDialog() {
                     Spin the wheel!
                 </Button>
             </DialogTrigger>
-            <DialogOverlay className="backdrop-blur-xl" />
+            <DialogOverlay className="backdrop-blur-md" />
             <DialogContent className="h-dvh w-dvw max-w-dvw sm:max-w-dvw overflow-hidden bg-transparent border-none p-0" showCloseButton={false}>
                 <VisuallyHidden>
                     <DialogHeader>
