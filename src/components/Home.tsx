@@ -3,7 +3,7 @@
 import { Grid2X2, Rows3, Search, X } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Aurora from "~/components/Aurora";
 import BackToTop from "~/components/BackToTop";
@@ -22,10 +22,12 @@ export default function Home() {
     const { searchTerm, setSearchTerm } = useAnimeStore();
     const [colorStops, setColorStops] = useState<string[]>(["#2e1cff", "#ff3161", "#b032ff"]);
     const { viewMode, setViewMode, hasSeenMai, setHasSeenMai } = useSettingsStore();
+    const maiInteracted = useRef(false);
 
     const [showMai, setShowMai] = useState(false);
     const handleMaiHover = () => {
-        if (!showMai) return;
+        if (!showMai || maiInteracted.current) return;
+        maiInteracted.current = true;
         setShowMai(false);
         setHasSeenMai(true);
         toast("You think you saw a bunny girl?", { description: "Congratulations, you're officially suffering from Adolescence Syndrome.", duration: 5000, position: "bottom-center", className: "justify-center text-center [&_[data-title]]:text-lg [&_[data-title]]:font-black! [&_[data-description]]:text-sm" });
