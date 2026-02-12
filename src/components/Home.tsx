@@ -17,7 +17,6 @@ import { Input } from "~/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { useAnimeStore } from "~/store/anime";
 import { useSettingsStore } from "~/store/settings";
-import Stats from "./Stats";
 
 export default function Home() {
     const { searchTerm, setSearchTerm } = useAnimeStore();
@@ -102,9 +101,6 @@ export default function Home() {
                                     <SortingDropdown />
                                 </div>
                             </div>
-                            {/* <div>
-                            <Stats />
-                        </div> */}
                             <MediaList />
                         </section>
                         <aside className="w-full md:w-[19rem] lg:w-[22rem] flex flex-col gap-4 md:sticky md:top-4 md:self-start">
