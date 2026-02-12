@@ -1,22 +1,26 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 import type { ImageSize, TitleLanguage } from "~/lib/types";
 
 export interface SettingsStore {
     preferredTitleLanguage: TitleLanguage;
     preferredImageSize: ImageSize;
-    showMediaRecommendations: boolean;
+    hideRecommendationsDeck: boolean;
     skipLandingAnimation: boolean;
     enableTickSounds: boolean;
     viewMode: "grid" | "list";
     hasSeenMai: boolean;
+    skippedMediaIds: number[];
     setPreferredTitleLanguage: (lang: TitleLanguage) => void;
     setPreferredImageSize: (size: ImageSize) => void;
-    setShowMediaRecommendations: (show: boolean) => void;
+    setHideRecommendationsDeck: (hide: boolean) => void;
     setSkipLandingAnimation: (skip: boolean) => void;
     setEnableTickSounds: (enable: boolean) => void;
     setViewMode: (mode: "grid" | "list") => void;
     setHasSeenMai: (seen: boolean) => void;
+    addSkippedMediaId: (id: number) => void;
+    removeSkippedMediaId: (id: number) => void;
+    resetSkippedMediaIds: () => void;
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -24,18 +28,22 @@ export const useSettingsStore = create<SettingsStore>()(
         (set) => ({
             preferredTitleLanguage: "en",
             preferredImageSize: "large",
-            showMediaRecommendations: true,
+            hideRecommendationsDeck: false,
             skipLandingAnimation: false,
             enableTickSounds: true,
             viewMode: "grid",
             hasSeenMai: false,
+            skippedMediaIds: [],
             setPreferredTitleLanguage: (lang) => set({ preferredTitleLanguage: lang }),
             setPreferredImageSize: (size) => set({ preferredImageSize: size }),
-            setShowMediaRecommendations: (show) => set({ showMediaRecommendations: show }),
+            setHideRecommendationsDeck: (hide) => set({ hideRecommendationsDeck: hide }),
             setSkipLandingAnimation: (skip) => set({ skipLandingAnimation: skip }),
             setEnableTickSounds: (enable) => set({ enableTickSounds: enable }),
             setViewMode: (mode) => set({ viewMode: mode }),
             setHasSeenMai: (seen) => set({ hasSeenMai: seen }),
+            addSkippedMediaId: (id) => set((state) => (state.skippedMediaIds.includes(id) ? state : { skippedMediaIds: [...state.skippedMediaIds, id] })),
+            removeSkippedMediaId: (id) => set((state) => ({ skippedMediaIds: state.skippedMediaIds.filter((skippedId) => skippedId !== id) })),
+            resetSkippedMediaIds: () => set({ skippedMediaIds: [] }),
         }),
         { name: "aniwheel-settings" },
     ),

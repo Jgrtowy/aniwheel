@@ -21,6 +21,7 @@ export interface AnimeStore {
     sortOrder: SortOrder;
     activeCustomLists: Set<string>;
     availableCustomLists: Set<string>;
+    isMediaListLoaded: boolean;
     setFullMediaList: (list: MediaItem[]) => void;
     setMediaList: (list: MediaItem[]) => void;
     setSelectedMedia: (set: Set<number>) => void;
@@ -75,9 +76,10 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     availableFormats: new Set(),
     activeCustomLists: new Set(),
     availableCustomLists: new Set(),
+    isMediaListLoaded: false,
 
     setFullMediaList: (list) => {
-        set({ fullMediaList: list });
+        set({ fullMediaList: list, isMediaListLoaded: true });
         get().applyFilters();
         get().initialize();
     },

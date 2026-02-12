@@ -1,7 +1,7 @@
 "use client";
 import { CheckCheck, X } from "lucide-react";
 import AddToPlannedSheet from "~/components/AddToPlannedSheet";
-import Recommendations from "~/components/Recommendations";
+import RecommendationsDeck from "~/components/RecommendationsDeck";
 import { SpinWheelDialog } from "~/components/SpinWheelDialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -60,7 +60,7 @@ export default function SidePanel() {
                     <AddToPlannedSheet />
                 </CardContent>
             </Card>
-            <Recommendations />
+            <RecommendationsDeck />
         </div>
     );
 }
