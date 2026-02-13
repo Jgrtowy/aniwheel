@@ -218,7 +218,7 @@ export default function RecommendationsDeck() {
 
             <CardContent>
                 <AnimatePresence mode="popLayout" initial={false} custom={direction}>
-                    <motion.div key={mediaRecommendation.id} custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }} className="flex flex-col gap-6">
+                    <motion.div key={`${viewIndex}-${mediaRecommendation.id}`} custom={direction} variants={variants} initial="enter" animate="center" exit="exit" transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }} className="flex flex-col gap-6">
                         <AnimeCard isStatic={true} anime={mediaRecommendation} className="mx-auto w-full sm:max-w-[200px] shadow-md" />
                     </motion.div>
                 </AnimatePresence>
