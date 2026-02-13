@@ -32,15 +32,16 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
       rating
       media {
         id
+        type
         title {
           english
-          native
           romaji
+          native
         }
         coverImage {
-          extraLarge
-          large
           medium
+          large
+          extraLarge
         }
         startDate {
           day
@@ -56,6 +57,11 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
         episodes
         siteUrl
         genres
+        mediaListEntry {
+          createdAt
+          status
+          customLists
+        }
         format
         duration
         status(version: 2)
@@ -67,19 +73,35 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
             }
           }
         }
-        type
+        trailer {
+          id
+          site
+        }
+        description
+        season
+        seasonYear
+        externalLinks {
+          site
+          type
+          url
+          language
+          notes
+          icon
+          color
+        }
       }
       mediaRecommendation {
         id
+        type
         title {
           english
-          native
           romaji
+          native
         }
         coverImage {
-          extraLarge
-          large
           medium
+          large
+          extraLarge
         }
         startDate {
           day
@@ -95,6 +117,11 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
         episodes
         siteUrl
         genres
+        mediaListEntry {
+          createdAt
+          status
+          customLists
+        }
         format
         duration
         status(version: 2)
@@ -106,7 +133,22 @@ query Recommendations($onList: Boolean, $sort: [RecommendationSort], $page: Int,
             }
           }
         }
-        type
+        trailer {
+          id
+          site
+        }
+        description
+        season
+        seasonYear
+        externalLinks {
+          site
+          type
+          url
+          language
+          notes
+          icon
+          color
+        }
       }
     }
   }
