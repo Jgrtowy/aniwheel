@@ -19,7 +19,6 @@
 - [x] Ability to add new titles to your "Planning" list on your selected anime tracker
 - [x] User recommendations
 - [x] Short summary of your list stats
-- [ ] Demo mode (view app without OAuth login)
 - [ ] Advanced user stats page
 - [ ] Manga mode
 - [ ] *...and more to come!*
