@@ -30,9 +30,11 @@ const BASE_ROTATION_MIN = 1440; // Minimum 4 full rotations
 const BASE_ROTATION_RANGE = 1440; // Additional random rotations
 
 const TICK_SOUND_DELAY = 30;
+const SEGMENT_SEPARATOR_WIDTH = 0.5;
 
 export function SpinWheelContent() {
     const { selectedMedia, fullMediaList, temporaryWatching } = useAnimeStore();
+
     const { enableTickSounds } = useSettingsStore();
     const items = [fullMediaList.filter((anime) => selectedMedia.has(anime.id)), Array.from(temporaryWatching.values())].flat();
 
@@ -235,13 +237,23 @@ export function SpinWheelContent() {
                                 </defs>
                                 {wheelSegments.map(({ item, index, pathData, imageDimensions, imageX, imageY }) => (
                                     <g key={index}>
-                                        <path d={pathData} fill="black" stroke="white" strokeWidth="2" />
+                                        <path d={pathData} fill="black" />
                                         <clipPath id={`clip-path-${index}`}>
                                             <path d={pathData} />
                                         </clipPath>
                                         <image href={getImageUrlWithPreference(item)} x={imageX - imageDimensions.width / 2} y={imageY - imageDimensions.height / 2} width={imageDimensions.width} height={imageDimensions.height} preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-path-${index})`} />
                                     </g>
                                 ))}
+                                <g>
+                                    {Array.from({ length: items.length }, (_, index) => {
+                                        const angle = (index * segmentAngle * Math.PI) / 180;
+                                        const x2 = WHEEL_CENTER + WHEEL_RADIUS * Math.cos(angle);
+                                        const y2 = WHEEL_CENTER + WHEEL_RADIUS * Math.sin(angle);
+
+                                        return <line key={`separator-${index}`} x1={WHEEL_CENTER} y1={WHEEL_CENTER} x2={x2} y2={y2} stroke="white" strokeWidth={SEGMENT_SEPARATOR_WIDTH} />;
+                                    })}
+                                    <circle cx={WHEEL_CENTER} cy={WHEEL_CENTER} r={WHEEL_RADIUS} fill="none" stroke="white" strokeWidth={SEGMENT_SEPARATOR_WIDTH} />
+                                </g>
                             </svg>
                             <ChevronDown strokeWidth={2} className="size-12 lg:w-16 lg:h-16 absolute -top-10 lg:-top-13 left-1/2 text-primary-foreground -translate-x-1/2" />
                             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 lg:w-8 lg:h-8 bg-white border-2 lg:border-4 border-gray-300 rounded-full" />
