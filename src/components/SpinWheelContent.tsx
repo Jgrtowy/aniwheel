@@ -44,7 +44,6 @@ export function SpinWheelContent() {
     const [isSpinning, setIsSpinning] = useState(false);
     const [rotation, setRotation] = useState(0);
     const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
-    const [showDetail, setShowDetail] = useState(false);
 
     const wheelRef = useRef<SVGSVGElement>(null);
     const currentAnimationRef = useRef<Animation | null>(null);
@@ -68,10 +67,6 @@ export function SpinWheelContent() {
             cancelAnimationFrame(animationFrameId);
         };
     }, [isSpinning, selectedItem, items.length]);
-
-    useEffect(() => {
-        if (selectedItem) setShowDetail(true);
-    }, [selectedItem]);
 
     const wheelSize = useMemo(() => {
         if (isMobile) return WHEEL_SIZE_MOBILE;
@@ -222,10 +217,10 @@ export function SpinWheelContent() {
                     </motion.div>
                 )}
             </AnimatePresence>
-            <div className="flex flex-col justify-center lg:p-10 md:p-6 sm:p-4 p-2 gap-4 overflow-hidden">
-                <motion.div className={cn("flex justify-center items-center", showDetail ? "flex-[1]" : "flex-[4]")} layout transition={{ type: "spring", stiffness: 600, damping: 30 }} key="spin-wheel">
-                    <div className="h-full max-h-[600px] max-w-full aspect-square flex items-center">
-                        <button className="relative aspect-square w-full cursor-pointer rounded-full appearance-none" type="button" onClick={spin} disabled={isSpinning}>
+            <div className="flex h-full min-h-0 flex-col justify-center gap-4 overflow-hidden p-2 sm:p-4 md:p-6 lg:p-10">
+                <motion.div className="flex min-h-0 w-full items-center justify-center" animate={{ flexGrow: selectedItem ? 1 : 4 }} transition={{ type: "spring", stiffness: 520, damping: 38 }} style={{ flexBasis: 0, willChange: "flex-grow" }} key="spin-wheel">
+                    <div className="flex h-full max-h-[600px] w-auto max-w-full items-center justify-center aspect-square">
+                        <button className="relative h-full w-full cursor-pointer rounded-full appearance-none" type="button" onClick={spin} disabled={isSpinning}>
                             <img src="/Click_to_spin.svg" alt="Click to spin the wheel!" className={cn("absolute inset-0 object-cover z-10 rounded-full opacity-100 pointer-events-none transition-opacity", isSpinning && "opacity-0")} />
                             <svg ref={wheelRef} width="100%" height="100%" viewBox={`0 0 ${wheelSize} ${wheelSize}`} className="absolute inset-0 overflow-hidden rounded-full" style={{ transform: `rotate(${rotation}deg)` }}>
                                 <defs>
@@ -260,9 +255,17 @@ export function SpinWheelContent() {
                         </button>
                     </div>
                 </motion.div>
-                <AnimatePresence onExitComplete={() => setShowDetail(false)}>
+                <AnimatePresence>
                     {selectedItem && (
-                        <motion.div className="flex-[3] flex justify-center items-center min-h-0 overflow-hidden" layout initial={{ opacity: 0, y: 80 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 80 }} transition={{ type: "spring", stiffness: 400, damping: 30 }} key="selected-item">
+                        <motion.div
+                            className="flex min-h-0 items-center justify-center overflow-hidden"
+                            initial={{ opacity: 0, y: 48, flexGrow: 0 }}
+                            animate={{ opacity: 1, y: 0, flexGrow: 3 }}
+                            exit={{ opacity: 0, y: 48, flexGrow: 0 }}
+                            transition={{ type: "spring", stiffness: 420, damping: 36 }}
+                            style={{ flexBasis: 0, willChange: "flex-grow, opacity, transform" }}
+                            key="selected-item"
+                        >
                             <span className="sr-only">Selected anime</span>
                             <AnimeDetails anime={selectedItem} className="size-full max-w-4xl max-h-full" />
                         </motion.div>
