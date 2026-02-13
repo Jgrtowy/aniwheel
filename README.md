@@ -26,17 +26,18 @@
 <details>
   <summary><h2><a href="#">&#x200B;</a>Screenshots 📷</h2><sub>*click!*</sub></summary>
   <p align="center">
-    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/f3c98e54-e469-4156-9e94-724cd324ee1d" />
-    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/5e0c6ff2-a25e-4996-8cf1-064c79a81d13" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/3a54657b-8402-43ea-8eb6-6a6e54a0f9d0" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/a3f1b546-3ccb-402a-bc74-1e5a2c3480bf" />
     <br />
-    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/c5af3548-dc8f-400b-83af-1955f7e55980" />
-    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/a279b925-2ece-4f99-a34b-c89b9a289324" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/c7732212-5a3d-46a1-a3e9-21cf295ff50c" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/e1e6f1f7-302e-4d78-9c9e-e45fa866a787" />
     <br />
-    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/7cfa5df0-1eef-484c-af6c-4ad7e9d5d15b" />
-    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/1f50e263-1eb3-407c-8978-8fab8f355c07" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/4f8744d6-6d32-4ed1-b196-d81772018785" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/45edcfbf-2177-4e95-a254-276ee309f699" />
     <br />
-    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/b0d67cc4-1233-4163-a118-a60c5228f342" />
-    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/96b5c9f1-f240-4093-959d-584a1394919c" />
+    <img width="45%" alt="image" src="https://github.com/user-attachments/assets/13d15cd7-056a-4a9a-adf1-dedaf1ff44e8" />
+    <img width="45%" height="1035" alt="image" src="https://github.com/user-attachments/assets/58c71b3b-7830-48e3-8bcc-d1d22ec44880" />
+
   </p>
 </details>
 
