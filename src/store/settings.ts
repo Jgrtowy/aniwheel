@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import type { ImageSize, TitleLanguage } from "~/lib/types";
+import { useAnimeStore } from "./anime";
 
 export interface SettingsStore {
     preferredTitleLanguage: TitleLanguage;
@@ -11,6 +12,8 @@ export interface SettingsStore {
     viewMode: "grid" | "list";
     hasSeenMai: boolean;
     skippedMediaIds: number[];
+    sortField: "date" | "title" | "score";
+    sortOrder: "asc" | "desc";
     setPreferredTitleLanguage: (lang: TitleLanguage) => void;
     setPreferredImageSize: (size: ImageSize) => void;
     setHideRecommendationsDeck: (hide: boolean) => void;
@@ -21,6 +24,8 @@ export interface SettingsStore {
     addSkippedMediaId: (id: number) => void;
     removeSkippedMediaId: (id: number) => void;
     resetSkippedMediaIds: () => void;
+    setSortField: (field: "date" | "title" | "score") => void;
+    setSortOrder: (order: "asc" | "desc") => void;
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -34,6 +39,8 @@ export const useSettingsStore = create<SettingsStore>()(
             viewMode: "grid",
             hasSeenMai: false,
             skippedMediaIds: [],
+            sortField: "date",
+            sortOrder: "desc",
             setPreferredTitleLanguage: (lang) => set({ preferredTitleLanguage: lang }),
             setPreferredImageSize: (size) => set({ preferredImageSize: size }),
             setHideRecommendationsDeck: (hide) => set({ hideRecommendationsDeck: hide }),
@@ -44,6 +51,14 @@ export const useSettingsStore = create<SettingsStore>()(
             addSkippedMediaId: (id) => set((state) => (state.skippedMediaIds.includes(id) ? state : { skippedMediaIds: [...state.skippedMediaIds, id] })),
             removeSkippedMediaId: (id) => set((state) => ({ skippedMediaIds: state.skippedMediaIds.filter((skippedId) => skippedId !== id) })),
             resetSkippedMediaIds: () => set({ skippedMediaIds: [] }),
+            setSortField: (field) => {
+                set({ sortField: field });
+                useAnimeStore.getState().applyFilters();
+            },
+            setSortOrder: (order) => {
+                set({ sortOrder: order });
+                useAnimeStore.getState().applyFilters();
+            },
         }),
         { name: "aniwheel-settings" },
     ),

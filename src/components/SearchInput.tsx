@@ -29,6 +29,14 @@ export default function SearchInput() {
         inputRef.current?.focus();
     });
 
+    useHotkey("Escape", () => {
+        if (document.activeElement === inputRef.current) {
+            setValue("");
+            setSearchTerm("");
+            inputRef.current?.blur();
+        }
+    });
+
     return (
         <div className="relative w-full sm:max-w-64 max-w-full">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
@@ -47,12 +55,11 @@ export default function SearchInput() {
                     <span className="sr-only">Clear search</span>
                 </Button>
             )}
-            {!value && (<>
+            {!value && (
                 <KbdGroup className="absolute right-2 top-1/2 transform -translate-y-1/2 p-0">
-                    <Kbd>{formatForDisplay("Mod+/", {platform: "windows"})}</Kbd>
+                    <Kbd className="bg-muted/50 border">{formatForDisplay("Mod+/", { platform: "windows" })}</Kbd>
                 </KbdGroup>
-            </>)
-            }
+            )}
         </div>
     );
 }

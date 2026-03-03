@@ -17,8 +17,6 @@ export interface AnimeStore {
     showUnaired: boolean;
     activeFormats: Set<MediaItem["format"]>;
     availableFormats: Set<MediaItem["format"]>;
-    sortField: SortField;
-    sortOrder: SortOrder;
     activeCustomLists: Set<string>;
     availableCustomLists: Set<string>;
     isMediaListLoaded: boolean;
@@ -48,9 +46,6 @@ export interface AnimeStore {
     setActiveCustomLists: (lists: string[]) => void;
     addActiveCustomList: (list: string) => void;
     removeActiveCustomList: (list: string) => void;
-    setSortField: (field: SortField) => void;
-    setSortOrder: (order: SortOrder) => void;
-    setSorting: (field: SortField, order: SortOrder) => void;
     initialize: () => void;
     applyFilters: () => void;
     clearFilters: () => void;
@@ -67,8 +62,6 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     activeGenres: [],
     score: { from: 0, to: 10 },
     showUnaired: false,
-    sortField: "date",
-    sortOrder: "desc",
     showPlanning: true,
     showPaused: false,
     showDropped: false,
@@ -77,6 +70,8 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     activeCustomLists: new Set(),
     availableCustomLists: new Set(),
     isMediaListLoaded: false,
+    sortField: useSettingsStore.getState().sortField,
+    sortOrder: useSettingsStore.getState().sortOrder,
 
     setFullMediaList: (list) => {
         set({ fullMediaList: list, isMediaListLoaded: true });
@@ -225,18 +220,6 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         set({ showUnaired: show });
         get().applyFilters();
     },
-    setSortField: (field) => {
-        set({ sortField: field });
-        get().applyFilters();
-    },
-    setSortOrder: (order) => {
-        set({ sortOrder: order });
-        get().applyFilters();
-    },
-    setSorting: (field, order) => {
-        set({ sortField: field, sortOrder: order });
-        get().applyFilters();
-    },
     initialize: () => {
         const { fullMediaList } = get();
 
@@ -301,7 +284,7 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         filteredAnime = filteredAnime.slice().sort((a, b) => {
             let comparison: number;
 
-            switch (state.sortField) {
+            switch (settings.sortField || "date") {
                 case "date": {
                     comparison = (a.entryCreatedAt ?? 0) < (b.entryCreatedAt ?? 0) ? -1 : (a.entryCreatedAt ?? 0) > (b.entryCreatedAt ?? 0) ? 1 : 1;
                     break;
@@ -319,7 +302,7 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
                 }
             }
 
-            return state.sortOrder === "asc" ? comparison : -comparison;
+            return settings.sortOrder === "asc" ? comparison : -comparison;
         });
 
         set({ mediaList: filteredAnime });

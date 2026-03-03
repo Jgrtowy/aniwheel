@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AnimeCard from "~/components/AnimeCard";
 import AnimeListItem from "~/components/AnimeListItem";
@@ -88,12 +88,14 @@ export default function PlannedList() {
                         </div>
                     </motion.div>
                 ))}
-            {!isFetching &&
-                mediaList.map((anime, index) => (
-                    <motion.div className="space-y-2" key={`${viewMode}-${anime.id}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15, delay: Math.min(index * 0.01, 0.5) }} layout={false}>
-                        {viewMode === "grid" ? <AnimeCard anime={anime} checked={selectedMedia.has(anime.id)} className="mx-auto" /> : <AnimeListItem anime={anime} checked={selectedMedia.has(anime.id)} />}
-                    </motion.div>
-                ))}
+            <AnimatePresence initial={false} mode="popLayout">
+                {!isFetching &&
+                    mediaList.map((anime) => (
+                        <motion.div className="space-y-2" key={anime.id} layout="position" initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.94 }} transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}>
+                            {viewMode === "grid" ? <AnimeCard anime={anime} checked={selectedMedia.has(anime.id)} className="mx-auto" /> : <AnimeListItem anime={anime} checked={selectedMedia.has(anime.id)} />}
+                        </motion.div>
+                    ))}
+            </AnimatePresence>
             {fullMediaList.length === 0 && !isFetching && (
                 <motion.div className="col-span-full text-muted-foreground text-center space-y-0.5 my-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                     <p className="text-2xl font-bold">Your planned list is empty</p>

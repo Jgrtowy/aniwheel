@@ -3,10 +3,10 @@ import { Button } from "~/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import type { SortField, SortOrder } from "~/lib/types";
-import { useAnimeStore } from "~/store/anime";
+import { useSettingsStore } from "~/store/settings";
 
 export default function SortingPopover() {
-    const { sortField, sortOrder, setSortField, setSortOrder } = useAnimeStore();
+    const { sortField, sortOrder, setSortField, setSortOrder } = useSettingsStore();
 
     const sortFieldOptions: { value: SortField; label: string; description: string; icon: React.ReactNode }[] = [
         { value: "date", label: "Date", description: "Date you added the title to your list", icon: <CalendarPlus /> },
