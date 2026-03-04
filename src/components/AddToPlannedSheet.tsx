@@ -1,14 +1,15 @@
 import { BadgePlus, Check, CheckCheck, Clapperboard, ExternalLink, LoaderCircle, Music4, Popcorn, Star, Trash2, X } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import AnimeCard from "~/components/AnimeCard";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "~/components/ui/input-group";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import { useDebounce } from "~/hooks/useDebounce";
 import type { MediaItem } from "~/lib/types";
 import { fetchMediaList, getImageUrlWithPreference, getPrettyProviderName, getTitleWithPreference } from "~/lib/utils";
 import { useSession } from "~/providers/session-provider";
@@ -17,7 +18,7 @@ import { useUiStore } from "~/store/ui";
 
 export default function AddToPlannedSheet() {
     const session = useSession();
-    const { fullMediaList, setFullMediaList, addSelectedMedia } = useAnimeStore();
+    const { fullMediaList } = useAnimeStore();
     const {
         addToPlannedSheet: { open, setOpen },
     } = useUiStore();
@@ -28,9 +29,11 @@ export default function AddToPlannedSheet() {
     const [searchResults, setSearchResults] = useState<MediaItem[]>([]);
     const [selectedTitles, setSelectedTitles] = useState<MediaItem[]>([]);
 
-    const debouncedSearch = useCallback(
-        async (query: string) => {
-            if (!query.trim() || !session?.activeProvider) {
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+    useEffect(() => {
+        const search = async () => {
+            if (!debouncedSearchQuery.trim() || !session?.activeProvider) {
                 setSearchResults([]);
                 setIsSearching(false);
                 return;
@@ -42,7 +45,7 @@ export default function AddToPlannedSheet() {
                 const response = await fetch("/api/search", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ query }),
+                    body: JSON.stringify({ query: debouncedSearchQuery }),
                 });
 
                 if (response.ok) {
@@ -58,15 +61,10 @@ export default function AddToPlannedSheet() {
             } finally {
                 setIsSearching(false);
             }
-        },
-        [session?.activeProvider],
-    );
+        };
 
-    useEffect(() => {
-        const timeoutId = setTimeout(() => debouncedSearch(searchQuery), 500);
-
-        return () => clearTimeout(timeoutId);
-    }, [searchQuery, debouncedSearch]);
+        void search();
+    }, [debouncedSearchQuery, session?.activeProvider]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value);
 
@@ -129,10 +127,10 @@ export default function AddToPlannedSheet() {
             <SheetContent className="gap-2 p-4 flex flex-col h-full overflow-hidden bg-component-secondary w-full max-w-full sm:max-w-[445px] !inset-x-auto !right-0 sm:rounded-bl-2xl" showClose={false} side="top">
                 <SheetHeader className="p-0 gap-4">
                     <SheetTitle className="text-lg font-bold">Add titles to your planning list</SheetTitle>
-                    <div className="relative">
-                        <Input placeholder="Enter anime title..." value={searchQuery} onChange={handleInputChange} />
-                        {isSearching && <LoaderCircle className="absolute right-0 p-2 h-full w-auto top-1/2 -translate-y-1/2 text-muted-foreground animate-spin" />}
-                    </div>
+                    <InputGroup>
+                        <InputGroupInput placeholder="Enter anime title..." value={searchQuery} onChange={handleInputChange} />
+                        <InputGroupAddon align="inline-end">{isSearching && <LoaderCircle className="size-4 animate-spin text-muted-foreground" />}</InputGroupAddon>
+                    </InputGroup>
                 </SheetHeader>
 
                 <ScrollArea className="flex flex-col flex-1 min-h-0" type="auto">
