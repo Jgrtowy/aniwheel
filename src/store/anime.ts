@@ -1,6 +1,8 @@
+import type { StateCreator } from "zustand";
 import { create } from "zustand";
-import type { MediaItem, SortField, SortOrder } from "~/lib/types";
-import { getTitleWithPreference, mediaDateToTimestamp } from "~/lib/utils";
+import { createJSONStorage, persist } from "zustand/middleware";
+import type { MediaItem } from "~/lib/types";
+import { getTitleWithPreference } from "~/lib/utils";
 import { useSettingsStore } from "~/store/settings";
 
 export interface AnimeStore {
@@ -20,6 +22,8 @@ export interface AnimeStore {
     activeCustomLists: Set<string>;
     availableCustomLists: Set<string>;
     isMediaListLoaded: boolean;
+    sortField: "date" | "title" | "score";
+    sortOrder: "asc" | "desc";
     setFullMediaList: (list: MediaItem[]) => void;
     setMediaList: (list: MediaItem[]) => void;
     setSelectedMedia: (set: Set<number>) => void;
@@ -53,7 +57,7 @@ export interface AnimeStore {
     getActiveFilterCount: () => number;
 }
 
-export const useAnimeStore = create<AnimeStore>((set, get) => ({
+const createAnimeStore: StateCreator<AnimeStore> = (set, get) => ({
     fullMediaList: [],
     mediaList: [],
     selectedMedia: new Set(),
@@ -74,7 +78,16 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     sortOrder: useSettingsStore.getState().sortOrder,
 
     setFullMediaList: (list) => {
+        const validMediaIds = new Set(list.map((anime) => anime.id));
+        const currentSelected = get().selectedMedia;
+        const nextSelected = new Set([...currentSelected].filter((id) => validMediaIds.has(id)));
+
         set({ fullMediaList: list, isMediaListLoaded: true });
+
+        if (nextSelected.size !== currentSelected.size) {
+            set({ selectedMedia: nextSelected });
+        }
+
         get().applyFilters();
         get().initialize();
     },
@@ -83,11 +96,13 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
     toggleSelectedMedia: (id) => {
         const currentSelected = get().selectedMedia;
         const newSelected = new Set(currentSelected);
+
         if (newSelected.has(id)) {
             newSelected.delete(id);
         } else {
             newSelected.add(id);
         }
+
         if (newSelected.size !== currentSelected.size || !currentSelected.has(id) === newSelected.has(id)) {
             set({ selectedMedia: newSelected });
         }
@@ -131,9 +146,8 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         if (hasChanges) set({ selectedMedia: newSelected });
     },
     selectAllMedia: () => {
-        const filteredIds = get().mediaList.map((a) => a.id);
-        const newSelected = new Set([...filteredIds]);
-        set({ selectedMedia: newSelected });
+        const filteredIds = get().mediaList.map((anime) => anime.id);
+        set({ selectedMedia: new Set(filteredIds) });
     },
     deselectAllMedia: () => set({ selectedMedia: new Set() }),
     addTemporaryWatching: (anime) => {
@@ -249,11 +263,7 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
         }
 
         if (!state.showUnaired) {
-            const currentDate = Date.now();
-            filteredAnime = filteredAnime.filter((anime) => {
-                if (anime.releasingStatus === "NOT_YET_RELEASED") return false;
-                return true;
-            });
+            filteredAnime = filteredAnime.filter((anime) => anime.releasingStatus !== "NOT_YET_RELEASED");
         }
 
         if (state.score.from > 0 || state.score.to < 10) {
@@ -274,6 +284,7 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
                 return state.activeFormats.has(anime.format);
             });
         }
+
         if (state.activeCustomLists.size > 0) {
             filteredAnime = filteredAnime.filter((anime) => {
                 if (!anime.customLists || anime.customLists.length === 0) return false;
@@ -338,4 +349,20 @@ export const useAnimeStore = create<AnimeStore>((set, get) => ({
             (state.activeCustomLists.size > 0 ? 1 : 0)
         );
     },
-}));
+});
+
+export const useAnimeStore = create<AnimeStore>()(
+    persist(createAnimeStore, {
+        name: "aniwheel-anime",
+        storage: createJSONStorage(() => localStorage),
+        partialize: (state) => ({ selectedMedia: [...state.selectedMedia] }),
+        merge: (persistedState, currentState) => {
+            const persisted = persistedState as { selectedMedia?: number[] } | undefined;
+
+            return {
+                ...currentState,
+                selectedMedia: new Set(persisted?.selectedMedia ?? []),
+            };
+        },
+    }),
+);
